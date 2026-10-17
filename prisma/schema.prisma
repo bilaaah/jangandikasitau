@@ -1,0 +1,324 @@
+// This is your Prisma schema file.
+// Documentation: https://pris.ly/d/prisma-schema
+//
+// Run `npx prisma generate` after ANY change to this file.
+// Run `npx prisma migrate dev --name <description>` to create and apply migrations.
+// Run `npm run db:seed` to populate development data.
+//
+// Member B is the primary owner of this file.
+// Any schema change must be communicated to the team so they can re-run
+// `npx prisma generate` to update their local type definitions.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// AUTHENTICATION & BUSINESS CONTEXT
+// =============================================================================
+
+model User {
+  id             String         @id @default(cuid())
+  email          String         @unique
+  /// Bcrypt-hashed password. Added in Milestone 2 with NextAuth.
+  hashedPassword String?
+  name           String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  /// A user can belong to multiple businesses (rare but supported).
+  /// In Milestone 1, each user belongs to exactly one business.
+  businesses     UserBusiness[]
+
+  @@map("users")
+}
+
+/// Junction table: many-to-many User ↔ Business with a role.
+model UserBusiness {
+  id         String   @id @default(cuid())
+  userId     String
+  businessId String
+  role       BusinessRole @default(MEMBER)
+  joinedAt   DateTime     @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, businessId])
+  @@map("user_businesses")
+}
+
+enum BusinessRole {
+  OWNER
+  MEMBER
+}
+
+// =============================================================================
+// BUSINESS (the SME context — all data is scoped to a business)
+// =============================================================================
+
+model Business {
+  id          String   @id @default(cuid())
+  name        String
+  /// The type of SME (e.g., "Bakery", "Garment", "Catering").
+  /// Free text in Milestone 1. Could become an enum in a later milestone.
+  type        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     UserBusiness[]
+  products    Product[]
+  workers     Worker[]
+  machines    Machine[]
+  materials   Material[]
+  orders      Order[]
+
+  @@map("businesses")
+}
+
+// =============================================================================
+// PRODUCTS (what the business produces)
+// =============================================================================
+
+model Product {
+  id                    String   @id @default(cuid())
+  businessId            String
+  name                  String
+  description           String?
+
+  /// Hours of worker time required to produce ONE unit of this product.
+  /// Used by the Capacity Engine. Must be > 0.
+  workerHoursPerUnit    Float
+
+  /// Hours of machine time required to produce ONE unit.
+  /// Set to 0 if this product requires no machine time.
+  machineHoursPerUnit   Float    @default(0)
+
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  business              Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  /// Materials consumed per unit of this product.
+  materials             ProductMaterial[]
+  orderItems            OrderItem[]
+
+  @@map("products")
+}
+
+/// Normalizes the many-to-many relationship between products and materials.
+/// Records how much of each material is needed per unit of product.
+model ProductMaterial {
+  id          String   @id @default(cuid())
+  productId   String
+  materialId  String
+
+  /// Quantity of the material needed to produce ONE unit of the product.
+  /// In the material's own unit (see Material.unit). No unit conversion.
+  quantityPerUnit Float
+
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  material    Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, materialId])
+  @@map("product_materials")
+}
+
+// =============================================================================
+// RESOURCES (workers, machines, materials)
+// =============================================================================
+
+model Worker {
+  id                   String   @id @default(cuid())
+  businessId           String
+  name                 String
+
+  /// Total hours this worker is available per working day (Mon–Fri).
+  /// E.g., 8 for a full-time worker, 4 for part-time.
+  /// All workers are treated as interchangeable (no skill matching).
+  dailyAvailableHours  Float
+
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  business             Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("workers")
+}
+
+model Machine {
+  id                   String   @id @default(cuid())
+  businessId           String
+  name                 String
+
+  /// Total hours this machine is available per working day.
+  /// All machines are treated as a pooled resource (no machine-product routing).
+  dailyAvailableHours  Float
+
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  business             Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("machines")
+}
+
+model Material {
+  id               String   @id @default(cuid())
+  businessId       String
+  name             String
+
+  /// Unit label for display purposes only (e.g., "kg", "liter", "pcs").
+  /// No unit conversion is performed. Consistency is the user's responsibility.
+  unit             String
+
+  /// Current on-hand stock quantity. This is a manually maintained snapshot.
+  /// Users must update this value when stock changes (purchase, usage, waste).
+  /// See MATERIAL_CONFIG.STOCK_MODEL in constants.ts.
+  currentStock     Float    @default(0)
+
+  /// Timestamp of the last manual stock update. Displayed in the UI as a
+  /// freshness indicator to remind users to keep stock current.
+  stockUpdatedAt   DateTime @default(now())
+
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  business         Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  usedInProducts   ProductMaterial[]
+
+  @@map("materials")
+}
+
+// =============================================================================
+// ORDERS
+// =============================================================================
+
+model Order {
+  id               String      @id @default(cuid())
+  businessId       String
+
+  customerName     String
+  notes            String?
+
+  /// Current lifecycle status of the order.
+  /// Only CONFIRMED and IN_PROGRESS orders consume capacity.
+  /// See ORDER_STATUS_CONFIG in constants.ts.
+  status           OrderStatus @default(DRAFT)
+
+  /// Customer-requested delivery deadline.
+  requiredDeliveryDate DateTime
+
+  /// When the order record was created (not necessarily when analysis ran).
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  business         Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  items            OrderItem[]
+
+  /// The capacity analysis result for this order (populated when analysis runs).
+  /// An order may have one current analysis; historical analyses are stored here too.
+  capacityAnalyses CapacityAnalysis[]
+
+  @@map("orders")
+}
+
+enum OrderStatus {
+  DRAFT
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+// =============================================================================
+// CAPACITY ANALYSIS (stored engine results)
+// =============================================================================
+
+/// Persisted result of a Capacity Engine run.
+/// Stored separately from Order so analyses can be queried independently
+/// (e.g., for the future Analytics module).
+model CapacityAnalysis {
+  id        String          @id @default(cuid())
+  orderId   String
+
+  /// Final feasibility verdict.
+  status    FeasibilityStatus
+
+  /// Worker utilization percentage at time of analysis.
+  workerUtilizationPercent  Float
+  /// Machine utilization percentage at time of analysis.
+  machineUtilizationPercent Float
+
+  /// Number of working days available between analysis date and delivery deadline.
+  availableWorkDays         Int
+  /// Estimated production days required for the order.
+  estimatedProductionDays   Int
+  /// Buffer days = availableWorkDays - estimatedProductionDays.
+  bufferDays                Int
+
+  /// Full reasoning array from the engine, stored as JSON.
+  /// Array of human-readable strings explaining each calculation step.
+  reasoning                 Json
+
+  /// Timestamp when this analysis was run.
+  analyzedAt                DateTime @default(now())
+
+  order      Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  bottlenecks Bottleneck[]
+
+  @@map("capacity_analyses")
+}
+
+enum FeasibilityStatus {
+  FEASIBLE
+  AT_RISK
+  NOT_FEASIBLE
+}
+
+/// Individual bottleneck identified during a capacity analysis.
+model Bottleneck {
+  id           String           @id @default(cuid())
+  analysisId   String
+
+  resourceType BottleneckResourceType
+  resourceId   String?          // null for WORKER, MACHINE, TIME; materialId for MATERIAL
+  severity     BottleneckSeverity
+  description  String
+
+  analysis     CapacityAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  @@map("bottlenecks")
+}
+
+enum BottleneckResourceType {
+  WORKER
+  MACHINE
+  MATERIAL
+  TIME
+}
+
+enum BottleneckSeverity {
+  CRITICAL
+  WARNING
+}

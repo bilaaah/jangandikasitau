@@ -239,12 +239,12 @@ type OrderStatus = 'DRAFT' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCEL
 
 ## 📊 Status Pengembangan
 
-| Milestone | Status | Deskripsi |
-|-----------|--------|-----------|
-| M1: Core Engine | ✅ Done | Deterministic capacity calculator |
-| M2: UI Dashboard | ✅ Done | Responsive frontend, semua halaman |
-| M3: AI Integration | 🔄 In Progress | Gemini recommendations |
-| M4: QA & Testing | 📋 Planned | Unit + integration + E2E tests |
+| Milestone | PIC | Status | Deskripsi |
+|-----------|-----|--------|-----------|
+| Frontend UI & Dashboard | Frontend | ✅ Done | Responsive UI, semua halaman, branding |
+| Core Engine & Backend | Backend | 🔄 In Progress | Capacity calculator, database, server actions |
+| AI Integration | AI Engineer | 🔄 In Progress | Gemini recommendations & advisory |
+| QA & Testing | QA | 📋 Planned | Unit + integration + E2E tests |
 
 ---
 

@@ -1,9 +1,9 @@
-// src/features/capacity/types.ts
+// src/engine/types.ts
 //
-// This file is the shared TypeScript contract for the Capacity Engine.
+// Shared TypeScript contract for the Capacity Engine.
 // ALL THREE TEAM MEMBERS depend on these types:
-//   - Member B: implements engine.ts that produces CapacityEngineResult
-//   - Member A: builds UI components that consume CapacityEngineResult
+//   - Member B: implements calculator.ts that produces CapacityEngineResult
+//   - Member A: builds UI components that consume CapacityEngineResult via @/types
 //   - Member C: builds simulation and AI modules that read CapacityEngineResult
 //
 // IMPORTANT: Any change to this file requires a PR reviewed by all three members.
@@ -31,10 +31,10 @@ export type FeasibilityStatus = "FEASIBLE" | "AT_RISK" | "NOT_FEASIBLE";
 
 /**
  * Everything the Capacity Engine needs to run a feasibility analysis.
- * This object is assembled by the Server Action in features/orders/actions.ts
+ * This object is assembled by the Server Action in actions/orders.actions.ts
  * by querying the database and combining resources with the new order details.
  *
- * The engine itself (engine.ts) performs NO database calls.
+ * The engine itself (capacity/calculator.ts) performs NO database calls.
  * All I/O happens before this input is constructed.
  */
 export interface CapacityEngineInput {

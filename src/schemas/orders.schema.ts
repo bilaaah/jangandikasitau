@@ -1,19 +1,10 @@
-// src/features/orders/schema.ts
+// src/schemas/orders.schema.ts
 //
-// Zod validation schemas for order-related inputs.
-// These schemas are the single source of truth for order data shape.
-// They are used in:
-//   - Server Actions (server-side validation before DB write)
-//   - Client forms (via react-hook-form + zodResolver, Milestone 1 UI)
-//
-// Member B owns this file. Member A imports these schemas for form validation.
+// Zod validation schemas for order inputs.
+// Single source of truth for validation on client forms and Server Actions.
 
 import { z } from "zod";
 
-/**
- * Schema for creating a new order.
- * Validated server-side in the createOrder Server Action.
- */
 export const CreateOrderSchema = z.object({
   customerName: z
     .string()
@@ -40,9 +31,6 @@ export const CreateOrderSchema = z.object({
 
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;
 
-/**
- * Schema for updating an order's status.
- */
 export const UpdateOrderStatusSchema = z.object({
   orderId: z.string().cuid("Invalid order ID"),
   status: z.enum(["CONFIRMED", "IN_PROGRESS", "COMPLETED", "CANCELLED"]),

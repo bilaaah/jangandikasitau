@@ -1,10 +1,15 @@
+"use client";
+
 // src/components/feasibility/FeasibilityCard.tsx
 //
 // Comprehensive Decision Support System result display card.
 // Visualizes Capacity Engine calculations, resource bottlenecks, and reasoning steps.
+// Includes inline "Explain with AI" panel (Modul C) — calls generateAdviceAction.
 
-import React from "react";
-import type { CapacityEngineResult } from "@/features/capacity/types";
+import React, { useState } from "react";
+import type { CapacityEngineResult } from "@/types";
+import type { AiOrderAdvice } from "@/ai/types";
+import { generateAdviceAction } from "@/actions/ai.actions";
 import { FeasibilityBadge } from "./FeasibilityBadge";
 import { cn, round } from "@/lib/utils";
 
@@ -12,12 +17,30 @@ interface FeasibilityCardProps {
   analysis: CapacityEngineResult;
   className?: string;
   isCompact?: boolean;
+  // Context props for AI — provided when used inside order form
+  productName?: string;
+  quantity?: number;
+  customerName?: string;
+  deliveryDateStr?: string;
 }
+
+// Quick-question shortcuts users can tap for instant AI explanation
+const QUICK_QUESTIONS = [
+  { id: "why_risk",    icon: "help",          label: "Kenapa pesanan ini berisiko?" },
+  { id: "bottleneck",  icon: "speed",         label: "Apa penyebab bottleneck-nya?" },
+  { id: "how_fix",     icon: "build",         label: "Bagaimana supaya pesanan ini layak?" },
+  { id: "add_worker",  icon: "group_add",     label: "Apa dampaknya kalau tambah 1 pekerja?" },
+  { id: "priority",    icon: "low_priority",  label: "Resource mana yang harus diprioritaskan?" },
+] as const;
 
 export function FeasibilityCard({
   analysis,
   className,
   isCompact = false,
+  productName = "Produk",
+  quantity = 0,
+  customerName = "Pelanggan",
+  deliveryDateStr = new Date().toISOString(),
 }: FeasibilityCardProps) {
   const {
     status,
@@ -31,29 +54,79 @@ export function FeasibilityCard({
     reasoning,
   } = analysis;
 
+  // ── AI Panel State ────────────────────────────────────────────────
+  const [showAiPanel, setShowAiPanel] = useState(false);
+  const [aiAdvice, setAiAdvice] = useState<AiOrderAdvice | null>(null);
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [activeQuestion, setActiveQuestion] = useState<string | null>(null);
+
+  async function handleAskAi(questionId?: string) {
+    setIsAiLoading(true);
+    setAiError(null);
+    setActiveQuestion(questionId || "general");
+    if (!showAiPanel) setShowAiPanel(true);
+
+    try {
+      const result = await generateAdviceAction({
+        productName,
+        quantity,
+        customerName,
+        deliveryDateStr,
+        analysis,
+      });
+
+      if (result.success && result.data) {
+        setAiAdvice(result.data);
+      } else {
+        setAiError(result.error || "Gagal mendapatkan penjelasan AI.");
+      }
+    } catch {
+      setAiError("Tidak dapat terhubung ke layanan AI. Coba lagi sebentar.");
+    } finally {
+      setIsAiLoading(false);
+    }
+  }
+
+  // ── Status Config ─────────────────────────────────────────────────
   const statusConfig = {
     FEASIBLE: {
-      headline: "Order is Feasible",
+      headline: "Pesanan Mampu Diselesaikan (Kapasitas Aman)",
       description:
-        "All labor, machine, material, and deadline constraints are comfortably satisfied.",
+        "Seluruh kebutuhan tenaga kerja, jam oven/mesin, stok bahan baku, dan batas waktu pengiriman terpenuhi dengan leluasa.",
       bannerClass: "border-emerald-500/30 bg-emerald-500/5 text-emerald-950 dark:text-emerald-200",
       accentColor: "emerald",
     },
     AT_RISK: {
-      headline: "Order is At Risk",
+      headline: "Pesanan Berisiko Keterlambatan (Butuh Tindakan)",
       description:
-        "Capacity or deadline thresholds are operating near maximum limits (>85% utilization or ≤1 day buffer). Review contingencies before accepting.",
+        "Beban kapasitas mendekati batas maksimal (>85% utilisasi atau buffer pengiriman ≤1 hari kerja). Pertimbangkan lembur atau pekerja harian.",
       bannerClass: "border-amber-500/30 bg-amber-500/5 text-amber-950 dark:text-amber-200",
       accentColor: "amber",
     },
     NOT_FEASIBLE: {
-      headline: "Order is Not Feasible",
+      headline: "Pesanan Tidak Layak Diterima (Defisit Kapasitas)",
       description:
-        "One or more hard constraints are violated (material deficit, insufficient work hours, or unachievable delivery date).",
+        "Terdapat kendala kritis (kekurangan bahan baku, jam kerja tidak mencukupi, atau deadline mustahil dicapai tanpa penyesuaian).",
       bannerClass: "border-rose-500/30 bg-rose-500/5 text-rose-950 dark:text-rose-200",
       accentColor: "rose",
     },
   }[status];
+
+  const riskBadgeStyle: Record<string, string> = {
+    LOW:      "bg-emerald-50 text-emerald-700 border-emerald-200",
+    MODERATE: "bg-amber-50   text-amber-700   border-amber-200",
+    HIGH:     "bg-orange-50  text-orange-700  border-orange-200",
+    CRITICAL: "bg-rose-50    text-rose-700    border-rose-200",
+  };
+
+  const categoryIcons: Record<string, string> = {
+    WORKFORCE: "groups",
+    MACHINERY: "precision_manufacturing",
+    MATERIAL:  "inventory_2",
+    DEADLINE:  "schedule",
+    STRATEGY:  "lightbulb",
+  };
 
   return (
     <div
@@ -63,7 +136,7 @@ export function FeasibilityCard({
         className,
       )}
     >
-      {/* Header Banner */}
+      {/* ── Header Banner ────────────────────────────────────────── */}
       <div className="p-6 border-b border-border/40 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
@@ -77,16 +150,16 @@ export function FeasibilityCard({
         <div className="flex items-center gap-4 bg-background/80 backdrop-blur-sm border rounded-xl px-4 py-2.5 text-xs text-muted-foreground shrink-0">
           <div className="text-center">
             <span className="block font-medium text-foreground text-sm font-mono">
-              {availableWorkDays}d
+              {availableWorkDays} Hari
             </span>
-            <span>Available</span>
+            <span>Tersedia</span>
           </div>
           <div className="w-px h-6 bg-border" />
           <div className="text-center">
             <span className="block font-medium text-foreground text-sm font-mono">
-              {estimatedProductionDays >= 0 ? `${estimatedProductionDays}d` : "N/A"}
+              {estimatedProductionDays >= 0 ? `${estimatedProductionDays} Hari` : "N/A"}
             </span>
-            <span>Est. Prod</span>
+            <span>Estimasi Produksi</span>
           </div>
           <div className="w-px h-6 bg-border" />
           <div className="text-center">
@@ -100,15 +173,15 @@ export function FeasibilityCard({
                   : "text-emerald-600",
               )}
             >
-              {bufferDays >= 0 ? `+${bufferDays}d` : `${bufferDays}d`}
+              {bufferDays >= 0 ? `+${bufferDays} Hari` : `${bufferDays} Hari`}
             </span>
-            <span>Buffer</span>
+            <span>Buffer Aman</span>
           </div>
         </div>
       </div>
 
       <div className="p-6 space-y-6">
-        {/* Resource Utilization Cards */}
+        {/* ── Resource Utilization Cards ────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Worker Utilization */}
           <div className="p-4 rounded-xl border bg-background/60 shadow-xs space-y-3">
@@ -120,7 +193,7 @@ export function FeasibilityCard({
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                   <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
-                Worker Capacity
+                Kapasitas Tenaga Kerja
               </span>
               <span
                 className={cn(
@@ -132,11 +205,9 @@ export function FeasibilityCard({
                     : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400",
                 )}
               >
-                {workerAnalysis.utilizationPercent}% Utilized
+                {workerAnalysis.utilizationPercent}% Terpakai
               </span>
             </div>
-
-            {/* Progress Bar */}
             <div className="w-full bg-secondary/80 rounded-full h-2.5 overflow-hidden">
               <div
                 className={cn(
@@ -150,19 +221,18 @@ export function FeasibilityCard({
                 style={{ width: `${Math.min(workerAnalysis.utilizationPercent, 100)}%` }}
               />
             </div>
-
             <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground pt-1 border-t border-border/30">
               <div>
-                <span className="block text-foreground font-mono">{round(workerAnalysis.requiredHours)}h</span>
-                <span>Required</span>
+                <span className="block text-foreground font-mono">{round(workerAnalysis.requiredHours)} jam</span>
+                <span>Dibutuhkan</span>
               </div>
               <div>
-                <span className="block text-foreground font-mono">{round(workerAnalysis.committedHours)}h</span>
-                <span>Committed</span>
+                <span className="block text-foreground font-mono">{round(workerAnalysis.committedHours)} jam</span>
+                <span>Terjadwal</span>
               </div>
               <div>
-                <span className="block text-foreground font-mono">{round(workerAnalysis.freeHours)}h</span>
-                <span>Available</span>
+                <span className="block text-foreground font-mono">{round(workerAnalysis.freeHours)} jam</span>
+                <span>Tersedia</span>
               </div>
             </div>
           </div>
@@ -176,7 +246,7 @@ export function FeasibilityCard({
                   <line x1="8" y1="21" x2="16" y2="21" />
                   <line x1="12" y1="17" x2="12" y2="21" />
                 </svg>
-                Machine Capacity
+                Kapasitas Mesin &amp; Oven
               </span>
               <span
                 className={cn(
@@ -188,11 +258,9 @@ export function FeasibilityCard({
                     : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400",
                 )}
               >
-                {machineAnalysis.utilizationPercent}% Utilized
+                {machineAnalysis.utilizationPercent}% Terpakai
               </span>
             </div>
-
-            {/* Progress Bar */}
             <div className="w-full bg-secondary/80 rounded-full h-2.5 overflow-hidden">
               <div
                 className={cn(
@@ -206,68 +274,70 @@ export function FeasibilityCard({
                 style={{ width: `${Math.min(machineAnalysis.utilizationPercent, 100)}%` }}
               />
             </div>
-
             <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground pt-1 border-t border-border/30">
               <div>
-                <span className="block text-foreground font-mono">{round(machineAnalysis.requiredHours)}h</span>
-                <span>Required</span>
+                <span className="block text-foreground font-mono">{round(machineAnalysis.requiredHours)} jam</span>
+                <span>Dibutuhkan</span>
               </div>
               <div>
-                <span className="block text-foreground font-mono">{round(machineAnalysis.committedHours)}h</span>
-                <span>Committed</span>
+                <span className="block text-foreground font-mono">{round(machineAnalysis.committedHours)} jam</span>
+                <span>Terjadwal</span>
               </div>
               <div>
-                <span className="block text-foreground font-mono">{round(machineAnalysis.freeHours)}h</span>
-                <span>Available</span>
+                <span className="block text-foreground font-mono">{round(machineAnalysis.freeHours)} jam</span>
+                <span>Tersedia</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Materials Table */}
+        {/* ── Materials Table ───────────────────────────────────── */}
         {materialAnalysis.length > 0 && (
           <div className="rounded-xl border bg-background/60 overflow-hidden shadow-xs">
             <div className="px-4 py-3 bg-muted/40 border-b flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Material Requirements
+                Ketersediaan Bahan Baku (BOM)
               </span>
               <span className="text-xs text-muted-foreground">
                 {materialAnalysis.filter((m) => m.gap < 0).length > 0 ? (
-                  <span className="text-rose-600 font-semibold">Shortage Detected</span>
+                  <span className="text-rose-600 font-semibold">Defisit Bahan Baku</span>
                 ) : (
-                  <span className="text-emerald-600 font-semibold">All Materials Stocked</span>
+                  <span className="text-emerald-600 font-semibold">Semua Bahan Aman</span>
                 )}
               </span>
             </div>
             <div className="divide-y divide-border/40">
               {materialAnalysis.map((mat) => {
                 const isShort = mat.gap < 0;
+                // Prefer materialName if available, fallback to materialId
+                const displayName = (mat as any).materialName || mat.materialId;
                 return (
                   <div
                     key={mat.materialId}
                     className="px-4 py-3 flex items-center justify-between text-sm hover:bg-muted/20 transition-colors"
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <span
                         className={cn(
-                          "w-2 h-2 rounded-full",
+                          "w-2 h-2 rounded-full flex-shrink-0",
                           isShort ? "bg-rose-500" : "bg-emerald-500",
                         )}
+                        title={isShort ? "Defisit" : "Aman"}
                       />
-                      <span className="font-mono text-xs text-muted-foreground">
-                        {mat.materialId}
+                      <span className="text-xs font-medium text-foreground truncate">
+                        {displayName}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-6 text-xs">
+                    <div className="flex items-center gap-4 text-xs flex-shrink-0">
                       <div>
-                        <span className="text-muted-foreground">Req: </span>
+                        <span className="text-muted-foreground">Butuh: </span>
                         <span className="font-medium font-mono text-foreground">
                           {round(mat.requiredQuantity)} {mat.unit}
                         </span>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Available: </span>
+                        <span className="text-muted-foreground">Tersedia: </span>
                         <span
                           className={cn(
                             "font-medium font-mono",
@@ -280,11 +350,11 @@ export function FeasibilityCard({
                       <div>
                         {isShort ? (
                           <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300">
-                            Deficit: {round(Math.abs(mat.gap))} {mat.unit}
+                            Defisit: {round(Math.abs(mat.gap))} {mat.unit}
                           </span>
                         ) : (
                           <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                            +{round(mat.gap)} {mat.unit} surplus
+                            +{round(mat.gap)} {mat.unit} aman
                           </span>
                         )}
                       </div>
@@ -296,11 +366,11 @@ export function FeasibilityCard({
           </div>
         )}
 
-        {/* Bottlenecks Section */}
+        {/* ── Bottlenecks Section ───────────────────────────────── */}
         {bottlenecks.length > 0 && (
           <div className="space-y-2">
             <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Identified Operational Bottlenecks
+              Bottleneck Operasional Terdeteksi
             </h4>
             <div className="space-y-2">
               {bottlenecks.map((b, idx) => (
@@ -323,11 +393,11 @@ export function FeasibilityCard({
           </div>
         )}
 
-        {/* Reasoning Steps Accordion/Log */}
+        {/* ── Reasoning Steps ───────────────────────────────────── */}
         {!isCompact && reasoning.length > 0 && (
           <div className="space-y-2 pt-2 border-t border-border/40">
             <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Capacity Engine Reasoning Steps
+              Rincian Logika Analisis Engine
             </h4>
             <div className="bg-muted/30 border rounded-xl p-3 font-mono text-xs space-y-1.5 overflow-x-auto">
               {reasoning.map((step, idx) => (
@@ -339,6 +409,204 @@ export function FeasibilityCard({
             </div>
           </div>
         )}
+
+        {/* ════════════════════════════════════════════════════════
+            MODUL C — EXPLAIN WITH AI PANEL
+            ════════════════════════════════════════════════════════ */}
+        <div className="border-t border-border/40 pt-4 space-y-3">
+          {/* Trigger Button */}
+          {!showAiPanel && (
+            <button
+              type="button"
+              onClick={() => handleAskAi("general")}
+              className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl
+                         bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700
+                         text-white text-sm font-bold shadow-md shadow-indigo-500/20
+                         transition-all duration-200 active:scale-[0.99] group"
+            >
+              <span className="material-symbols-outlined text-[20px] group-hover:animate-pulse">
+                auto_awesome
+              </span>
+              <span>Jelaskan ke Saya — Explain with AI</span>
+              <span className="text-[10px] font-normal bg-white/20 px-2 py-0.5 rounded-full">
+                Gratis
+              </span>
+            </button>
+          )}
+
+          {/* AI Panel — expanded */}
+          {showAiPanel && (
+            <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50/60 via-white to-violet-50/40 overflow-hidden shadow-sm">
+              {/* Panel Header */}
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-indigo-100 bg-white/70">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-sm text-sm">
+                    ✨
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-900">Explain with AI</p>
+                    <p className="text-[11px] text-slate-500">Penjelasan berbasis data kapasitas nyata</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAiPanel(false)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                  title="Tutup panel AI"
+                >
+                  <span className="material-symbols-outlined text-[18px]">close</span>
+                </button>
+              </div>
+
+              <div className="p-5 space-y-4">
+                {/* Quick Questions */}
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                    Pertanyaan Cepat
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {QUICK_QUESTIONS.map((q) => (
+                      <button
+                        key={q.id}
+                        type="button"
+                        onClick={() => handleAskAi(q.id)}
+                        disabled={isAiLoading}
+                        className={cn(
+                          "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all",
+                          activeQuestion === q.id && !isAiLoading
+                            ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                            : "bg-white text-slate-700 border-slate-200 hover:border-indigo-300 hover:text-indigo-700 hover:bg-indigo-50",
+                          isAiLoading && "opacity-60 cursor-not-allowed",
+                        )}
+                      >
+                        <span className="material-symbols-outlined text-[14px]">{q.icon}</span>
+                        <span>{q.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Loading State */}
+                {isAiLoading && (
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-indigo-50 border border-indigo-100">
+                    <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-indigo-900">AI sedang menganalisis...</p>
+                      <p className="text-xs text-indigo-600">Membaca data kapasitas dan bottleneck pesanan ini</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Error State */}
+                {aiError && !isAiLoading && (
+                  <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3">
+                    <span className="material-symbols-outlined text-rose-500 text-[20px] flex-shrink-0">error</span>
+                    <div>
+                      <p className="text-sm font-semibold text-rose-800">Gagal mendapatkan penjelasan</p>
+                      <p className="text-xs text-rose-600 mt-0.5">{aiError}</p>
+                      <button
+                        type="button"
+                        onClick={() => handleAskAi(activeQuestion || "general")}
+                        className="mt-2 text-xs font-bold text-rose-700 hover:underline"
+                      >
+                        Coba Lagi
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* AI Advice Result */}
+                {aiAdvice && !isAiLoading && (
+                  <div className="space-y-4">
+                    {/* Risk + Headline */}
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <h4 className="text-base font-bold text-slate-800 flex-1">{aiAdvice.headline}</h4>
+                      <span
+                        className={cn(
+                          "px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border flex-shrink-0",
+                          riskBadgeStyle[aiAdvice.riskAssessment] || "bg-slate-50 text-slate-600 border-slate-200",
+                        )}
+                      >
+                        Risiko: {aiAdvice.riskAssessment}
+                      </span>
+                    </div>
+
+                    {/* Summary */}
+                    <p className="text-sm text-slate-600 leading-relaxed bg-white/80 rounded-xl p-4 border border-slate-100">
+                      {aiAdvice.summary}
+                    </p>
+
+                    {/* Action Items */}
+                    {aiAdvice.actionItems && aiAdvice.actionItems.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                          Rekomendasi Tindakan
+                        </p>
+                        <div className="space-y-2">
+                          {aiAdvice.actionItems.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-start gap-3 p-3 rounded-xl bg-white border border-slate-200/70 hover:border-indigo-200 transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-indigo-600 text-[20px] flex-shrink-0 mt-0.5">
+                                {categoryIcons[item.category] || "task_alt"}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-xs font-bold text-slate-800">{item.action}</span>
+                                  <span
+                                    className={cn(
+                                      "text-[10px] font-bold uppercase flex-shrink-0",
+                                      item.priority === "HIGH"   ? "text-rose-600"
+                                      : item.priority === "MEDIUM" ? "text-amber-600"
+                                      : "text-slate-400",
+                                    )}
+                                  >
+                                    {item.priority === "HIGH" ? "🔴" : item.priority === "MEDIUM" ? "🟡" : "🟢"}{" "}
+                                    {item.priority}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{item.impact}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Negotiation Tip */}
+                    {aiAdvice.customerNegotiationTip && (
+                      <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+                        <div className="flex items-center gap-2 text-xs font-bold text-indigo-800 mb-1.5">
+                          <span className="material-symbols-outlined text-[16px]">chat_bubble</span>
+                          Tips Komunikasi ke Pelanggan
+                        </div>
+                        <p className="text-xs text-indigo-700 leading-relaxed">
+                          {aiAdvice.customerNegotiationTip}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Fallback notice */}
+                    {aiAdvice.isFallback && (
+                      <p className="text-[11px] text-slate-400 text-center">
+                        * Penjelasan ini dihasilkan dari aturan offline karena AI tidak tersedia saat ini.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Initial state: not yet loaded */}
+                {!isAiLoading && !aiAdvice && !aiError && (
+                  <div className="text-center py-4 text-sm text-slate-400">
+                    Pilih salah satu pertanyaan di atas untuk memulai.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        {/* ═══ end AI Panel ═══ */}
       </div>
     </div>
   );

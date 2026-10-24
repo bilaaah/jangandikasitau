@@ -1,7 +1,7 @@
 // src/lib/utils.ts
 //
 // General-purpose utility functions shared across the project.
-// Do NOT put domain-specific logic here — it belongs in src/features/.
+// Do NOT put domain-specific logic here — it belongs in src/engine, src/actions, or src/ai.
 
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";

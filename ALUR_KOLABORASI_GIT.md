@@ -89,26 +89,28 @@ cp .env.example .env.local
 ### 🔨 Langkah B: Mulai Mengerjakan Tugas (Bikin Branch Sendiri)
 **PENTING:** Setiap kali mau mulai ngoding, pastikan buat branch fitur baru yang dicabangkan dari `dev`:
 
-- **Anggota 1 (Ketua / Frontend):**
+- **Anggota 1 (Ketua / Frontend)** — folder: `src/app/`, `src/components/`
   ```bash
   git checkout dev
   git pull origin dev
   git checkout -b feature/frontend-orders
   ```
 
-- **Anggota 2 (Backend):**
+- **Anggota 2 (Backend)** — folder: `prisma/`, `src/actions/`, `src/queries/`, `src/schemas/`, `src/engine/`
   ```bash
   git checkout dev
   git pull origin dev
   git checkout -b feature/backend-engine
   ```
 
-- **Anggota 3 (AI & Simulasi):**
+- **Anggota 3 (AI & Simulasi)** — folder: `src/ai/`, `src/actions/ai.actions.ts`, `src/engine/simulation/`
   ```bash
   git checkout dev
   git pull origin dev
   git checkout -b feature/ai-simulation
   ```
+
+Kontrak bersama `src/engine/types.ts` hanya diubah lewat PR yang direview ketiga anggota. Detail folder: [`src/ARCHITECTURE.md`](src/ARCHITECTURE.md).
 
 ---
 

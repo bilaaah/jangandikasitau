@@ -16,10 +16,17 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+// Dev server optimization: only log queries when explicitly requested via DEBUG_PRISMA=true.
+// This prevents terminal flood and reduces memory/CPU spikes on laptops.
+const logLevels: ("query" | "error" | "warn")[] =
+  process.env.DEBUG_PRISMA === "true"
+    ? ["query", "error", "warn"]
+    : ["error", "warn"];
+
 export const db =
   globalForPrisma.prisma ??
   new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+    log: logLevels,
   });
 
 if (process.env.NODE_ENV !== "production") {

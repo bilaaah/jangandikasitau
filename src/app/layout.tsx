@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/layout/Navbar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "BizCapacity — Know Your Capacity Before You Promise",
+  title: "BizCapacity — Solusi Kapasitas Produksi UKM Indonesia",
   description:
-    "Decision Support System for make-to-order SMEs to evaluate order feasibility against worker hours, machine capacity, stock, and delivery deadlines.",
+    "Know Your Capacity Before You Promise. Sistem pendukung keputusan kapasitas produksi cerdas untuk UMKM Indonesia.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -25,18 +26,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-background text-foreground selection:bg-indigo-500/20 selection:text-indigo-600">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <footer className="border-t border-border/40 py-6 text-center text-xs text-muted-foreground">
-          <div className="container max-w-7xl mx-auto px-4">
-            BizCapacity &copy; 2026 &bull; Decision Support System for Make-To-Order SMEs &bull; Milestone 1
-          </div>
-        </footer>
+    <html lang="id" className={`${plusJakartaSans.variable} h-full antialiased`}>
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0&display=swap"
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-[#f8f9ff] text-[#0b1c30]">
+        {children}
       </body>
     </html>
   );

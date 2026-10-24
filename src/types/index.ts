@@ -1,7 +1,7 @@
 // src/types/index.ts
 //
-// Shared global types re-exported from feature modules.
-// All components and pages can import from "@/types" instead of deep paths.
+// Shared global types re-exported for UI and AI.
+// Import from "@/types" instead of deep engine/schema paths.
 
 export type {
   FeasibilityStatus,
@@ -10,9 +10,22 @@ export type {
   ResourceAnalysis,
   MaterialAnalysis,
   Bottleneck,
-} from "@/features/capacity/types";
+} from "@/engine/types";
 
 export type {
   CreateOrderInput,
   UpdateOrderStatusInput,
-} from "@/features/orders/schema";
+} from "@/schemas/orders.schema";
+
+export type {
+  WhatIfAdjustments,
+  WhatIfSimulationInput,
+  WhatIfSimulationResult,
+} from "@/engine/simulation/types";
+
+export type {
+  AiOrderAdvice,
+  OperationalActionItem,
+  RiskLevel,
+  WhatIfAiInsight,
+} from "@/ai/types";

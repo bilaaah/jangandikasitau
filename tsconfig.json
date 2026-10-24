@@ -19,7 +19,13 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/actions/*": ["./src/actions/*"],
+      "@/engine/*": ["./src/engine/*"],
+      "@/ai/*": ["./src/ai/*"],
+      "@/queries/*": ["./src/queries/*"],
+      "@/schemas/*": ["./src/schemas/*"],
+      "@/components/*": ["./src/components/*"]
     }
   },
   "include": [

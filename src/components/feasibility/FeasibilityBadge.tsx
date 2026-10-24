@@ -4,7 +4,7 @@
 // Supports "FEASIBLE" | "AT_RISK" | "NOT_FEASIBLE" with tailored color palettes and icons.
 
 import React from "react";
-import { FeasibilityStatus } from "@/features/capacity/types";
+import type { FeasibilityStatus } from "@/types";
 import { cn } from "@/lib/utils";
 
 interface FeasibilityBadgeProps {

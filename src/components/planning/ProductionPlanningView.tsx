@@ -1,0 +1,548 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+
+interface ScheduleItem {
+  id: string;
+  orderId: string;
+  customer: string;
+  product: string;
+  qty: number;
+  station: "mixing" | "baking" | "assembly" | "packaging";
+  startDay: number; // 0=Senin, 1=Selasa, 2=Rabu, 3=Kamis, 4=Jumat, 5=Sabtu
+  spanDays: number;
+  status: "completed" | "in_progress" | "at_risk" | "scheduled";
+  progress: number;
+  operator: string;
+  isCapacityLocked: boolean; // Sesuai aturan: hanya pesanan CONFIRMED & IN_PROGRESS yang mengunci kapasitas
+}
+
+const STATIONS = [
+  { id: "mixing", name: "1. Mixing & Dough Prep", totalHours: 40, usedHours: 26, color: "bg-blue-500", lightColor: "bg-blue-50 border-blue-200 text-blue-700" },
+  { id: "baking", name: "2. Oven Baking & Proofing", totalHours: 48, usedHours: 42, color: "bg-amber-500", lightColor: "bg-amber-50 border-amber-200 text-amber-700" },
+  { id: "assembly", name: "3. Assembly & Hias", totalHours: 40, usedHours: 28, color: "bg-purple-500", lightColor: "bg-purple-50 border-purple-200 text-purple-700" },
+  { id: "packaging", name: "4. Packaging & Box Wrapping", totalHours: 36, usedHours: 34.5, color: "bg-rose-500", lightColor: "bg-rose-50 border-rose-200 text-rose-700" },
+];
+
+const DAYS = [
+  { index: 0, name: "Senin", date: "22 Okt" },
+  { index: 1, name: "Selasa", date: "23 Okt" },
+  { index: 2, name: "Rabu", date: "24 Okt" },
+  { index: 3, name: "Kamis", date: "25 Okt" },
+  { index: 4, name: "Jumat", date: "26 Okt" },
+  { index: 5, name: "Sabtu", date: "27 Okt" },
+];
+
+const INITIAL_SCHEDULE: ScheduleItem[] = [
+  {
+    id: "SCH-01",
+    orderId: "BC-1024",
+    customer: "PT Nusantara Sentosa",
+    product: "Hampers Lebaran Royale",
+    qty: 300,
+    station: "packaging",
+    startDay: 2,
+    spanDays: 3,
+    status: "at_risk",
+    progress: 40,
+    operator: "Budi & Tim Packing (3 Org)",
+    isCapacityLocked: true, // PO Terkonfirmasi mengunci kapasitas
+  },
+  {
+    id: "SCH-02",
+    orderId: "BC-1024",
+    customer: "PT Nusantara Sentosa",
+    product: "Kue Kering Butter Wijsman",
+    qty: 300,
+    station: "baking",
+    startDay: 1,
+    spanDays: 2,
+    status: "in_progress",
+    progress: 75,
+    operator: "Chef Aris (Oven Deck A)",
+    isCapacityLocked: true,
+  },
+  {
+    id: "SCH-03",
+    orderId: "BC-1023",
+    customer: "Ibu Ratna Catering",
+    product: "Signature Brownies Panggang",
+    qty: 120,
+    station: "baking",
+    startDay: 0,
+    spanDays: 2,
+    status: "completed",
+    progress: 100,
+    operator: "Chef Dita (Oven Konveksi B)",
+    isCapacityLocked: true,
+  },
+  {
+    id: "SCH-04",
+    orderId: "BC-1023",
+    customer: "Ibu Ratna Catering",
+    product: "Packaging Box Brownies",
+    qty: 120,
+    station: "packaging",
+    startDay: 1,
+    spanDays: 1,
+    status: "completed",
+    progress: 100,
+    operator: "Siti Rahma",
+    isCapacityLocked: true,
+  },
+  {
+    id: "SCH-05",
+    orderId: "BC-1022",
+    customer: "Kopi Selaras Cafe",
+    product: "Artisan Croissants (Laminasi)",
+    qty: 500,
+    station: "mixing",
+    startDay: 1,
+    spanDays: 2,
+    status: "in_progress",
+    progress: 60,
+    operator: "Ahmad Fauzi (Sheeter Machine)",
+    isCapacityLocked: true,
+  },
+  {
+    id: "SCH-06",
+    orderId: "BC-1022",
+    customer: "Kopi Selaras Cafe",
+    product: "Croissant Proof & Bake",
+    qty: 500,
+    station: "baking",
+    startDay: 3,
+    spanDays: 2,
+    status: "scheduled",
+    progress: 0,
+    operator: "Chef Aris (Oven Rotary)",
+    isCapacityLocked: false, // Draft proposal - belum mengunci kapasitas
+  },
+  {
+    id: "SCH-07",
+    orderId: "BC-1020",
+    customer: "Wedding Organizer Harmoni",
+    product: "Royal Tier Fondant Decoration",
+    qty: 1,
+    station: "assembly",
+    startDay: 2,
+    spanDays: 3,
+    status: "in_progress",
+    progress: 50,
+    operator: "Chef Maya (Master Decorator)",
+    isCapacityLocked: true,
+  },
+];
+
+export function ProductionPlanningView() {
+  const [schedule, setSchedule] = useState<ScheduleItem[]>(INITIAL_SCHEDULE);
+  const [selectedStation, setSelectedStation] = useState<string>("all");
+  const [selectedItem, setSelectedItem] = useState<ScheduleItem | null>(null);
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [onlyLockedCapacity, setOnlyLockedCapacity] = useState<boolean>(false);
+
+  const filteredSchedule = schedule.filter((item) => {
+    if (selectedStation !== "all" && item.station !== selectedStation) return false;
+    if (filterStatus !== "all" && item.status !== filterStatus) return false;
+    if (onlyLockedCapacity && !item.isCapacityLocked) return false;
+    return true;
+  });
+
+  return (
+    <div className="container max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e5eeff]">
+        <div>
+          <div className="flex items-center gap-2 text-xs text-[#525e7d]">
+            <span>Operasional</span>
+            <span>/</span>
+            <span className="text-[#0b1c30] font-semibold">Jadwal Gantt Multi-Stasiun</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0b1c30] mt-1">
+            Jadwal Produksi Mingguan
+          </h1>
+          <p className="mt-1 text-sm text-[#525e7d]">
+            Pantau alokasi mesin dan operator secara visual untuk mencegah bentrok jadwal sebelum PO dikonfirmasi.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link
+            href="/simulations"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#eff4ff] border border-[#dbe1ff] text-[#004ac6] text-xs sm:text-sm font-bold hover:bg-[#e0ebff] transition-all"
+          >
+            <span className="material-symbols-outlined text-[18px]">science</span>
+            <span>Simulasi What-If</span>
+          </Link>
+          <Link
+            href="/orders/new"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#2563eb] text-white text-xs sm:text-sm font-bold shadow-sm shadow-[#2563eb]/20 hover:bg-[#004ac6] transition-all"
+          >
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            <span>+ Cek PO Baru</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* KPI Highlights Bar */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="p-4 rounded-2xl bg-white border border-[#e5eeff] shadow-xs">
+          <span className="text-[11px] font-bold text-[#737686] uppercase">Kapasitas Terpakai</span>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-2xl font-black text-[#0b1c30]">82.4%</span>
+            <span className="text-xs text-amber-600 font-bold">Mendekati Limit</span>
+          </div>
+          <div className="w-full bg-[#e2e8f0] h-1.5 rounded-full mt-2 overflow-hidden">
+            <div className="bg-amber-500 h-full rounded-full" style={{ width: "82.4%" }} />
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white border border-[#e5eeff] shadow-xs">
+          <span className="text-[11px] font-bold text-[#737686] uppercase">Titik Macet Aktif</span>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-2xl font-black text-rose-600">Stasiun 4</span>
+            <span className="text-xs bg-rose-50 text-rose-700 px-2 py-0.5 rounded-full font-bold border border-rose-200">
+              Packaging (95.8%)
+            </span>
+          </div>
+          <p className="text-[11px] text-[#525e7d] mt-2">Dampak: Potensi telat PO BC-1024</p>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white border border-[#e5eeff] shadow-xs">
+          <span className="text-[11px] font-bold text-[#737686] uppercase">Pesanan Berjalan</span>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-2xl font-black text-[#004ac6]">18 PO</span>
+            <span className="text-xs text-[#525e7d]">Pekan Ini</span>
+          </div>
+          <p className="text-[11px] text-[#525e7d] mt-2">12 On-Track • 4 Terjadwal • 2 At-Risk</p>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white border border-[#e5eeff] shadow-xs">
+          <span className="text-[11px] font-bold text-[#737686] uppercase">Rasio Tepat Waktu (OTD)</span>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-2xl font-black text-emerald-600">98.2%</span>
+            <span className="text-xs text-emerald-600 font-bold">Target &gt;95%</span>
+          </div>
+          <p className="text-[11px] text-[#525e7d] mt-2">Akurasi janji kapasitas terjaga</p>
+        </div>
+      </div>
+
+      {/* Filter and View Controls */}
+      <div className="bg-white border border-[#e5eeff] rounded-2xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
+        {/* Workstation Filter */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-bold text-[#525e7d] mr-1">Filter Stasiun:</span>
+          <button
+            onClick={() => setSelectedStation("all")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              selectedStation === "all"
+                ? "bg-[#004ac6] text-white shadow-xs"
+                : "bg-[#f8f9ff] text-[#525e7d] hover:bg-[#eff4ff]"
+            }`}
+          >
+            Semua Stasiun
+          </button>
+          {STATIONS.map((st) => (
+            <button
+              key={st.id}
+              onClick={() => setSelectedStation(st.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                selectedStation === st.id
+                  ? "bg-[#004ac6] text-white shadow-xs"
+                  : "bg-[#f8f9ff] text-[#525e7d] hover:bg-[#eff4ff]"
+              }`}
+            >
+              {st.name.split(". ")[1]}
+            </button>
+          ))}
+        </div>
+
+        {/* Status Filter & Locked Capacity Filter */}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setOnlyLockedCapacity(!onlyLockedCapacity)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              onlyLockedCapacity
+                ? "bg-amber-600 text-white shadow-xs"
+                : "bg-[#f8f9ff] text-[#525e7d] border border-[#e5eeff] hover:bg-[#eff4ff]"
+            }`}
+          >
+            <span className="material-symbols-outlined text-[15px]">
+              {onlyLockedCapacity ? "lock" : "lock_open"}
+            </span>
+            <span>{onlyLockedCapacity ? "🔒 Hanya Kapasitas Terkunci (Aktif)" : "Semua (Terkunci & Draft)"}</span>
+          </button>
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-bold text-[#525e7d]">Status:</span>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="text-xs font-medium px-3 py-1.5 rounded-lg bg-[#f8f9ff] border border-[#e5eeff] text-[#0b1c30] focus:outline-none focus:ring-1 focus:ring-[#004ac6]"
+            >
+              <option value="all">Semua Status</option>
+              <option value="at_risk">⚠️ Perlu Tindakan / At-Risk</option>
+              <option value="in_progress">▶️ Sedang Diproduksi</option>
+              <option value="scheduled">📅 Terjadwal</option>
+              <option value="completed">✅ Selesai</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Info Banner: Rule Kapasitas Terkunci */}
+      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-blue-50/80 border border-blue-200 text-xs text-blue-900">
+        <span className="material-symbols-outlined text-[18px] text-blue-600 shrink-0">info</span>
+        <span>
+          <strong>Aturan Kapasitas UMKM:</strong> Hanya pesanan berstatus <strong>CONFIRMED</strong> dan <strong>IN_PROGRESS</strong> yang mengunci slot mesin &amp; jam staf secara permanen. Pesanan baru berstatus simulasi/draft tidak memblokir kuota.
+        </span>
+      </div>
+
+      {/* Visual Gantt Chart Table with Horizontal Scroll for Mobile */}
+      <div className="bg-white border border-[#e5eeff] rounded-2xl shadow-xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <div className="min-w-[820px]">
+            {/* Gantt Header */}
+            <div className="grid grid-cols-12 bg-[#f8f9ff] border-b border-[#e5eeff] text-xs font-bold text-[#525e7d]">
+              <div className="col-span-4 p-3.5 border-r border-[#e5eeff]">
+                Workstation / Antrean Batch
+              </div>
+              <div className="col-span-8 grid grid-cols-6 divide-x divide-[#e5eeff]">
+                {DAYS.map((d) => (
+                  <div key={d.index} className="p-3 text-center">
+                    <span className="block font-bold text-[#0b1c30]">{d.name}</span>
+                    <span className="text-[10px] text-[#737686]">{d.date}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+        {/* Gantt Rows per Workstation */}
+        <div className="divide-y divide-[#e5eeff]">
+          {STATIONS.filter((st) => selectedStation === "all" || st.id === selectedStation).map((station) => {
+            const stationItems = filteredSchedule.filter((item) => item.station === station.id);
+            const utilPct = Math.round((station.usedHours / station.totalHours) * 100);
+            const isOverloaded = utilPct >= 90;
+
+            return (
+              <div key={station.id} className="grid grid-cols-12 min-h-[105px]">
+                {/* Station Info Column */}
+                <div className="col-span-4 p-4 border-r border-[#e5eeff] bg-[#fafbff] flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-sm text-[#0b1c30]">{station.name}</span>
+                      <span
+                        className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                          isOverloaded
+                            ? "bg-rose-100 text-rose-700 border border-rose-200"
+                            : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                        }`}
+                      >
+                        {utilPct}% Utilized
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#525e7d] mt-1">
+                      Kapasitas: {station.usedHours}j / {station.totalHours}j terpakai
+                    </p>
+                  </div>
+
+                  {isOverloaded && (
+                    <div className="mt-2 text-[11px] text-rose-700 bg-rose-50 border border-rose-200 p-1.5 rounded-lg flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[14px]">warning</span>
+                      <span>Kapasitas kritis! Disarankan lembur atau re-route.</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Days Grid Column */}
+                <div className="col-span-8 grid grid-cols-6 divide-x divide-[#e5eeff] relative p-2 bg-white">
+                  {/* Grid background lines */}
+                  {DAYS.map((d) => (
+                    <div key={d.index} className="h-full min-h-[90px]" />
+                  ))}
+
+                  {/* Schedule Bars Layer */}
+                  <div className="absolute inset-0 p-2 flex flex-col justify-center gap-2 pointer-events-none">
+                    {stationItems.length === 0 ? (
+                      <div className="text-center text-xs text-[#94a3b8] italic py-4">
+                        Tidak ada antrean pesanan di stasiun ini.
+                      </div>
+                    ) : (
+                      stationItems.map((item) => {
+                        const leftPercent = (item.startDay / 6) * 100;
+                        const widthPercent = (item.spanDays / 6) * 100 - 1.5;
+
+                        return (
+                          <div
+                            key={item.id}
+                            style={{
+                              marginLeft: `${leftPercent}%`,
+                              width: `${widthPercent}%`,
+                            }}
+                            onClick={() => setSelectedItem(item)}
+                            className={`pointer-events-auto cursor-pointer p-2 rounded-xl text-left shadow-xs border transition-all hover:scale-[1.01] hover:shadow-md ${
+                              item.status === "at_risk"
+                                ? "bg-rose-50 border-rose-300 text-rose-900 ring-1 ring-rose-400"
+                                : item.status === "completed"
+                                ? "bg-emerald-50 border-emerald-300 text-emerald-900"
+                                : item.status === "in_progress"
+                                ? "bg-blue-50 border-blue-300 text-blue-900"
+                                : "bg-slate-50 border-slate-300 text-slate-800"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-1 text-[11px]">
+                              <span className="font-extrabold truncate flex items-center gap-1">
+                                {item.isCapacityLocked && (
+                                  <span className="text-[10px]" title="Kapasitas Terkunci (PO Terkonfirmasi)">🔒</span>
+                                )}
+                                {item.orderId} • {item.product}
+                              </span>
+                              {item.status === "at_risk" && (
+                                <span className="text-[10px] bg-rose-600 text-white font-bold px-1.5 py-0.2 rounded-full shrink-0">
+                                  RISK
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between text-[10px] text-[#525e7d] mt-1">
+                              <span>{item.qty} pcs</span>
+                              <span className="font-mono">{item.progress}%</span>
+                            </div>
+                            {/* Progress bar */}
+                            <div className="w-full bg-black/10 h-1 rounded-full mt-1 overflow-hidden">
+                              <div
+                                className={`h-full rounded-full ${
+                                  item.status === "at_risk"
+                                    ? "bg-rose-600"
+                                    : item.status === "completed"
+                                    ? "bg-emerald-600"
+                                    : "bg-[#004ac6]"
+                                }`}
+                                style={{ width: `${item.progress}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  </div>
+
+      {/* Selected Item Modal / Drawer */}
+      {selectedItem && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#e5eeff] space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-[#f1f5f9] pb-3">
+              <div>
+                <span className="text-xs font-bold text-[#004ac6] uppercase">{selectedItem.id}</span>
+                <h3 className="text-lg font-extrabold text-[#0b1c30]">
+                  {selectedItem.orderId} — {selectedItem.customer}
+                </h3>
+              </div>
+              <button
+                onClick={() => setSelectedItem(null)}
+                className="w-8 h-8 rounded-lg bg-[#f1f5f9] text-[#525e7d] hover:bg-[#e2e8f0] flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="grid grid-cols-2 gap-3 bg-[#f8f9ff] p-3 rounded-xl border border-[#e5eeff]">
+                <div>
+                  <span className="text-[#737686] block text-[10px] uppercase font-bold">Produk</span>
+                  <strong className="text-[#0b1c30] text-sm">{selectedItem.product}</strong>
+                </div>
+                <div>
+                  <span className="text-[#737686] block text-[10px] uppercase font-bold">Kuantitas</span>
+                  <strong className="text-[#0b1c30] text-sm">{selectedItem.qty} Unit</strong>
+                </div>
+                <div>
+                  <span className="text-[#737686] block text-[10px] uppercase font-bold">Stasiun</span>
+                  <strong className="text-[#0b1c30]">
+                    {STATIONS.find((s) => s.id === selectedItem.station)?.name}
+                  </strong>
+                </div>
+                <div>
+                  <span className="text-[#737686] block text-[10px] uppercase font-bold">Operator PIC</span>
+                  <strong className="text-[#0b1c30]">{selectedItem.operator}</strong>
+                </div>
+                <div className="col-span-2 pt-2 border-t border-[#e5eeff] flex items-center justify-between">
+                  <span className="text-[#737686] text-[10px] uppercase font-bold">Status Alokasi Kapasitas:</span>
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                    selectedItem.isCapacityLocked
+                      ? "bg-amber-50 text-amber-800 border border-amber-300"
+                      : "bg-slate-100 text-slate-700 border border-slate-300"
+                  }`}>
+                    <span>{selectedItem.isCapacityLocked ? "🔒" : "⏳"}</span>
+                    <span>{selectedItem.isCapacityLocked ? "Kapasitas Terkunci (PO Terkonfirmasi)" : "Belum Mengunci (Draft/Simulasi)"}</span>
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[#737686] block text-[10px] uppercase font-bold mb-1">
+                  Progres Penyelesaian ({selectedItem.progress}%)
+                </span>
+                <div className="w-full bg-[#e2e8f0] h-2 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${
+                      selectedItem.status === "at_risk" ? "bg-rose-600" : "bg-[#004ac6]"
+                    }`}
+                    style={{ width: `${selectedItem.progress}%` }}
+                  />
+                </div>
+              </div>
+
+              {selectedItem.status === "at_risk" && (
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-rose-900">
+                    <span className="material-symbols-outlined text-[16px]">error</span>
+                    <span>Peringatan DSS: Bottleneck Terdeteksi!</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    Stasiun packaging kehabisan buffer waktu sebelum deadline pengiriman.
+                    Rekomendasi tindakan: Tambah shift lembur atau aktifkan pekerja freelance packing.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#f1f5f9]">
+              <button
+                onClick={() => setSelectedItem(null)}
+                className="px-4 py-2 rounded-xl border border-[#e5eeff] text-xs font-bold text-[#525e7d] hover:bg-[#f8f9ff]"
+              >
+                Tutup
+              </button>
+              {selectedItem.status === "at_risk" ? (
+                <Link
+                  href={`/simulations?order=${selectedItem.orderId}`}
+                  className="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 shadow-sm transition-all flex items-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[16px]">science</span>
+                  <span>Buka Solusi What-If</span>
+                </Link>
+              ) : (
+                <Link
+                  href={`/orders/${selectedItem.orderId}`}
+                  className="px-4 py-2 rounded-xl bg-[#004ac6] text-white text-xs font-bold hover:bg-[#003ca2] shadow-sm transition-all"
+                >
+                  Detail Order
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

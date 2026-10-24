@@ -1,7 +1,6 @@
-// src/features/resources/schema.ts
+// src/schemas/resources.schema.ts
 //
-// Zod schemas and TypeScript types for resource operations.
-// Used for validation and type safety when fetching or managing resources.
+// Zod schemas for business resources operations.
 
 import { z } from "zod";
 

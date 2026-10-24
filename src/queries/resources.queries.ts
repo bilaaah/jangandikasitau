@@ -1,7 +1,7 @@
-// src/features/resources/queries.ts
+// src/queries/resources.queries.ts
 //
 // Read-only database queries for business resources (Workers, Machines, Materials, Products).
-// Used by Capacity Engine assembly and UI pages.
+// Owned by Backend & Engine Lead (Anggota 2).
 
 import { db } from "@/lib/db";
 

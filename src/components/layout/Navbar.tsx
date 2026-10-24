@@ -24,16 +24,16 @@ export function Navbar() {
 
           <nav className="hidden md:flex items-center gap-1 text-sm font-medium">
             <Link
+              href="/dashboard"
+              className="px-3.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+            >
+              Dasbor
+            </Link>
+            <Link
               href="/orders"
               className="px-3.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
             >
-              Orders & Capacity
-            </Link>
-            <Link
-              href="/orders/new"
-              className="px-3.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-            >
-              Analyze New Order
+              Daftar Pesanan
             </Link>
           </nav>
         </div>
@@ -41,7 +41,7 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/70 border border-border/40 text-xs text-muted-foreground">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>M1 Active • Single-Tenant Context</span>
+            <span>Sistem Siap • Operasional UKM</span>
           </div>
 
           <Link
@@ -52,7 +52,7 @@ export function Navbar() {
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            <span>New Order Analysis</span>
+            <span>Evaluasi Pesanan Baru</span>
           </Link>
         </div>
       </div>

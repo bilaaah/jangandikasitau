@@ -1,7 +1,8 @@
-// src/features/orders/queries.ts
+// src/queries/orders.queries.ts
 //
 // Read-only database queries for orders and capacity commitments.
 // All queries require businessId for strict multi-tenant isolation.
+// Owned by Backend & Engine Lead (Anggota 2).
 
 import { db } from "@/lib/db";
 import { OrderStatus } from "@prisma/client";
@@ -62,10 +63,6 @@ export async function getOrderById(orderId: string, businessId: string) {
 
 /**
  * Calculates current active commitments for all CONFIRMED and IN_PROGRESS orders.
- * Sums up:
- *  - Worker hours committed
- *  - Machine hours committed
- *  - Material quantities committed
  */
 export async function getActiveCommitments(businessId: string) {
   const activeOrders = await db.order.findMany({

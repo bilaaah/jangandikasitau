@@ -12,16 +12,18 @@ Dokumen ini adalah panduan pembagian tugas resmi untuk tim pengembang BizCapacit
 
 | Anggota | Peran Utama | Fokus File & Modul |
 |---|---|---|
-| **Anggota 1 (Ketua / Lead)** | **Project Lead & Frontend / UX** | `src/app/`, `src/components/`, alur navigasi & form UI |
-| **Anggota 2** | **Backend & Core Capacity Engine** | `prisma/`, `src/features/capacity/`, `src/features/orders/`, `src/features/resources/` |
-| **Anggota 3** | **AI Integration & DSS Simulation** | `src/features/ai/`, `src/features/simulation/`, prompt engineering LLM |
+| **Anggota 1 (Ketua / Lead)** | **Project Lead & Frontend / UX** | `src/app/`, `src/components/` |
+| **Anggota 2** | **Backend & Core Capacity Engine** | `prisma/`, `src/actions/` (kecuali AI), `src/queries/`, `src/schemas/`, `src/engine/` |
+| **Anggota 3** | **AI Integration & DSS Simulation** | `src/ai/`, `src/actions/ai.actions.ts`, `src/engine/simulation/`, prompt LLM |
+
+Kontrak bersama (semua anggota): [`src/engine/types.ts`](src/engine/types.ts) — UI mengimpor lewat `@/types`. Lihat [`src/ARCHITECTURE.md`](src/ARCHITECTURE.md).
 
 ---
 
 ## 📌 Aturan Emas Kolaborasi (Wajib Dipatuhi)
 
-1. **JANGAN UBAH [`src/features/capacity/types.ts`](file:///d:/jangandikasihtau/src/features/capacity/types.ts) SECARA SEPIHAK!**  
-   File ini adalah **kontrak tipe bersama** yang dipakai oleh Frontend, Backend, dan AI. Perubahan pada file ini akan menyebabkan error di kode anggota lain. Jika ada tipe yang perlu ditambah/diubah, harus dibahas dan disetujui bersama di grup.
+1. **JANGAN UBAH [`src/engine/types.ts`](src/engine/types.ts) SECARA SEPIHAK!**  
+   File ini adalah **kontrak tipe bersama** yang dipakai oleh Frontend, Backend, dan AI. Perubahan pada file ini akan menyebabkan error di kode anggota lain. Jika ada tipe yang perlu ditambah/diubah, harus dibahas dan disetujui bersama di grup. Jangan menghidupkan folder `src/features/` — itu sudah diganti arsitektur layered.
 2. **STRATEGI BRANCH GIT:**
    - Branch `main`: Branch rilis/produksi yang stabil.
    - Branch `dev`: Branch integrasi bersama.
@@ -78,12 +80,12 @@ Dokumen ini adalah panduan pembagian tugas resmi untuk tim pengembang BizCapacit
      ```
   6. Salin UUID bisnis yang muncul di terminal ke variabel `DEV_BUSINESS_ID` di file `.env.local`.
 - [ ] **Tugas Pengembangan:**
-  - [ ] **Evaluasi Formula Engine (`src/features/capacity/engine.ts`):**
+  - [ ] **Evaluasi Formula Engine (`src/engine/capacity/calculator.ts`):**
     - Cek apakah formula jam kerja (`totalDailyWorkerHours * availableWorkDays`), utilisasi mesin, dan hari kerja (Senin–Jumat) sudah sesuai dengan spesifikasi kasus UMKM Anda.
-    - Pastikan fungsi tetap berupa *pure function* (tidak melakukan query DB langsung di dalam file `engine.ts`).
-  - [ ] **Queries & Komitmen Aktif (`src/features/orders/queries.ts`):**
+    - Pastikan fungsi tetap berupa *pure function* (tidak melakukan query DB langsung di dalam file calculator).
+  - [ ] **Queries & Komitmen Aktif (`src/queries/orders.queries.ts`):**
     - Pastikan fungsi `getActiveCommitments()` menghitung pesanan berstatus `CONFIRMED` dan `IN_PROGRESS` secara akurat agar tidak terjadi *double booking* kapasitas.
-  - [ ] **Server Actions (`src/features/orders/actions.ts`):**
+  - [ ] **Server Actions (`src/actions/orders.actions.ts`):**
     - Pastikan transaksi penyimpanan `createOrder` menyimpan data ke tabel `orders`, `order_items`, `capacity_analyses`, dan `bottlenecks` dengan tepat.
 
 ---
@@ -98,14 +100,14 @@ Dokumen ini adalah panduan pembagian tugas resmi untuk tim pengembang BizCapacit
   3. Dapatkan API Key LLM (disarankan **Google Gemini API** via Google AI Studio / Gemini 1.5/2.0 Flash yang cepat dan hemat kuota).
   4. Tambahkan `GEMINI_API_KEY="AIzaSy..."` di file `.env.local`.
 - [ ] **Tugas Pengembangan:**
-  - [ ] **Modul Rekomendasi AI (`src/features/ai/`):**
-    - Buat modul Server Action / Route Handler yang menerima payload `CapacityEngineResult` (dari `src/features/capacity/types.ts`).
+  - [ ] **Modul Rekomendasi AI (`src/ai/`, `src/actions/ai.actions.ts`):**
+    - Buat modul Server Action yang menerima payload `CapacityEngineResult` (dari `src/engine/types.ts`, UI memakai `@/types`).
     - Buat prompt engineering terstruktur:
       - *Konteks:* "Anda adalah asisten konsultan operasional UMKM."
       - *Input:* Status kelayakan, utilisasi jam pekerja, mesin, defisit bahan baku, dan sisa hari kerja.
       - *Output:* Bahasa manusia yang solutif (Contoh: *"Pesanan ini kekurangan 10 kg tepung dan kelebihan jam kerja 4 jam. Saran: Beli tepung sebelum hari Kamis dan jadwalkan lembur 1 jam selama 4 hari."*).
     - Tampilkan hasil rekomendasi AI ini di halaman detail pesanan (`/orders/[id]`).
-  - [ ] **Modul Simulasi What-If (`src/features/simulation/`):**
+  - [ ] **Modul Simulasi What-If (`src/engine/simulation/`, `src/actions/simulation.actions.ts`):**
     - Buat fungsi yang memungkinkan pemilik bisnis menguji skenario hipotetis sebelum menerima pesanan:
       - *Skenario A:* "Bagaimana jika menambah 1 pekerja lepas (freelance)?"
       - *Skenario B:* "Bagaimana jika tanggal kirim dinegosiasikan mundur 3 hari?"
@@ -116,8 +118,11 @@ Dokumen ini adalah panduan pembagian tugas resmi untuk tim pengembang BizCapacit
 ## 🛠️ Perintah Berguna Sehari-hari
 
 ```bash
-# Menjalankan development server lokal (http://localhost:3000)
+# Development server ringan (localhost only, RAM Node dibatasi 2GB)
 npm run dev
+
+# Jangan jalankan Prisma Studio bersamaan dengan `dev` di laptop 8GB
+# npm run db:studio
 
 # Memeriksa ada/tidaknya kesalahan tipe TypeScript di seluruh proyek
 npx tsc --noEmit

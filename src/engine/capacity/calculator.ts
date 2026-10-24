@@ -1,15 +1,12 @@
-// src/features/capacity/engine.ts
+// src/engine/capacity/calculator.ts
 //
-// THE CAPACITY ENGINE — Core deterministic calculations.
+// THE CAPACITY ENGINE — Pure deterministic calculation functions.
 //
-// RULES FOR THIS FILE:
-//   1. Pure functions only. No database calls, no HTTP requests, no side effects.
-//   2. All inputs come through CapacityEngineInput. No process.env reads here.
-//   3. All outputs are deterministic — same input always produces same output.
-//   4. This file can be unit-tested with Vitest by constructing input objects directly.
-//   5. AI modules may READ the output but must NEVER modify it or re-run calculations.
-//
-// Member B owns this file. Changes require PR review.
+// RULES:
+//   1. Pure functions only. Zero database calls, zero HTTP requests, zero side-effects.
+//   2. Inputs strictly typed via CapacityEngineInput.
+//   3. Completely deterministic — same input always yields identical output.
+//   4. Can be unit-tested directly without mock DB or Next.js runtime.
 
 import { CAPACITY_THRESHOLDS, WORKING_DAY_CONFIG } from "./constants";
 import type {
@@ -19,17 +16,10 @@ import type {
   MaterialAnalysis,
   ResourceAnalysis,
   Bottleneck,
-} from "./types";
-
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
+} from "@/engine/types";
 
 /**
  * Runs a complete capacity feasibility analysis for a new order.
- *
- * @param input - All resource data and order details, assembled by the caller.
- * @returns A CapacityEngineResult with status, analysis, bottlenecks, and reasoning.
  */
 export function runCapacityEngine(input: CapacityEngineInput): CapacityEngineResult {
   const reasoning: string[] = [];
@@ -125,16 +115,8 @@ export function runCapacityEngine(input: CapacityEngineInput): CapacityEngineRes
   };
 }
 
-// ---------------------------------------------------------------------------
-// Working day calculation (Mon–Fri, no holiday awareness)
-// ---------------------------------------------------------------------------
-
 /**
- * Counts the number of working days (Mon–Fri) between two dates, inclusive of
- * the start date but exclusive of the end date (delivery day itself is not a
- * production day).
- *
- * Returns 0 if the delivery date is today or in the past.
+ * Counts the number of working days (Mon–Fri) between two dates.
  */
 export function countWorkingDays(from: Date, to: Date): number {
   const start = startOfDay(from);
@@ -155,10 +137,6 @@ export function countWorkingDays(from: Date, to: Date): number {
 
   return count;
 }
-
-// ---------------------------------------------------------------------------
-// Private helpers
-// ---------------------------------------------------------------------------
 
 function buildResourceAnalysis(params: {
   totalAvailableHours: number;
@@ -212,7 +190,7 @@ function buildMaterialAnalysis(
 ): MaterialAnalysis[] {
   return input.product.materials.map((productMaterial) => {
     const stockItem = input.inventory.materials.find((m) => m.id === productMaterial.materialId);
-    const commitment = input.activeCommitments.materialCommitments.find(
+    const commitment = (input.activeCommitments?.materialCommitments || []).find(
       (c) => c.materialId === productMaterial.materialId,
     );
 
@@ -311,10 +289,6 @@ function classifyFeasibility(params: {
 
   return "FEASIBLE";
 }
-
-// ---------------------------------------------------------------------------
-// Date utilities (kept local — no external date library needed)
-// ---------------------------------------------------------------------------
 
 function startOfDay(date: Date): Date {
   const d = new Date(date);

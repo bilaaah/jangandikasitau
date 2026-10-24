@@ -5,7 +5,7 @@
 // Client component allowing real-time status transitions (DRAFT -> CONFIRMED -> IN_PROGRESS -> COMPLETED / CANCELLED).
 
 import React, { useTransition } from "react";
-import { updateOrderStatus } from "@/features/orders/actions";
+import { updateOrderStatus } from "@/actions/orders.actions";
 import { OrderStatus } from "@prisma/client";
 
 interface OrderStatusSelectProps {

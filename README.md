@@ -241,13 +241,13 @@ type OrderStatus = 'DRAFT' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCEL
 
 | Milestone | PIC | Status | Deskripsi |
 |-----------|-----|--------|-----------|
-| Frontend UI & Dashboard | Frontend | ✅ Done | Responsive UI, semua halaman, branding |
-| Core Engine & Backend | Backend | 🔄 In Progress | Capacity calculator, database, server actions |
-| AI Integration | AI Engineer | 🔄 In Progress | Gemini recommendations & advisory |
+| Frontend UI & Dashboard | Frontend | 🔄 In Progress | Responsive UI, semua halaman, branding |
+| Core Engine & Backend | Backend | 📋 Planned | Capacity calculator, database, server actions |
+| AI Integration | AI Engineer | 📋 Planned | Gemini recommendations & advisory |
 | QA & Testing | QA | 📋 Planned | Unit + integration + E2E tests |
 
 ---
 
 ## 📄 Lisensi
 
-MIT License — Tim BizCapacity © 2025
+MIT License — Tim Jangan Dikasih Tau © 2026

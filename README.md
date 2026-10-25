@@ -57,7 +57,7 @@ UMKM seringkali menerima pesanan tanpa mengetahui apakah kapasitas produksi mere
 | **Database ORM** | Prisma 6 + PostgreSQL |
 | **Validasi Schema** | Zod |
 | **AI/ML** | Vercel AI SDK (Google Gemini) |
-| **Auth** | NextAuth.js / Custom JWT |
+| **Auth** | Auth.js v5 Credentials + JWT Session |
 
 ---
 
@@ -147,30 +147,34 @@ npm install
 ```
 
 ### 2. Environment Variables
-Copy `.env.example` ke `.env.local`:
+Copy `.env.example` ke `.env`:
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 Isi variabel berikut:
 ```env
 DATABASE_URL="postgresql://user:password@host:5432/dbname"
-NEXTAUTH_SECRET="your-secret-here"
+AUTH_SECRET="generate-a-unique-random-secret"
 GOOGLE_GEMINI_API_KEY="your-gemini-key"
 ```
 
 ### 3. Setup Database
 ```bash
 npm run db:generate    # Generate Prisma Client
-npm run db:migrate     # Jalankan migrasi
+npm run db:migrate -- --name init # Buat/jalankan migrasi awal
 npm run db:seed        # Seed data awal
 ```
-Salin `DEV_BUSINESS_ID` dari output seed ke `.env.local`.
+Seed membuat atau memperbarui satu usaha demo, tiga produk beserta BOM,
+pekerja, mesin, bahan baku, serta akun Owner dan Staff tanpa menghapus data
+usaha lain. Saat akun pertama kali dibuat, kata sandi acak dicetak di terminal;
+simpan kata sandi tersebut dengan aman.
 
 ### 4. Jalankan Development Server
 ```bash
 npm run dev
 ```
-Buka [http://localhost:3000](http://localhost:3000)
+Buka [http://localhost:3000](http://localhost:3000). Masuk melalui
+[http://localhost:3000/login](http://localhost:3000/login).
 
 > ⚠️ Jangan jalankan `npm run db:studio` bersamaan dengan `npm run dev` di mesin dengan RAM 8GB.
 

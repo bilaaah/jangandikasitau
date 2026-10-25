@@ -31,10 +31,10 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files
-# .env.example IS committed — it contains only placeholder values
-# .env.local and .env.*.local are NEVER committed — they contain real secrets
-.env.local
-.env.*.local
+# Keep real database credentials and auth secrets out of Git.
+.env
+.env.*
+!.env.example
 
 # vercel
 .vercel

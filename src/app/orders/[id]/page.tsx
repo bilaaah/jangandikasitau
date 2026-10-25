@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { getBusinessId } from "@/lib/context";
 import { getOrderById } from "@/queries/orders.queries";
-import { FeasibilityCard } from "@/components/feasibility/FeasibilityCard";
 import { OrderStatusSelect } from "./OrderStatusSelect";
 import { formatDate } from "@/lib/utils";
-import type { CapacityEngineResult } from "@/types";
 import { DashboardShell } from "@/components/layout/DashboardShell";
+import { notFound } from "next/navigation";
 
 interface OrderDetailPageProps {
   params: Promise<{ id: string }>;
@@ -13,376 +12,20 @@ interface OrderDetailPageProps {
 
 export const instant = false;
 
-const DEMO_ORDER_DETAILS: Record<string, any> = {
-  "bc-1024": {
-    id: "BC-1024",
-    customerName: "PT Nusantara Sentosa",
-    clientType: "Corporate B2B • Jakarta",
-    poNumber: "PO-2026-881",
-    status: "CONFIRMED",
-    createdAt: new Date("2026-10-16T09:00:00Z"),
-    requiredDeliveryDate: new Date("2026-10-24T17:00:00Z"),
-    notes: "Prioritas pengiriman hampers seremonial kantor. Harap packing rapi dengan pita gold.",
-    items: [
-      {
-        quantity: 300,
-        product: {
-          name: "Custom Gift Boxes (4 SKU Set)",
-          description: "Paket hampers exclusive: 3 jar cookies, 1 greeting card, box hardboard laminasi satin.",
-          workerHoursPerUnit: 1.5,
-          machineHoursPerUnit: 0.8,
-          materials: [
-            { id: "m1", quantityPerUnit: 1, material: { name: "Hardbox Rigid Satin", unit: "box", currentStock: 250 } },
-            { id: "m2", quantityPerUnit: 2, material: { name: "Pita Satin Emas", unit: "meter", currentStock: 600 } },
-            { id: "m3", quantityPerUnit: 3, material: { name: "Jar Kaca 350ml", unit: "pcs", currentStock: 800 } },
-          ],
-        },
-      },
-    ],
-    analysis: {
-      status: "AT_RISK",
-      availableWorkDays: 6,
-      estimatedProductionDays: 7,
-      bufferDays: -1,
-      workerAnalysis: {
-        totalAvailableHours: 192,
-        committedHours: 80,
-        requiredHours: 450,
-        freeHours: 112,
-        gap: -338,
-        utilizationPercent: 93,
-      },
-      machineAnalysis: {
-        totalAvailableHours: 144,
-        committedHours: 40,
-        requiredHours: 240,
-        freeHours: 104,
-        gap: -136,
-        utilizationPercent: 88,
-      },
-      materialAnalysis: [
-        {
-          materialId: "Hardbox Rigid Satin",
-          unit: "box",
-          requiredQuantity: 300,
-          currentStock: 250,
-          committedQuantity: 50,
-          effectiveAvailable: 200,
-          gap: -100,
-        },
-        {
-          materialId: "Pita Satin Emas",
-          unit: "meter",
-          requiredQuantity: 600,
-          currentStock: 600,
-          committedQuantity: 100,
-          effectiveAvailable: 500,
-          gap: -100,
-        },
-        {
-          materialId: "Jar Kaca 350ml",
-          unit: "pcs",
-          requiredQuantity: 900,
-          currentStock: 1200,
-          committedQuantity: 200,
-          effectiveAvailable: 1000,
-          gap: 100,
-        },
-      ],
-      bottlenecks: [
-        {
-          resourceType: "WORKER",
-          description: "Stasiun Perakitan Box & Packaging mengalami defisit 8 jam kerja operator.",
-          severity: "WARNING",
-        },
-        {
-          resourceType: "MATERIAL",
-          description: "Defisit stok Hardbox Rigid Satin sebesar 100 box untuk memenuhi volume 300 unit.",
-          severity: "CRITICAL",
-        },
-      ],
-      reasoning: [
-        "Jadwal kerja tersedia: 6 hari kerja (Senin–Jumat) sebelum deadline 24 Okt 2026.",
-        "Kapasitas lini packaging terpakai 93% — melampaui batas toleransi aman UMKM (85%).",
-        "Rekomendasi DSS: Tambah 1 shift lembur (+3 jam) atau ajukan pergeseran deadline 24 jam kepada klien.",
-      ],
-    },
-  },
-  "bc-1021": {
-    id: "BC-1021",
-    customerName: "Wedding Organizer Lestari",
-    clientType: "Custom Project • Tangerang",
-    poNumber: "PO-2026-878",
-    status: "CANCELLED",
-    createdAt: new Date("2026-10-18T10:00:00Z"),
-    requiredDeliveryDate: new Date("2026-10-21T09:00:00Z"),
-    notes: "Kue pernikahan bertingkat dengan ornamen fondant rumit. Butuh pengerjaan detail tinggi.",
-    items: [
-      {
-        quantity: 1,
-        product: {
-          name: "Royal Tier Wedding Cake",
-          description: "Kue 3-tier dengan fondant custom, butuh 28 jam kerja artisan spesialis.",
-          workerHoursPerUnit: 28,
-          machineHoursPerUnit: 14,
-          materials: [
-            { id: "m7", quantityPerUnit: 12, material: { name: "Rolled Fondant Premium", unit: "kg", currentStock: 4 } },
-            { id: "m8", quantityPerUnit: 8, material: { name: "Specialty Buttercream", unit: "kg", currentStock: 3 } },
-          ],
-        },
-      },
-    ],
-    analysis: {
-      status: "NOT_FEASIBLE",
-      availableWorkDays: 2,
-      estimatedProductionDays: 5,
-      bufferDays: -3,
-      workerAnalysis: {
-        totalAvailableHours: 32,
-        committedHours: 24,
-        requiredHours: 28,
-        freeHours: 8,
-        gap: -20,
-        utilizationPercent: 162,
-      },
-      machineAnalysis: {
-        totalAvailableHours: 24,
-        committedHours: 16,
-        requiredHours: 14,
-        freeHours: 8,
-        gap: -6,
-        utilizationPercent: 125,
-      },
-      materialAnalysis: [
-        {
-          materialId: "Rolled Fondant Premium",
-          unit: "kg",
-          requiredQuantity: 12,
-          currentStock: 4,
-          committedQuantity: 2,
-          effectiveAvailable: 2,
-          gap: -10,
-        },
-        {
-          materialId: "Specialty Buttercream",
-          unit: "kg",
-          requiredQuantity: 8,
-          currentStock: 3,
-          committedQuantity: 1,
-          effectiveAvailable: 2,
-          gap: -6,
-        },
-      ],
-      bottlenecks: [
-        {
-          resourceType: "WORKER",
-          description: "Defisit 20 jam kerja artisan spesialis. Waktu produksi butuh 5 hari kerja, sisa waktu hanya 2 hari kerja.",
-          severity: "CRITICAL",
-        },
-        {
-          resourceType: "MATERIAL",
-          description: "Defisit stok Rolled Fondant Premium sebesar 10 kg untuk pembuatan ornamen.",
-          severity: "CRITICAL",
-        },
-        {
-          resourceType: "TIME",
-          description: "Buffer waktu negatif (-3 hari). Batas waktu pengiriman 21 Okt 2026 mustahil dicapai.",
-          severity: "CRITICAL",
-        },
-      ],
-      reasoning: [
-        "Jadwal kerja tersedia: 2 hari kerja sebelum batas waktu pengiriman.",
-        "Kapasitas artisan terlampaui hingga 162% dari total jam kerja yang tersedia.",
-        "Stok bahan baku utama mengalami defisit kritis (Fondant & Buttercream).",
-        "Rekomendasi DSS: Tolak pesanan atau tawarkan tanggal kirim alternatif (minimal +5 hari kerja).",
-      ],
-    },
-  },
-  "bc-1023": {
-    id: "BC-1023",
-    customerName: "Ibu Ratna Catering",
-    clientType: "Repeat Regular • Depok",
-    poNumber: "PO-2026-880",
-    status: "IN_PROGRESS",
-    createdAt: new Date("2026-10-17T08:00:00Z"),
-    requiredDeliveryDate: new Date("2026-10-23T12:00:00Z"),
-    notes: "Pengiriman pagi langsung ke lokasi hajatan Depok Timur.",
-    items: [
-      {
-        quantity: 120,
-        product: {
-          name: "Signature Fudgy Brownies Box",
-          description: "Brownies panggang premium tabur almond & choco chips ukuran 20x20cm.",
-          workerHoursPerUnit: 0.4,
-          machineHoursPerUnit: 0.7,
-          materials: [
-            { id: "m4", quantityPerUnit: 0.25, material: { name: "Dark Cocoa Powder", unit: "kg", currentStock: 80 } },
-            { id: "m5", quantityPerUnit: 0.2, material: { name: "Unsalted Butter Anchor", unit: "kg", currentStock: 60 } },
-            { id: "m6", quantityPerUnit: 1, material: { name: "Brownie Packaging Box", unit: "box", currentStock: 500 } },
-          ],
-        },
-      },
-    ],
-    analysis: {
-      status: "FEASIBLE",
-      availableWorkDays: 5,
-      estimatedProductionDays: 3,
-      bufferDays: 2,
-      workerAnalysis: {
-        totalAvailableHours: 160,
-        committedHours: 48,
-        requiredHours: 48,
-        freeHours: 112,
-        gap: 64,
-        utilizationPercent: 60,
-      },
-      machineAnalysis: {
-        totalAvailableHours: 120,
-        committedHours: 35,
-        requiredHours: 84,
-        freeHours: 85,
-        gap: 1,
-        utilizationPercent: 70,
-      },
-      materialAnalysis: [
-        {
-          materialId: "Dark Cocoa Powder",
-          unit: "kg",
-          requiredQuantity: 30,
-          currentStock: 80,
-          committedQuantity: 10,
-          effectiveAvailable: 70,
-          gap: 40,
-        },
-      ],
-      bottlenecks: [],
-      reasoning: [
-        "Seluruh stasiun kerja (Mixer, Deck Oven #2, Stasiun Packaging) dalam kondisi aman.",
-        "Buffer pengiriman tersedia +2 hari kerja sebelum batas waktu pengiriman.",
-      ],
-    },
-  },
-  "bc-1025": {
-    id: "BC-1025",
-    customerName: "Kopi Kenangan Senopati",
-    clientType: "B2B Contract • Jakarta",
-    poNumber: "PO-2026-882",
-    status: "CONFIRMED",
-    createdAt: new Date("2026-10-22T08:00:00Z"),
-    requiredDeliveryDate: new Date("2026-10-29T17:00:00Z"),
-    notes: "Pesanan batch perdana croissants butter dan brownies untuk display outlet.",
-    items: [
-      {
-        quantity: 150,
-        product: {
-          name: "Signature Fudgy Brownies Box",
-          description: "Brownies fudgy premium 20x20cm kemasan display cafe.",
-          workerHoursPerUnit: 0.4,
-          machineHoursPerUnit: 0.7,
-          materials: [
-            { id: "m4", quantityPerUnit: 0.25, material: { name: "Dark Cocoa Powder", unit: "kg", currentStock: 80 } },
-            { id: "m5", quantityPerUnit: 0.2, material: { name: "Unsalted Butter Anchor", unit: "kg", currentStock: 60 } },
-            { id: "m6", quantityPerUnit: 1, material: { name: "Brownie Packaging Box", unit: "box", currentStock: 500 } },
-          ],
-        },
-      },
-    ],
-    analysis: {
-      status: "FEASIBLE",
-      availableWorkDays: 7,
-      estimatedProductionDays: 4,
-      bufferDays: 3,
-      workerAnalysis: {
-        totalAvailableHours: 180,
-        committedHours: 90,
-        requiredHours: 60,
-        freeHours: 90,
-        gap: 30,
-        utilizationPercent: 83,
-      },
-      machineAnalysis: {
-        totalAvailableHours: 120,
-        committedHours: 50,
-        requiredHours: 42,
-        freeHours: 70,
-        gap: 28,
-        utilizationPercent: 77,
-      },
-      materialAnalysis: [
-        {
-          materialId: "Dark Cocoa Powder",
-          unit: "kg",
-          requiredQuantity: 37.5,
-          currentStock: 80,
-          committedQuantity: 20,
-          effectiveAvailable: 60,
-          gap: 22.5,
-        },
-      ],
-      bottlenecks: [],
-      reasoning: [
-        "Kapasitas staf dan oven berada dalam batas aman UMKM (<85%).",
-        "Tersedia buffer waktu 3 hari kerja sebelum target kirim 29 Okt 2026.",
-      ],
-    },
-  },
-};
-
 export default async function OrderDetailPage({ params }: OrderDetailPageProps) {
   const { id } = await params;
-  const normalizedId = id.toLowerCase();
-  let order: any = null;
+  const businessId = await getBusinessId();
+  const order = await getOrderById(id, businessId);
 
-  try {
-    const businessId = await getBusinessId();
-    if (businessId) {
-      order = await getOrderById(id, businessId);
-    }
-  } catch (err) {
-    // Fallback to rich demo details below
-  }
-
-  // Graceful fallback to demo dataset if order not found in DB
   if (!order) {
-    order = DEMO_ORDER_DETAILS[normalizedId] || DEMO_ORDER_DETAILS["bc-1024"];
+    notFound();
   }
 
-  const item = order.items?.[0];
-  const analysisResult: CapacityEngineResult = order.analysis || {
-    status: "AT_RISK",
-    availableWorkDays: 5,
-    estimatedProductionDays: 5,
-    bufferDays: 0,
-    workerAnalysis: {
-      totalAvailableHours: 160,
-      committedHours: 80,
-      requiredHours: 60,
-      freeHours: 80,
-      gap: 20,
-      utilizationPercent: 88,
-    },
-    machineAnalysis: {
-      totalAvailableHours: 120,
-      committedHours: 60,
-      requiredHours: 40,
-      freeHours: 60,
-      gap: 20,
-      utilizationPercent: 83,
-    },
-    materialAnalysis: [],
-    bottlenecks: [
-      {
-        resourceType: "WORKER",
-        description: "Jam kerja lini finishing mendekati batas toleransi aman.",
-        severity: "WARNING",
-      },
-    ],
-    reasoning: ["Kapasitas terpakai 88% — disarankan memantau progres harian."],
-  };
-
-  const isAtRisk = analysisResult.status === "AT_RISK";
-  const isNotFeasible = analysisResult.status === "NOT_FEASIBLE";
-  const isFeasible = analysisResult.status === "FEASIBLE";
+  const item = order.items[0];
+  const latestAnalysis = order.capacityAnalyses[0];
+  const isAtRisk = latestAnalysis?.status === "AT_RISK";
+  const isNotFeasible = latestAnalysis?.status === "NOT_FEASIBLE";
+  const isFeasible = latestAnalysis?.status === "FEASIBLE";
 
   return (
     <DashboardShell>
@@ -427,7 +70,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                 )}
               </div>
               <p className="text-xs sm:text-sm text-[#64748B]">
-                PO: <strong className="text-[#0F172A] font-mono">{order.poNumber || "PO-2026-X"}</strong> &bull; Dibuat: {formatDate(order.createdAt)} &bull; Target Kirim:{" "}
+                Dibuat: {formatDate(order.createdAt)} &bull; Target Kirim:{" "}
                 <strong className="text-[#0F172A]">{formatDate(order.requiredDeliveryDate)}</strong>
               </p>
             </div>
@@ -445,66 +88,72 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
           </div>
 
           {/* Quick DSS Diagnosis Banner */}
-          <div
-            className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-              isAtRisk
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-950"
-                : isNotFeasible
-                ? "bg-rose-500/10 border-rose-500/30 text-rose-950"
-                : "bg-emerald-500/10 border-emerald-500/30 text-emerald-950"
-            }`}
-          >
-            <div className="flex items-start gap-3">
-              <span className="material-symbols-outlined text-[24px] text-amber-700 shrink-0 mt-0.5">
-                {isFeasible ? "verified" : "warning"}
-              </span>
-              <div className="space-y-0.5">
-                <h4 className="text-sm font-bold">
-                  {isFeasible
-                    ? "Status Kapasitas: Seluruh Sumber Daya Memadai"
-                    : isAtRisk
-                    ? "Peringatan DSS: Bottleneck Terdeteksi di Stasiun Packaging"
-                    : "Peringatan DSS: Kapasitas Defisit — Pesanan Tidak Mampu Selesai Tepat Waktu"}
-                </h4>
-                <p className="text-xs text-[#64748B]">
-                  {isFeasible
-                    ? "Tenaga kerja, oven, dan material aman dengan buffer waktu pengiriman yang cukup."
-                    : "Estimasi keterlambatan 1 hari jika tidak dilakukan tindakan penyesuaian jam kerja atau suplai bahan."}
-                </p>
+          {latestAnalysis ? (
+            <div
+              className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                isAtRisk
+                  ? "bg-amber-500/10 border-amber-500/30 text-amber-950"
+                  : isNotFeasible
+                    ? "bg-rose-500/10 border-rose-500/30 text-rose-950"
+                    : "bg-emerald-500/10 border-emerald-500/30 text-emerald-950"
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <span className="material-symbols-outlined text-[24px] shrink-0 mt-0.5">
+                  {isFeasible ? "verified" : "warning"}
+                </span>
+                <div className="space-y-0.5">
+                  <h4 className="text-sm font-bold">
+                    {isFeasible
+                      ? "Status Kapasitas: Layak"
+                      : isAtRisk
+                        ? "Status Kapasitas: Perlu Ditinjau"
+                        : "Status Kapasitas: Tidak Layak"}
+                  </h4>
+                  <p className="text-xs text-[#64748B]">
+                    Analisis tersimpan pada {formatDate(latestAnalysis.analyzedAt)}.
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-4 bg-white/80 border rounded-xl px-4 py-2 text-xs shrink-0">
-              <div className="text-center">
-                <span className="block font-mono font-bold text-sm text-[#0F172A]">
-                  {analysisResult.availableWorkDays}d
-                </span>
-                <span className="text-[#64748B] text-[10px] uppercase">Tersedia</span>
-              </div>
-              <div className="w-px h-6 bg-[#e2e8f0]" />
-              <div className="text-center">
-                <span className="block font-mono font-bold text-sm text-[#0F172A]">
-                  {analysisResult.estimatedProductionDays}d
-                </span>
-                <span className="text-[#64748B] text-[10px] uppercase">Estimasi</span>
-              </div>
-              <div className="w-px h-6 bg-[#e2e8f0]" />
-              <div className="text-center">
-                <span
-                  className={`block font-mono font-bold text-sm ${
-                    analysisResult.bufferDays < 0
-                      ? "text-rose-600"
-                      : analysisResult.bufferDays <= 1
-                      ? "text-amber-600"
-                      : "text-emerald-600"
-                  }`}
-                >
-                  {analysisResult.bufferDays > 0 ? `+${analysisResult.bufferDays}d` : `${analysisResult.bufferDays}d`}
-                </span>
-                <span className="text-[#64748B] text-[10px] uppercase">Buffer</span>
+              <div className="flex items-center gap-4 bg-white/80 border rounded-xl px-4 py-2 text-xs shrink-0">
+                <div className="text-center">
+                  <span className="block font-mono font-bold text-sm text-[#0F172A]">
+                    {latestAnalysis.availableWorkDays}d
+                  </span>
+                  <span className="text-[#64748B] text-[10px] uppercase">Tersedia</span>
+                </div>
+                <div className="w-px h-6 bg-[#e2e8f0]" />
+                <div className="text-center">
+                  <span className="block font-mono font-bold text-sm text-[#0F172A]">
+                    {latestAnalysis.estimatedProductionDays}d
+                  </span>
+                  <span className="text-[#64748B] text-[10px] uppercase">Estimasi</span>
+                </div>
+                <div className="w-px h-6 bg-[#e2e8f0]" />
+                <div className="text-center">
+                  <span
+                    className={`block font-mono font-bold text-sm ${
+                      latestAnalysis.bufferDays < 0
+                        ? "text-rose-600"
+                        : latestAnalysis.bufferDays <= 1
+                          ? "text-amber-600"
+                          : "text-emerald-600"
+                    }`}
+                  >
+                    {latestAnalysis.bufferDays > 0
+                      ? `+${latestAnalysis.bufferDays}d`
+                      : `${latestAnalysis.bufferDays}d`}
+                  </span>
+                  <span className="text-[#64748B] text-[10px] uppercase">Buffer</span>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              Belum ada hasil analisis kapasitas untuk pesanan ini.
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -555,7 +204,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                       Kebutuhan Bahan Baku (Bill of Materials)
                     </h5>
                     <div className="divide-y divide-[#e2e8f0] rounded-xl border border-[#e2e8f0] bg-white text-xs">
-                      {(item.product?.materials || []).map((pm: any) => {
+                      {(item.product?.materials || []).map((pm) => {
                         const requiredQty = item.quantity * pm.quantityPerUnit;
                         const isShortage = pm.material.currentStock < requiredQty;
                         return (
@@ -596,7 +245,40 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
 
           {/* Right Column: Full DSS Feasibility Report */}
           <div className="lg:col-span-7 space-y-6">
-            <FeasibilityCard analysis={analysisResult} />
+            {latestAnalysis ? (
+              <div className="rounded-2xl bg-white border border-[#e2e8f0] p-6 shadow-xs space-y-4">
+                <h3 className="text-sm font-bold text-[#0F172A]">Alasan Analisis Kapasitas</h3>
+                <ul className="space-y-2 text-sm text-[#475569]">
+                  {Array.isArray(latestAnalysis.reasoning) &&
+                  latestAnalysis.reasoning.every((reason): reason is string => typeof reason === "string") ? (
+                    latestAnalysis.reasoning.map((reason, index) => (
+                      <li key={`${index}-${reason}`} className="flex gap-2">
+                        <span aria-hidden="true">•</span>
+                        <span>{reason}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li>Rincian alasan analisis tidak tersedia.</li>
+                  )}
+                </ul>
+                {latestAnalysis.bottlenecks.length > 0 && (
+                  <div className="space-y-2 border-t border-[#e2e8f0] pt-4">
+                    <h4 className="text-xs font-bold uppercase tracking-wide text-[#64748B]">
+                      Kendala yang terdeteksi
+                    </h4>
+                    {latestAnalysis.bottlenecks.map((bottleneck) => (
+                      <p key={bottleneck.id} className="text-sm text-rose-700">
+                        {bottleneck.description}
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-2xl bg-white border border-[#e2e8f0] p-6 text-sm text-[#64748B] shadow-xs">
+                Hasil analisis belum tersedia.
+              </div>
+            )}
 
             {/* AI Decision Explainability & Recommendation Card */}
             <div className="p-6 rounded-2xl bg-white border border-[#e2e8f0] shadow-xs space-y-4">

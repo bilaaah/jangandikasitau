@@ -1,195 +1,264 @@
-// prisma/seed.ts
-//
-// Development seed script.
-// Creates one Business with one Owner user and a sample set of resources
-// so the team can run Milestone 1 without needing real data entry.
-//
-// Run with: npm run db:seed
-// After running, copy the logged businessId into .env.local as DEV_BUSINESS_ID.
-//
-// This script is ONLY for local development. Do NOT run in production.
-
-import { PrismaClient } from "@prisma/client";
+import { randomBytes } from "node:crypto";
+import bcrypt from "bcryptjs";
+import { BusinessRole, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
+const BUSINESS_NAME = "SweetCrumbs Bakery";
+
+async function ensureDemoUser(input: {
+  email: string;
+  name: string;
+  businessId: string;
+  role: BusinessRole;
+}) {
+  const existingUser = await prisma.user.findUnique({
+    where: { email: input.email },
+  });
+  const initialPassword = existingUser?.hashedPassword
+    ? undefined
+    : randomBytes(18).toString("base64url");
+  const hashedPassword = initialPassword
+    ? await bcrypt.hash(initialPassword, 12)
+    : undefined;
+
+  let user: Awaited<ReturnType<typeof prisma.user.findUnique>>;
+  if (existingUser) {
+    user = await prisma.user.update({
+      where: { id: existingUser.id },
+      data: { name: input.name, ...(hashedPassword ? { hashedPassword } : {}) },
+    });
+  } else {
+    if (!hashedPassword) {
+      throw new Error(`Kata sandi awal tidak berhasil dibuat untuk ${input.email}.`);
+    }
+    user = await prisma.user.create({
+      data: {
+        email: input.email,
+        name: input.name,
+        hashedPassword,
+      },
+    });
+  }
+
+  await prisma.userBusiness.upsert({
+    where: {
+      userId_businessId: {
+        userId: user.id,
+        businessId: input.businessId,
+      },
+    },
+    create: {
+      userId: user.id,
+      businessId: input.businessId,
+      role: input.role,
+    },
+    update: { role: input.role },
+  });
+
+  console.log(`Akun ${input.role === BusinessRole.OWNER ? "Owner" : "Staff"}: ${input.email}`);
+  if (initialPassword) {
+    console.log(`Kata sandi awal (simpan sekarang): ${initialPassword}`);
+  } else {
+    console.log("Kata sandi akun yang sudah ada tidak diubah.");
+  }
+}
+
+async function ensureMaterial(
+  businessId: string,
+  material: { name: string; unit: string; currentStock: number },
+) {
+  const existing = await prisma.material.findFirst({
+    where: { businessId, name: material.name },
+  });
+
+  return existing
+    ? prisma.material.update({
+        where: { id: existing.id },
+        data: { ...material, isActive: true },
+      })
+    : prisma.material.create({
+        data: { businessId, ...material },
+      });
+}
+
+async function ensureProduct(
+  businessId: string,
+  productInput: {
+    name: string;
+    description: string;
+    workerHoursPerUnit: number;
+    machineHoursPerUnit: number;
+    billOfMaterials: { materialId: string; quantityPerUnit: number }[];
+  },
+) {
+  const { billOfMaterials, ...productData } = productInput;
+  const existing = await prisma.product.findFirst({
+    where: { businessId, name: productData.name },
+  });
+
+  const product = existing
+    ? await prisma.product.update({
+        where: { id: existing.id },
+        data: { ...productData, isActive: true },
+      })
+    : await prisma.product.create({
+        data: { businessId, ...productData },
+      });
+
+  for (const item of billOfMaterials) {
+    await prisma.productMaterial.upsert({
+      where: {
+        productId_materialId: {
+          productId: product.id,
+          materialId: item.materialId,
+        },
+      },
+      create: {
+        productId: product.id,
+        materialId: item.materialId,
+        quantityPerUnit: item.quantityPerUnit,
+      },
+      update: { quantityPerUnit: item.quantityPerUnit },
+    });
+  }
+
+  await prisma.productMaterial.deleteMany({
+    where: {
+      productId: product.id,
+      materialId: { notIn: billOfMaterials.map((item) => item.materialId) },
+    },
+  });
+}
+
+async function ensureWorker(businessId: string, name: string, dailyAvailableHours: number) {
+  const existing = await prisma.worker.findFirst({
+    where: { businessId, name },
+  });
+
+  return existing
+    ? prisma.worker.update({
+        where: { id: existing.id },
+        data: { dailyAvailableHours, isActive: true },
+      })
+    : prisma.worker.create({
+        data: { businessId, name, dailyAvailableHours },
+      });
+}
+
+async function ensureMachine(businessId: string, name: string, dailyAvailableHours: number) {
+  const existing = await prisma.machine.findFirst({
+    where: { businessId, name },
+  });
+
+  return existing
+    ? prisma.machine.update({
+        where: { id: existing.id },
+        data: { dailyAvailableHours, isActive: true },
+      })
+    : prisma.machine.create({
+        data: { businessId, name, dailyAvailableHours },
+      });
+}
 
 async function main() {
-  console.log("🌱 Seeding development database...");
+  const existingBusiness = await prisma.business.findFirst({
+    where: { name: BUSINESS_NAME },
+  });
+  const business = existingBusiness
+    ? await prisma.business.update({
+        where: { id: existingBusiness.id },
+        data: { type: "Bakery & Custom Gift" },
+      })
+    : await prisma.business.create({
+        data: { name: BUSINESS_NAME, type: "Bakery & Custom Gift" },
+      });
 
-  // ---------------------------------------------------------------------------
-  // Clean existing seed data (safe for repeated runs)
-  // ---------------------------------------------------------------------------
-  // Delete in reverse dependency order to respect FK constraints
-  await prisma.bottleneck.deleteMany();
-  await prisma.capacityAnalysis.deleteMany();
-  await prisma.orderItem.deleteMany();
-  await prisma.order.deleteMany();
-  await prisma.productMaterial.deleteMany();
-  await prisma.material.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.machine.deleteMany();
-  await prisma.worker.deleteMany();
-  await prisma.userBusiness.deleteMany();
-  await prisma.business.deleteMany();
-  await prisma.user.deleteMany();
-
-  console.log("  ✓ Cleared existing seed data");
-
-  // ---------------------------------------------------------------------------
-  // Create business
-  // ---------------------------------------------------------------------------
-  const business = await prisma.business.create({
-    data: {
-      name: "Sweet Delights Bakery (Demo)",
-      type: "Bakery",
-    },
+  await ensureDemoUser({
+    email: "bilah@sweetcrumbs.id",
+    name: "Bilah",
+    businessId: business.id,
+    role: BusinessRole.OWNER,
+  });
+  await ensureDemoUser({
+    email: "staff@sweetcrumbs.id",
+    name: "Demo Staff",
+    businessId: business.id,
+    role: BusinessRole.MEMBER,
   });
 
-  console.log(`  ✓ Created business: ${business.name}`);
-  console.log(`\n  ✨ DEV_BUSINESS_ID=${business.id}\n`);
-
-  // ---------------------------------------------------------------------------
-  // Create owner user
-  // ---------------------------------------------------------------------------
-  const user = await prisma.user.create({
-    data: {
-      email: "owner@sweetdelights.dev",
-      name: "Demo Owner",
-    },
-  });
-
-  await prisma.userBusiness.create({
-    data: {
-      userId: user.id,
-      businessId: business.id,
-      role: "OWNER",
-    },
-  });
-
-  console.log(`  ✓ Created user: ${user.email}`);
-
-  // ---------------------------------------------------------------------------
-  // Create materials
-  // ---------------------------------------------------------------------------
-  const [flour, butter, chocolate, eggs] = await Promise.all([
-    prisma.material.create({
-      data: { businessId: business.id, name: "Flour", unit: "kg", currentStock: 50 },
-    }),
-    prisma.material.create({
-      data: { businessId: business.id, name: "Butter", unit: "kg", currentStock: 20 },
-    }),
-    prisma.material.create({
-      data: { businessId: business.id, name: "Dark Chocolate", unit: "kg", currentStock: 15 },
-    }),
-    prisma.material.create({
-      data: { businessId: business.id, name: "Eggs", unit: "pcs", currentStock: 200 },
-    }),
+  const [
+    hardbox,
+    ribbon,
+    glassJar,
+    cocoa,
+    butter,
+    brownieBox,
+    flour,
+    yeastStarter,
+  ] = await Promise.all([
+    ensureMaterial(business.id, { name: "Hardbox Rigid Satin", unit: "box", currentStock: 250 }),
+    ensureMaterial(business.id, { name: "Pita Satin Emas", unit: "meter", currentStock: 600 }),
+    ensureMaterial(business.id, { name: "Jar Kaca 350ml", unit: "pcs", currentStock: 800 }),
+    ensureMaterial(business.id, { name: "Dark Cocoa Powder", unit: "kg", currentStock: 80 }),
+    ensureMaterial(business.id, { name: "Unsalted Butter Anchor", unit: "kg", currentStock: 60 }),
+    ensureMaterial(business.id, { name: "Brownie Packaging Box", unit: "box", currentStock: 500 }),
+    ensureMaterial(business.id, { name: "Premium Bread Flour", unit: "kg", currentStock: 120 }),
+    ensureMaterial(business.id, { name: "Wild Yeast Starter", unit: "kg", currentStock: 30 }),
   ]);
 
-  console.log("  ✓ Created 4 materials");
-
-  // ---------------------------------------------------------------------------
-  // Create products
-  // ---------------------------------------------------------------------------
-  const [weddingCake, brownies] = await Promise.all([
-    prisma.product.create({
-      data: {
-        businessId: business.id,
-        name: "Custom Wedding Cake",
-        description: "Multi-tier fondant wedding cake",
-        workerHoursPerUnit: 8,   // 8 worker-hours per cake
-        machineHoursPerUnit: 2,  // 2 machine-hours (oven time) per cake
-        materials: {
-          create: [
-            { materialId: flour.id, quantityPerUnit: 2 },    // 2 kg flour per cake
-            { materialId: butter.id, quantityPerUnit: 0.5 }, // 0.5 kg butter per cake
-            { materialId: eggs.id, quantityPerUnit: 12 },    // 12 eggs per cake
-          ],
-        },
-      },
-    }),
-    prisma.product.create({
-      data: {
-        businessId: business.id,
-        name: "Chocolate Brownie Box (24 pcs)",
-        description: "Box of 24 premium chocolate brownies",
-        workerHoursPerUnit: 2,   // 2 worker-hours per box
-        machineHoursPerUnit: 1,  // 1 machine-hour (oven time) per box
-        materials: {
-          create: [
-            { materialId: flour.id, quantityPerUnit: 0.5 },
-            { materialId: butter.id, quantityPerUnit: 0.3 },
-            { materialId: chocolate.id, quantityPerUnit: 0.4 },
-            { materialId: eggs.id, quantityPerUnit: 4 },
-          ],
-        },
-      },
-    }),
-  ]);
-
-  console.log("  ✓ Created 2 products");
-
-  // ---------------------------------------------------------------------------
-  // Create workers
-  // ---------------------------------------------------------------------------
   await Promise.all([
-    prisma.worker.create({
-      data: { businessId: business.id, name: "Siti (Head Baker)", dailyAvailableHours: 8 },
+    ensureProduct(business.id, {
+      name: "Custom Gift Boxes Lebaran (4 SKU Set)",
+      description: "Paket hampers premium dengan hardbox satin, pita, dan jar.",
+      workerHoursPerUnit: 1.5,
+      machineHoursPerUnit: 0.8,
+      billOfMaterials: [
+        { materialId: hardbox.id, quantityPerUnit: 1 },
+        { materialId: ribbon.id, quantityPerUnit: 2 },
+        { materialId: glassJar.id, quantityPerUnit: 3 },
+      ],
     }),
-    prisma.worker.create({
-      data: { businessId: business.id, name: "Budi (Decorator)", dailyAvailableHours: 8 },
+    ensureProduct(business.id, {
+      name: "Signature Fudgy Brownies Box",
+      description: "Brownies cokelat premium dalam kotak kemasan.",
+      workerHoursPerUnit: 0.4,
+      machineHoursPerUnit: 0.7,
+      billOfMaterials: [
+        { materialId: cocoa.id, quantityPerUnit: 0.25 },
+        { materialId: butter.id, quantityPerUnit: 0.2 },
+        { materialId: brownieBox.id, quantityPerUnit: 1 },
+      ],
     }),
-    prisma.worker.create({
-      data: { businessId: business.id, name: "Rina (Part-time)", dailyAvailableHours: 4 },
+    ensureProduct(business.id, {
+      name: "Artisan Sourdough Loaf",
+      description: "Roti sourdough artisan dengan fermentasi alami.",
+      workerHoursPerUnit: 0.6,
+      machineHoursPerUnit: 1.2,
+      billOfMaterials: [
+        { materialId: flour.id, quantityPerUnit: 0.6 },
+        { materialId: yeastStarter.id, quantityPerUnit: 0.15 },
+      ],
     }),
   ]);
 
-  console.log("  ✓ Created 3 workers (20 total daily hours)");
-
-  // ---------------------------------------------------------------------------
-  // Create machines
-  // ---------------------------------------------------------------------------
   await Promise.all([
-    prisma.machine.create({
-      data: { businessId: business.id, name: "Commercial Oven 1", dailyAvailableHours: 10 },
-    }),
-    prisma.machine.create({
-      data: { businessId: business.id, name: "Commercial Oven 2", dailyAvailableHours: 8 },
-    }),
+    ensureWorker(business.id, "Budi Santoso", 8),
+    ensureWorker(business.id, "Chef Aris", 8),
+    ensureWorker(business.id, "Siti Rahma", 8),
+    ensureWorker(business.id, "Dita", 6),
+    ensureMachine(business.id, "Oven Deck Gas 3-Deck", 10),
+    ensureMachine(business.id, "Mesin Band Sealer", 8),
   ]);
 
-  console.log("  ✓ Created 2 machines (18 total daily hours)");
-
-  // ---------------------------------------------------------------------------
-  // Create a sample active order (to test commitment deduction)
-  // ---------------------------------------------------------------------------
-  const nextWeek = new Date();
-  nextWeek.setDate(nextWeek.getDate() + 7);
-
-  await prisma.order.create({
-    data: {
-      businessId: business.id,
-      customerName: "Budi Wedding (Existing)",
-      status: "CONFIRMED",
-      requiredDeliveryDate: nextWeek,
-      items: {
-        create: [{ productId: weddingCake.id, quantity: 2 }],
-      },
-    },
-  });
-
-  console.log("  ✓ Created 1 sample active order (2x Wedding Cake, CONFIRMED)");
-  console.log("\n✅ Seed complete!");
-  console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("  NEXT STEP: Add this to your .env.local file:");
-  console.log(`  DEV_BUSINESS_ID="${business.id}"`);
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+  console.log(`Data demo berhasil disiapkan untuk ${business.name}.`);
+  console.log("Seed tidak menghapus data usaha atau pesanan lain.");
+  console.log("Jumlah fixture: 1 usaha, 3 produk+BOM, 4 pekerja, 2 mesin, 8 bahan baku.");
 }
 
 main()
-  .catch((e) => {
-    console.error("❌ Seed failed:", e);
-    process.exit(1);
+  .catch((error: unknown) => {
+    console.error("Gagal menjalankan seed data demo:", error);
+    process.exitCode = 1;
   })
   .finally(async () => {
     await prisma.$disconnect();

@@ -68,17 +68,19 @@ Kontrak bersama (semua anggota): [`src/engine/types.ts`](src/engine/types.ts) â€
 - [ ] **Langkah Awal (Clone & Setup):**
   1. Clone repository dari GitHub: `git clone <url-repo>`
   2. Masuk folder dan jalankan: `npm install`
-  3. Buat file `.env.local` dari `.env.example`:
+  3. Buat file `.env` dari `.env.example`:
      - Isi `DATABASE_URL` dengan database PostgreSQL (bisa menggunakan cloud gratis seperti [Neon.tech](https://neon.tech) atau [Supabase](https://supabase.com)).
-  4. Jalankan migrasi skema Prisma:
+     - Isi `AUTH_SECRET` dengan nilai acak yang hanya disimpan lokal.
+  4. Generate Prisma Client dan jalankan migrasi skema:
      ```bash
-     npx prisma migrate dev --name init
+     npm run db:generate
+     npm run db:migrate -- --name init
      ```
   5. Jalankan seed data contoh bisnis UMKM:
      ```bash
      npm run db:seed
      ```
-  6. Salin UUID bisnis yang muncul di terminal ke variabel `DEV_BUSINESS_ID` di file `.env.local`.
+  6. Catat kata sandi awal Owner dan Staff yang dicetak seed saat akun demo pertama dibuat.
 - [ ] **Tugas Pengembangan:**
   - [ ] **Evaluasi Formula Engine (`src/engine/capacity/calculator.ts`):**
     - Cek apakah formula jam kerja (`totalDailyWorkerHours * availableWorkDays`), utilisasi mesin, dan hari kerja (Seninâ€“Jumat) sudah sesuai dengan spesifikasi kasus UMKM Anda.
@@ -96,7 +98,7 @@ Kontrak bersama (semua anggota): [`src/engine/types.ts`](src/engine/types.ts) â€
 
 - [ ] **Langkah Awal (Clone & Setup):**
   1. Clone repository dari GitHub dan jalankan `npm install`.
-  2. Minta salinan string koneksi database development dan `DEV_BUSINESS_ID` ke Anggota 2/1.
+  2. Minta akses ke database development dan akun demo Owner/Staff ke Anggota 2/1.
   3. Dapatkan API Key LLM (disarankan **Google Gemini API** via Google AI Studio / Gemini 1.5/2.0 Flash yang cepat dan hemat kuota).
   4. Tambahkan `GEMINI_API_KEY="AIzaSy..."` di file `.env.local`.
 - [ ] **Tugas Pengembangan:**

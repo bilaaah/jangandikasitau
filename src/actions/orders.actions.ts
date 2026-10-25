@@ -13,7 +13,7 @@ import { CreateOrderSchema, UpdateOrderStatusSchema } from "@/schemas/orders.sch
 import { runCapacityEngine } from "@/engine/capacity/calculator";
 import { getBusinessResources, getProductById } from "@/queries/resources.queries";
 import { getActiveCommitments } from "@/queries/orders.queries";
-import { runDemoSimulation, type ActionResult } from "./feasibility.actions";
+import type { ActionResult } from "./feasibility.actions";
 import type { CapacityEngineInput, CapacityEngineResult } from "@/engine/types";
 import { OrderStatus, FeasibilityStatus, BottleneckResourceType, BottleneckSeverity } from "@prisma/client";
 
@@ -23,14 +23,9 @@ import { OrderStatus, FeasibilityStatus, BottleneckResourceType, BottleneckSever
 export async function createOrderAction(
   formData: unknown,
 ): Promise<ActionResult<{ orderId: string; analysis: CapacityEngineResult }>> {
-  try {
-    let businessId: string | null = null;
-    try {
-      businessId = await getBusinessId();
-    } catch {
-      // Demo preview mode
-    }
+  const businessId = await getBusinessId();
 
+  try {
     // 1. Server-side validation
     const parsed = CreateOrderSchema.safeParse(formData);
     if (!parsed.success) {
@@ -43,17 +38,6 @@ export async function createOrderAction(
 
     const { customerName, productId, quantity, requiredDeliveryDate: deliveryDateStr, notes } = parsed.data;
     const requiredDeliveryDate = new Date(deliveryDateStr);
-
-    if (!businessId) {
-      const demoResult = await runDemoSimulation(productId, quantity, requiredDeliveryDate);
-      return {
-        success: true,
-        data: {
-          orderId: "BC-1025",
-          analysis: demoResult,
-        },
-      };
-    }
 
     // 2. Query business resources, product, and commitments
     const [resources, product, commitments] = await Promise.all([
@@ -160,10 +144,13 @@ export async function createOrderAction(
         analysis,
       },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       success: false,
-      error: error.message || "An unexpected error occurred while creating order.",
+      error:
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred while creating order.",
     };
   }
 }
@@ -174,9 +161,9 @@ export async function createOrderAction(
 export async function updateOrderStatusAction(
   formData: unknown,
 ): Promise<ActionResult<{ orderId: string; status: OrderStatus }>> {
-  try {
-    const businessId = await getBusinessId();
+  const businessId = await getBusinessId();
 
+  try {
     const parsed = UpdateOrderStatusSchema.safeParse(formData);
     if (!parsed.success) {
       return {
@@ -187,31 +174,26 @@ export async function updateOrderStatusAction(
 
     const { orderId, status } = parsed.data;
 
-    // Verify order ownership
-    const existingOrder = await db.order.findFirst({
+    const updated = await db.order.updateMany({
       where: { id: orderId, businessId },
-    });
-
-    if (!existingOrder) {
-      return { success: false, error: "Order not found." };
-    }
-
-    const updated = await db.order.update({
-      where: { id: orderId },
       data: { status: status as OrderStatus },
     });
+
+    if (updated.count === 0) {
+      return { success: false, error: "Order not found." };
+    }
 
     revalidatePath("/orders");
     revalidatePath(`/orders/${orderId}`);
 
     return {
       success: true,
-      data: { orderId: updated.id, status: updated.status },
+      data: { orderId, status: status as OrderStatus },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       success: false,
-      error: error.message || "Failed to update order status.",
+      error: error instanceof Error ? error.message : "Failed to update order status.",
     };
   }
 }

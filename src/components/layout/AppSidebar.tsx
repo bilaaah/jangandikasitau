@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { logout } from "@/actions/auth.actions";
 
 interface AppSidebarProps {
   activeCount?: number;
@@ -253,13 +254,15 @@ export function AppSidebar({ activeCount = 18, isOpen, onClose, onOpenHelp }: Ap
               <span className="material-symbols-outlined text-[15px]">help_outline</span>
               <span>Panduan</span>
             </button>
-            <Link
-              href="/login"
-              className="flex items-center gap-1.5 text-[11.5px] text-[#64748B] hover:text-red-400 transition-colors py-1"
-            >
-              <span className="material-symbols-outlined text-[15px]">logout</span>
-              <span>Keluar</span>
-            </Link>
+            <form action={logout}>
+              <button
+                type="submit"
+                className="flex items-center gap-1.5 text-[11.5px] text-[#64748B] hover:text-red-400 transition-colors py-1"
+              >
+                <span className="material-symbols-outlined text-[15px]">logout</span>
+                <span>Keluar</span>
+              </button>
+            </form>
           </div>
         </div>
       </aside>

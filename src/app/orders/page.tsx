@@ -8,17 +8,8 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { OrdersDashboardView } from "@/components/orders/OrdersDashboardView";
 
 export default async function OrdersPage() {
-  let orders: any[] = [];
-
-  try {
-    const businessId = await getBusinessId();
-    if (businessId) {
-      orders = await getOrders(businessId);
-    }
-  } catch (err) {
-    // Fallback gracefully to demo mock dataset in view component
-    console.log("Running in preview mode with demo datasets:", err);
-  }
+  const businessId = await getBusinessId();
+  const orders = await getOrders(businessId);
 
   return (
     <DashboardShell activeCount={orders.length > 0 ? orders.length : 18}>

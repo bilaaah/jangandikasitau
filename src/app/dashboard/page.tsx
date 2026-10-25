@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 
 export default function DashboardPage() {
+  const { data: session } = useSession();
   const [greeting, setGreeting] = useState("Selamat datang");
   const [currentDate, setCurrentDate] = useState("");
-  const [ownerName, setOwnerName] = useState("Bilah");
+  const [ownerName, setOwnerName] = useState("");
   const [bizName, setBizName] = useState("SweetCrumbs");
 
   useEffect(() => {
@@ -16,14 +18,13 @@ export default function DashboardPage() {
     setCurrentDate(new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" }));
 
     try {
-      const storedOwner = localStorage.getItem("biz_owner");
       const storedBiz = localStorage.getItem("biz_name");
-      if (storedOwner) setOwnerName(storedOwner);
       if (storedBiz) setBizName(storedBiz);
     } catch {
       // SSR guard
     }
-  }, []);
+    setOwnerName(session?.user?.name ?? "");
+  }, [session?.user?.name]);
 
   return (
     <DashboardShell>

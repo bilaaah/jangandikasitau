@@ -23,7 +23,7 @@ export function OrderStatusSelect({
     startTransition(async () => {
       await updateOrderStatus({
         orderId,
-        status: newStatus as any,
+        status: newStatus,
       });
     });
   };

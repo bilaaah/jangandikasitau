@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { logout } from "@/actions/auth.actions";
 
 interface AppHeaderProps {
   onToggleSidebar?: () => void;
@@ -47,6 +49,7 @@ const SEARCH_DATABASE: SearchItem[] = [
 
 export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHelp, onCloseHelp }: AppHeaderProps) {
   const router = useRouter();
+  const { data: session } = useSession();
 
   // Dropdown states
   const [showNotifications, setShowNotifications] = useState(false);
@@ -382,7 +385,7 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
               {/* Avatar */}
               <div className="relative flex-shrink-0">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#1D4ED8] text-white font-bold flex items-center justify-center text-[12px] shadow-sm shadow-blue-300/30">
-                  BL
+                  {session?.user?.name?.slice(0, 2).toUpperCase() ?? "BC"}
                 </div>
                 <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
               </div>
@@ -390,10 +393,10 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
               {/* Name info */}
               <div className="hidden sm:flex flex-col text-left">
                 <span className="text-[13px] font-semibold text-[#0F172A] leading-tight">
-                  Bilah
+                  {session?.user?.name ?? "Pengguna BizCapacity"}
                 </span>
                 <span className="text-[10.5px] text-[#64748B] leading-none">
-                  Owner / Production Lead
+                  {session?.user?.role === "OWNER" ? "Owner" : "Staff"}
                 </span>
               </div>
 
@@ -452,14 +455,15 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
 
                 <div className="my-1 border-t border-[#F1F5F9]" />
 
-                <Link
-                  href="/login"
-                  onClick={() => setShowProfile(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[18px]">logout</span>
-                  <span>Keluar Akun</span>
-                </Link>
+                <form action={logout}>
+                  <button
+                    type="submit"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors text-left"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">logout</span>
+                    <span>Keluar Akun</span>
+                  </button>
+                </form>
               </div>
             )}
           </div>

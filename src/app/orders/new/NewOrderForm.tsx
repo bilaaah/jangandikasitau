@@ -153,8 +153,10 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
       } else {
         setErrorMsg(res.error || "Gagal menjalankan cek kelayakan kapasitas.");
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || "Gagal menghubungi engine kapasitas.");
+    } catch (err: unknown) {
+      setErrorMsg(
+        err instanceof Error ? err.message : "Gagal menghubungi engine kapasitas.",
+      );
     } finally {
       setIsPreviewLoading(false);
     }

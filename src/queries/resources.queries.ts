@@ -5,6 +5,38 @@
 
 import { db } from "@/lib/db";
 
+export async function getManagedResources(businessId: string) {
+  const [workers, machines, materials] = await Promise.all([
+    db.worker.findMany({
+      where: { businessId, isActive: true },
+      orderBy: { name: "asc" },
+    }),
+    db.machine.findMany({
+      where: { businessId, isActive: true },
+      orderBy: { name: "asc" },
+    }),
+    db.material.findMany({
+      where: { businessId, isActive: true },
+      orderBy: { name: "asc" },
+    }),
+  ]);
+
+  return { workers, machines, materials };
+}
+
+export async function getManagedProducts(businessId: string) {
+  return db.product.findMany({
+    where: { businessId, isActive: true },
+    include: {
+      materials: {
+        include: { material: true },
+        orderBy: { material: { name: "asc" } },
+      },
+    },
+    orderBy: { name: "asc" },
+  });
+}
+
 /**
  * Retrieves all active resources for a given business to construct the Capacity Engine input.
  */

@@ -1,10 +1,21 @@
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { ProductsManagerView } from "@/components/products/ProductsManagerView";
+import { ProductManagementView } from "@/components/products/ProductManagementView";
+import { getBusinessId } from "@/lib/context";
+import { getManagedProducts, getManagedResources } from "@/queries/resources.queries";
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const businessId = await getBusinessId();
+  const [products, resources] = await Promise.all([
+    getManagedProducts(businessId),
+    getManagedResources(businessId),
+  ]);
+
   return (
     <DashboardShell>
-      <ProductsManagerView />
+      <ProductManagementView
+        products={products}
+        materials={resources.materials.map(({ id, name, unit }) => ({ id, name, unit }))}
+      />
     </DashboardShell>
   );
 }

@@ -45,6 +45,11 @@ UMKM seringkali menerima pesanan tanpa mengetahui apakah kapasitas produksi mere
 - Penjadwalan kapasitas untuk order-order mendatang
 - Deteksi konflik kapasitas antar order
 
+### 7. Data Produk & Sumber Daya (`/products`, `/resources`)
+- CRUD produk beserta BOM yang tersimpan dan divalidasi terhadap bahan aktif milik usaha.
+- CRUD snapshot stok bahan baku dengan penanda keterbaruan (terkini, perlu diperbarui, atau usang).
+- CRUD pekerja dan mesin; data yang dinonaktifkan tetap disimpan untuk menjaga riwayat.
+
 ---
 
 ## 🛠️ Technology Stack

@@ -6,7 +6,7 @@
 // Visualizes Capacity Engine calculations, resource bottlenecks, and reasoning steps.
 // Includes inline "Explain with AI" panel (Modul C) — calls generateAdviceAction.
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { CapacityEngineResult } from "@/types";
 import type { AiOrderAdvice } from "@/ai/types";
 import { generateAdviceAction } from "@/actions/ai.actions";
@@ -60,6 +60,55 @@ export function FeasibilityCard({
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [activeQuestion, setActiveQuestion] = useState<string | null>(null);
+  const [loadingSeconds, setLoadingSeconds] = useState(0);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isAiLoading) {
+      setLoadingSeconds(0);
+      interval = setInterval(() => {
+        setLoadingSeconds((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setLoadingSeconds(0);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isAiLoading]);
+
+  function getLoadingStatus(seconds: number) {
+    if (seconds < 4) {
+      return {
+        step: 1,
+        title: "Membaca Data Kapasitas & Bottleneck",
+        desc: "Mengambil kalkulasi utilisasi tenaga kerja, jam mesin, dan ketersediaan bahan baku...",
+        isFallback: false,
+      };
+    }
+    if (seconds < 12) {
+      return {
+        step: 2,
+        title: "Menghubungi AI Engine (Model Utama)",
+        desc: "Merumuskan rekomendasi mitigasi dan saran negosiasi pelanggan secara kontekstual...",
+        isFallback: false,
+      };
+    }
+    if (seconds < 22) {
+      return {
+        step: 3,
+        title: "Beralih ke Gemini Fallback Model",
+        desc: "Model utama memerlukan waktu lebih lama. Sistem otomatis mengalihkan ke model cadangan (~15-30 dtk)...",
+        isFallback: true,
+      };
+    }
+    return {
+      step: 4,
+      title: "Memvalidasi Hasil & Rekomendasi",
+      desc: "Memastikan angka persentase risiko konsisten dan selaras dengan engine kapasitas...",
+      isFallback: true,
+    };
+  }
 
   async function handleAskAi(questionId?: string) {
     setIsAiLoading(true);
@@ -419,10 +468,11 @@ export function FeasibilityCard({
             <button
               type="button"
               onClick={() => handleAskAi("general")}
+              disabled={isAiLoading}
               className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl
                          bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700
                          text-white text-sm font-bold shadow-md shadow-indigo-500/20
-                         transition-all duration-200 active:scale-[0.99] group"
+                         transition-all duration-200 active:scale-[0.99] group disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <span className="material-symbols-outlined text-[20px] group-hover:animate-pulse">
                 auto_awesome
@@ -448,14 +498,25 @@ export function FeasibilityCard({
                     <p className="text-[11px] text-slate-500">Penjelasan berbasis data kapasitas nyata</p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowAiPanel(false)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
-                  title="Tutup panel AI"
-                >
-                  <span className="material-symbols-outlined text-[18px]">close</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  {isAiLoading && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-100/90 border border-indigo-200 text-indigo-700 text-xs font-semibold">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
+                      </span>
+                      <span>Menganalisis ({loadingSeconds}d)</span>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setShowAiPanel(false)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                    title="Tutup panel AI"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">close</span>
+                  </button>
+                </div>
               </div>
 
               <div className="p-5 space-y-4">
@@ -486,16 +547,82 @@ export function FeasibilityCard({
                   </div>
                 </div>
 
-                {/* Loading State */}
-                {isAiLoading && (
-                  <div className="flex items-center gap-3 p-4 rounded-xl bg-indigo-50 border border-indigo-100">
-                    <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-semibold text-indigo-900">AI sedang menganalisis...</p>
-                      <p className="text-xs text-indigo-600">Membaca data kapasitas dan bottleneck pesanan ini</p>
+                {/* Enhanced Loading State */}
+                {isAiLoading && (() => {
+                  const status = getLoadingStatus(loadingSeconds);
+                  return (
+                    <div className="space-y-4">
+                      {/* Interactive Progress Box */}
+                      <div className="p-4 rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50/90 to-violet-50/70 shadow-xs space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
+                              <span className="material-symbols-outlined text-[20px] animate-spin">
+                                sync
+                              </span>
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-bold text-slate-900">{status.title}</p>
+                                {status.isFallback && (
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                    Fallback Model
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">{status.desc}</p>
+                            </div>
+                          </div>
+                          <span className="px-2.5 py-1 rounded-full bg-white border border-indigo-200 text-xs font-mono font-bold text-indigo-700 shrink-0 shadow-2xs">
+                            {loadingSeconds}s
+                          </span>
+                        </div>
+
+                        {/* Progress Stepper Bar */}
+                        <div className="space-y-1.5 pt-1">
+                          <div className="flex justify-between text-[11px] font-medium text-slate-500">
+                            <span>Tahap {status.step} dari 4</span>
+                            <span>{status.step * 25}%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-indigo-200/60 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-indigo-600 to-violet-600 rounded-full transition-all duration-700 ease-out"
+                              style={{ width: `${status.step * 25}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Fallback Notice for long waits */}
+                        {loadingSeconds >= 10 && (
+                          <div className="p-2.5 rounded-lg bg-amber-50/80 border border-amber-200/80 text-amber-900 text-xs flex items-start gap-2">
+                            <span className="material-symbols-outlined text-[16px] text-amber-600 shrink-0 mt-0.5">
+                              info
+                            </span>
+                            <span className="leading-relaxed">
+                              Proses ini dapat memakan waktu hingga <strong>~30 detik</strong> jika model utama sibuk dan sistem berpindah ke model cadangan. Mohon tunggu sebentar...
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Skeleton Shimmer Preview */}
+                      <div className="space-y-3.5 p-4 rounded-xl bg-white/70 border border-slate-200/60 shadow-2xs">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="h-4 bg-slate-200 rounded-md w-2/3 animate-pulse" />
+                          <div className="h-5 bg-slate-200 rounded-full w-20 animate-pulse" />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="h-3 bg-slate-100 rounded w-full animate-pulse" />
+                          <div className="h-3 bg-slate-100 rounded w-4/5 animate-pulse" />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                          <div className="h-16 bg-slate-50 border border-slate-100 rounded-xl animate-pulse" />
+                          <div className="h-16 bg-slate-50 border border-slate-100 rounded-xl animate-pulse" />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* Error State */}
                 {aiError && !isAiLoading && (

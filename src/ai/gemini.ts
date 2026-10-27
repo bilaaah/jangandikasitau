@@ -1,63 +1,127 @@
 // src/ai/gemini.ts
 //
-// Google Gemini LLM Client with Instant Offline Fallback.
-// Ensures development servers run ultra-lightweight and never hang on slow networks or missing keys.
+// Google Gemini LLM Client: keluaran dipaksa skema, divalidasi Zod, dicek terhadap engine,
+// lalu jatuh ke heuristik lokal jika gagal.
 // Owned by Anggota 3 (AI Lead).
 
-import type { AiOrderAdvice } from "./types";
+import type { AiOrderAdvice, RiskLevel } from "./types";
 import type { CapacityEngineResult } from "@/engine/types";
+import { adviceSchema, geminiResponseSchema } from "./schema";
+
+const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
+
+/** Persentase referensi yang sah selain utilisasi engine (samakan dengan ambang AT_RISK di engine/capacity/constants.ts). */
+const KNOWN_PERCENT_REFERENCES = [85, 100];
+
+/** Tingkat risiko ditentukan engine, bukan AI. */
+const RISK_BY_STATUS: Record<CapacityEngineResult["status"], RiskLevel> = {
+  FEASIBLE: "LOW",
+  AT_RISK: "HIGH",
+  NOT_FEASIBLE: "CRITICAL",
+};
+
+interface ModelPlan {
+  name: string;
+  timeoutMs: number;
+}
+
+/** Model utama cepat (lite); model cadangan lebih lambat sehingga diberi batas waktu lebih longgar. */
+function getModelChain(): ModelPlan[] {
+  const names = [
+    process.env.GEMINI_MODEL || "gemini-3.5-flash-lite",
+    process.env.GEMINI_FALLBACK_MODEL || "",
+  ].filter((name, index, all) => name && all.indexOf(name) === index);
+  return names.map((name, index) => ({ name, timeoutMs: index === 0 ? 10000 : 20000 }));
+}
+
+async function requestGeminiJson(
+  plan: ModelPlan,
+  apiKey: string,
+  prompt: string,
+): Promise<string | null> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), plan.timeoutMs);
+  try {
+    const response = await fetch(`${GEMINI_ENDPOINT}/${plan.name}:generateContent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: geminiResponseSchema,
+          temperature: 0.2,
+          thinkingConfig: { thinkingLevel: "low" },
+        },
+      }),
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      console.warn(`[AI Gemini] ${plan.name} returned status ${response.status}.`);
+      return null;
+    }
+    const data = await response.json();
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 /**
- * Generates advice using Gemini REST API or falls back to smart local heuristics.
+ * Guardrail: setiap persentase di teks AI harus sama dengan utilisasi hasil engine
+ * (atau ambang referensi). Jika tidak, penjelasan AI ditolak dan model berikutnya/fallback dipakai.
  */
-export async function callGeminiAdvisory(prompt: string, analysis: CapacityEngineResult): Promise<AiOrderAdvice> {
+export function hasUnknownPercentages(text: string, analysis: CapacityEngineResult): boolean {
+  const allowed = [
+    analysis.workerAnalysis.utilizationPercent,
+    analysis.machineAnalysis.utilizationPercent,
+    ...KNOWN_PERCENT_REFERENCES,
+  ];
+  const found = [...text.matchAll(/(\d+(?:[.,]\d+)?)\s*%/g)].map((m) =>
+    parseFloat(m[1].replace(",", ".")),
+  );
+  return found.some((value) => !allowed.some((a) => Math.abs(a - value) <= 0.6));
+}
+
+/**
+ * Generates advice using Gemini (model utama, lalu cadangan), divalidasi Zod,
+ * atau jatuh ke heuristik lokal.
+ */
+export async function callGeminiAdvisory(
+  prompt: string,
+  analysis: CapacityEngineResult,
+): Promise<AiOrderAdvice> {
   const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return generateLocalFallbackAdvice(analysis);
 
-  if (!apiKey) {
-    return generateLocalFallbackAdvice(analysis);
+  for (const plan of getModelChain()) {
+    const rawText = await requestGeminiJson(plan, apiKey, prompt);
+    if (!rawText) continue;
+
+    try {
+      const cleaned = rawText.replace(/^```(?:json)?\s*|\s*```$/g, "").trim();
+      const parsed = adviceSchema.safeParse(JSON.parse(cleaned));
+      if (!parsed.success) {
+        console.warn(`[AI Gemini] ${plan.name}: output gagal validasi Zod.`);
+        continue;
+      }
+      if (hasUnknownPercentages(JSON.stringify(parsed.data), analysis)) {
+        console.warn(`[AI Gemini] ${plan.name}: persentase tidak cocok dengan engine.`);
+        continue;
+      }
+      return {
+        ...parsed.data,
+        riskAssessment: RISK_BY_STATUS[analysis.status],
+        isFallback: false,
+      };
+    } catch {
+      continue;
+    }
   }
 
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout to avoid dev server lag
-
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.2,
-          },
-        }),
-        signal: controller.signal,
-      },
-    );
-
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      console.warn(`[AI Gemini] Request returned status ${response.status}. Using smart fallback.`);
-      return generateLocalFallbackAdvice(analysis);
-    }
-
-    const data = await response.json();
-    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!rawText) {
-      return generateLocalFallbackAdvice(analysis);
-    }
-
-    const parsed = JSON.parse(rawText) as AiOrderAdvice;
-    return {
-      ...parsed,
-      isFallback: false,
-    };
-  } catch {
-    return generateLocalFallbackAdvice(analysis);
-  }
+  return generateLocalFallbackAdvice(analysis);
 }
 
 /**

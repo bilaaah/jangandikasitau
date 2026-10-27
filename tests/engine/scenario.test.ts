@@ -80,4 +80,5 @@ describe("simulateScenario", () => {
     });
     expect(input).toEqual(snapshot);
   });
+  
 });

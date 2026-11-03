@@ -3,6 +3,8 @@ import { ResourceManagementView } from "@/components/resources/ResourceManagemen
 import { getBusinessId } from "@/lib/context";
 import { getManagedResources } from "@/queries/resources.queries";
 
+export const instant = false;
+
 interface ResourcesPageProps {
   searchParams: Promise<{ tab?: string }>;
 }

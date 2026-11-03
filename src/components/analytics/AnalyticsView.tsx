@@ -45,28 +45,28 @@ export function AnalyticsView() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e5eeff]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-700">
         <div>
-          <div className="flex items-center gap-2 text-xs text-[#525e7d]">
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
             <span>Intelligence</span>
             <span>/</span>
-            <span className="text-[#0b1c30] font-semibold">Laporan Utilisasi &amp; Efisiensi</span>
+            <span className="text-slate-800 dark:text-slate-200 font-semibold">Laporan Utilisasi &amp; Efisiensi</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0b1c30] mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 mt-1">
             Analytics &amp; Kapasitas Historis
           </h1>
-          <p className="mt-1 text-sm text-[#525e7d]">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Evaluasi akurasi janji pengiriman (On-Time Delivery), rasio utilisasi mesin, dan margin operasional.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           {/* Period selector */}
-          <div className="bg-[#eff4ff] p-1 rounded-xl border border-[#dbe1ff] flex items-center gap-1 text-xs font-bold text-[#525e7d]">
+          <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-1 text-xs font-bold text-slate-500 dark:text-slate-400">
             <button
               onClick={() => setPeriod("7d")}
               className={`px-3 py-1.5 rounded-lg transition-all ${
-                period === "7d" ? "bg-white text-[#004ac6] shadow-xs" : "hover:text-[#0b1c30]"
+                period === "7d" ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs" : "hover:text-slate-800 dark:hover:text-slate-200"
               }`}
             >
               7 Hari
@@ -74,7 +74,7 @@ export function AnalyticsView() {
             <button
               onClick={() => setPeriod("30d")}
               className={`px-3 py-1.5 rounded-lg transition-all ${
-                period === "30d" ? "bg-white text-[#004ac6] shadow-xs" : "hover:text-[#0b1c30]"
+                period === "30d" ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs" : "hover:text-slate-800 dark:hover:text-slate-200"
               }`}
             >
               30 Hari
@@ -82,7 +82,7 @@ export function AnalyticsView() {
             <button
               onClick={() => setPeriod("q4")}
               className={`px-3 py-1.5 rounded-lg transition-all ${
-                period === "q4" ? "bg-white text-[#004ac6] shadow-xs" : "hover:text-[#0b1c30]"
+                period === "q4" ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs" : "hover:text-slate-800 dark:hover:text-slate-200"
               }`}
             >
               Q4 2026
@@ -92,7 +92,7 @@ export function AnalyticsView() {
           <button
             onClick={handleExport}
             disabled={isExporting}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-[#e5eeff] text-[#0b1c30] text-xs sm:text-sm font-bold shadow-xs hover:bg-[#eff4ff] transition-all disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-bold shadow-xs hover:bg-slate-50 dark:hover:bg-slate-700 transition-all disabled:opacity-50"
           >
             <span className="material-symbols-outlined text-[18px]">
               {isExporting ? "sync" : "download"}
@@ -104,76 +104,76 @@ export function AnalyticsView() {
 
       {/* Primary KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white border border-[#e5eeff] shadow-xs">
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs uppercase font-bold text-[#737686]">On-Time Delivery (OTD)</span>
+            <span className="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">On-Time Delivery (OTD)</span>
             <span className="material-symbols-outlined text-[20px] text-emerald-600">verified</span>
           </div>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-black text-[#15803d]">99.4%</span>
-            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+            <span className="text-3xl font-black text-emerald-700 dark:text-emerald-400">99.4%</span>
+            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-0.5 rounded-full">
               +4.2% MoM
             </span>
           </div>
-          <p className="text-xs text-[#525e7d] mt-2">178 dari 179 PO tiba sesuai jadwal janji.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">178 dari 179 PO tiba sesuai jadwal janji.</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-[#e5eeff] shadow-xs">
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs uppercase font-bold text-[#737686]">Rata-rata Utilisasi Oven</span>
-            <span className="material-symbols-outlined text-[20px] text-[#004ac6]">oven_gen</span>
+            <span className="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">Rata-rata Utilisasi Oven</span>
+            <span className="material-symbols-outlined text-[20px] text-blue-600 dark:text-blue-400">oven_gen</span>
           </div>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-black text-[#004ac6]">78.5%</span>
-            <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+            <span className="text-3xl font-black text-blue-700 dark:text-blue-400">78.5%</span>
+            <span className="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full">
               Optimal
             </span>
           </div>
-          <p className="text-xs text-[#525e7d] mt-2">Batas aman 70% - 85% untuk cegah breakdown.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Batas aman 70% - 85% untuk cegah breakdown.</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-[#e5eeff] shadow-xs">
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs uppercase font-bold text-[#737686]">Penghematan Biaya Lembur</span>
+            <span className="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">Penghematan Biaya Lembur</span>
             <span className="material-symbols-outlined text-[20px] text-amber-600">savings</span>
           </div>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-black text-[#bc4800]">Rp 8.4jt</span>
-            <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+            <span className="text-3xl font-black text-amber-700 dark:text-amber-400">Rp 8.4jt</span>
+            <span className="text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-0.5 rounded-full">
               Hemat
             </span>
           </div>
-          <p className="text-xs text-[#525e7d] mt-2">Efisiensi penjadwalan via DSS sebelum deal.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Efisiensi penjadwalan via DSS sebelum deal.</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-[#e5eeff] shadow-xs">
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs uppercase font-bold text-[#737686]">Order Feasibility Rate</span>
+            <span className="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">Order Feasibility Rate</span>
             <span className="material-symbols-outlined text-[20px] text-purple-600">fact_check</span>
           </div>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-black text-purple-700">86.2%</span>
-            <span className="text-xs text-[#525e7d]">Langsung Layak</span>
+            <span className="text-3xl font-black text-purple-700 dark:text-purple-400">86.2%</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Langsung Layak</span>
           </div>
-          <p className="text-xs text-[#525e7d] mt-2">13.8% diselamatkan lewat simulasi solusi.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">13.8% diselamatkan lewat simulasi solusi.</p>
         </div>
       </div>
 
       {/* Main Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Weekly Utilization Trend */}
-        <div className="lg:col-span-7 bg-white border border-[#e5eeff] rounded-2xl p-6 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-7 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-[#f1f5f9]">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
               <div>
-                <h3 className="font-extrabold text-[#0b1c30] text-base">
+                <h3 className="font-extrabold text-slate-900 dark:text-slate-50 text-base">
                   Tren Beban Kapasitas Harian (Shop-Floor Load)
                 </h3>
-                <p className="text-xs text-[#525e7d]">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Visualisasi beban produksi aktual vs batas aman ambang batas (85%).
                 </p>
               </div>
-              <span className="text-xs bg-[#f8f9ff] px-2.5 py-1 rounded-lg border border-[#e5eeff] font-bold text-[#525e7d]">
+              <span className="text-xs bg-slate-50 dark:bg-slate-700 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-600 font-bold text-slate-500 dark:text-slate-400">
                 Sen - Sab
               </span>
             </div>
@@ -183,24 +183,24 @@ export function AnalyticsView() {
               <div className="relative pt-6">
                 {/* 85% Safe line indicator */}
                 <div
-                  className="absolute left-0 right-0 border-t-2 border-dashed border-rose-300 z-10 flex items-center justify-end"
+                  className="absolute left-0 right-0 border-t-2 border-dashed border-rose-300 dark:border-rose-500 z-10 flex items-center justify-end"
                   style={{ top: "15%" }}
                 >
-                  <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 -mt-3 mr-2">
+                  <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/40 px-2 py-0.5 rounded-full border border-rose-200 dark:border-rose-700 -mt-3 mr-2">
                     Batas Kritis: 85%
                   </span>
                 </div>
 
                 {/* Bars */}
-                <div className="grid grid-cols-6 gap-1 sm:gap-3 md:gap-6 items-end h-48 border-b border-[#e5eeff] pb-2">
+                <div className="grid grid-cols-6 gap-1 sm:gap-3 md:gap-6 items-end h-48 border-b border-slate-200 dark:border-slate-700 pb-2">
                   {trendData.map((d) => {
                     const isOver = d.util > d.safe;
                     return (
                       <div key={d.day} className="flex flex-col items-center h-full justify-end group">
-                        <span className="hidden sm:block text-[11px] font-bold text-[#0b1c30] mb-1 group-hover:scale-110 transition-transform">
+                        <span className="hidden sm:block text-[11px] font-bold text-slate-800 dark:text-slate-200 mb-1 group-hover:scale-110 transition-transform">
                           {d.util}%
                         </span>
-                        <div className="w-full max-w-[48px] bg-[#eff4ff] rounded-t-xl overflow-hidden h-full flex items-end">
+                        <div className="w-full max-w-[48px] bg-blue-50 dark:bg-slate-700 rounded-t-xl overflow-hidden h-full flex items-end">
                           <div
                             style={{ height: `${d.util}%` }}
                             className={`w-full rounded-t-xl transition-all duration-500 ${
@@ -210,38 +210,37 @@ export function AnalyticsView() {
                             }`}
                           />
                         </div>
-                        <span className="text-[10px] sm:text-xs font-bold text-[#0b1c30] mt-2">{d.day}</span>
-                        <span className="hidden xs:block text-[10px] text-[#737686]">{d.orders} PO</span>
+                        <span className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 mt-2">{d.day}</span>
+                        <span className="hidden xs:block text-[10px] text-slate-400 dark:text-slate-500">{d.orders} PO</span>
                       </div>
                     );
                   })}
                 </div>
-
               </div>
             </div>
           </div>
 
-          <div className="mt-4 p-3 rounded-xl bg-[#f8f9ff] border border-[#e5eeff] flex items-center justify-between text-xs text-[#525e7d]">
+          <div className="mt-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-blue-600 inline-block" />
               <span>Zona Normal (&lt;85%)</span>
               <span className="w-3 h-3 rounded-full bg-rose-500 inline-block ml-3" />
               <span>Zona Kritis Overcapacity (&ge;85%)</span>
             </div>
-            <Link href="/simulations" className="text-[#004ac6] font-bold hover:underline">
+            <Link href="/simulations" className="text-blue-600 dark:text-blue-400 font-bold hover:underline">
               Buka What-If Sandbox →
             </Link>
           </div>
         </div>
 
         {/* Bottleneck Distribution by Station */}
-        <div className="lg:col-span-5 bg-white border border-[#e5eeff] rounded-2xl p-6 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="pb-3 border-b border-[#f1f5f9]">
-              <h3 className="font-extrabold text-[#0b1c30] text-base">
+            <div className="pb-3 border-b border-slate-100 dark:border-slate-700">
+              <h3 className="font-extrabold text-slate-900 dark:text-slate-50 text-base">
                 Distribusi Hambatan (Bottleneck Workstations)
               </h3>
-              <p className="text-xs text-[#525e7d]">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Stasiun dengan frekuensi kelebihan kapasitas tertinggi dalam 30 hari.
               </p>
             </div>
@@ -250,13 +249,13 @@ export function AnalyticsView() {
               {bottlenecks.map((b) => (
                 <div key={b.name} className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-[#0b1c30]">{b.name}</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{b.name}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-[#525e7d]">{b.hours}</span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">{b.hours}</span>
                       <span className={`font-mono font-extrabold ${b.text}`}>{b.pct}%</span>
                     </div>
                   </div>
-                  <div className="w-full bg-[#f1f5f9] h-2.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full ${b.color}`}
                       style={{ width: `${b.pct}%` }}
@@ -268,32 +267,32 @@ export function AnalyticsView() {
           </div>
 
           {/* AI Strategic Insight Box */}
-          <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-[#eff4ff] to-[#f8f9ff] border border-[#dbe1ff] space-y-2">
-            <div className="flex items-center gap-2 text-xs font-extrabold text-[#004ac6]">
+          <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border border-blue-200 dark:border-blue-800 space-y-2">
+            <div className="flex items-center gap-2 text-xs font-extrabold text-blue-700 dark:text-blue-400">
               <span className="material-symbols-outlined text-[16px]">lightbulb</span>
               <span>Rekomendasi Kapasitas Strategis (DSS Advisor)</span>
             </div>
-            <p className="text-xs text-[#525e7d] leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
               Stasiun Packaging menyumbang 42% bottleneck akibat pita & packaging hampers manual.
               Menggunakan 1 operator freelance tambahan khusus hari Kamis-Jumat berpotensi menaikkan
-              throughput sebesar <strong className="text-[#0b1c30]">35%</strong> dengan estimasi penambahan omzet <strong className="text-[#0b1c30]">Rp 14.200.000/bulan</strong>.
+              throughput sebesar <strong className="text-slate-900 dark:text-slate-100">35%</strong> dengan estimasi penambahan omzet <strong className="text-slate-900 dark:text-slate-100">Rp 14.200.000/bulan</strong>.
             </p>
           </div>
         </div>
       </div>
 
       {/* Root Cause & Corrective Actions Table */}
-      <div className="bg-white border border-[#e5eeff] rounded-2xl p-6 shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-[#f1f5f9] pb-3">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
           <div>
-            <h3 className="font-extrabold text-[#0b1c30] text-base">
+            <h3 className="font-extrabold text-slate-900 dark:text-slate-50 text-base">
               Riwayat Penanganan Kapasitas &amp; Keputusan Tindakan
             </h3>
-            <p className="text-xs text-[#525e7d]">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Bagaimana sistem mendeteksi kendala dan solusi apa yang diambil pemilik UMKM.
             </p>
           </div>
-          <span className="text-xs bg-[#eff4ff] text-[#004ac6] px-3 py-1 rounded-full font-bold border border-[#dbe1ff]">
+          <span className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-full font-bold border border-blue-200 dark:border-blue-800">
             100% Keputusan Terdokumentasi
           </span>
         </div>
@@ -301,7 +300,7 @@ export function AnalyticsView() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-[#e5eeff] bg-[#f8f9ff] text-[#737686] uppercase font-bold text-[10px]">
+              <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 uppercase font-bold text-[10px]">
                 <th className="p-3">Order ID &amp; Klien</th>
                 <th className="p-3">Gejala Awal</th>
                 <th className="p-3">Bottleneck Terdeteksi</th>
@@ -309,60 +308,60 @@ export function AnalyticsView() {
                 <th className="p-3 text-right">Hasil Akhir</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f1f5f9]">
-              <tr className="hover:bg-[#fafbff]">
-                <td className="p-3 font-bold text-[#004ac6]">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+              <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+                <td className="p-3 font-bold text-blue-700 dark:text-blue-400">
                   BC-1024 • PT Nusantara Sentosa
                 </td>
-                <td className="p-3 text-[#525e7d]">Lead time 48 jam untuk 300 unit</td>
+                <td className="p-3 text-slate-500 dark:text-slate-400">Lead time 48 jam untuk 300 unit</td>
                 <td className="p-3">
-                  <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 font-bold border border-rose-200">
+                  <span className="px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 font-bold border border-rose-200 dark:border-rose-800">
                     Packaging Overload (95%)
                   </span>
                 </td>
-                <td className="p-3 text-[#0b1c30] font-medium">
+                <td className="p-3 text-slate-800 dark:text-slate-200 font-medium">
                   +1 Shift Lembur Packaging &amp; Negosiasi +1 Hari
                 </td>
                 <td className="p-3 text-right">
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-800">
                     Tepat Waktu (OTD 100%)
                   </span>
                 </td>
               </tr>
-              <tr className="hover:bg-[#fafbff]">
-                <td className="p-3 font-bold text-[#004ac6]">
+              <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+                <td className="p-3 font-bold text-blue-700 dark:text-blue-400">
                   BC-1019 • Hotel Grand Sahid
                 </td>
-                <td className="p-3 text-[#525e7d]">800 Croissants sarapan pagi</td>
+                <td className="p-3 text-slate-500 dark:text-slate-400">800 Croissants sarapan pagi</td>
                 <td className="p-3">
-                  <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-bold border border-amber-200">
+                  <span className="px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 font-bold border border-amber-200 dark:border-amber-800">
                     Oven Deck Maxed (92%)
                   </span>
                 </td>
-                <td className="p-3 text-[#0b1c30] font-medium">
+                <td className="p-3 text-slate-800 dark:text-slate-200 font-medium">
                   Baking batch 1 dipercepat ke shift malam (20:00)
                 </td>
                 <td className="p-3 text-right">
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-800">
                     Tepat Waktu (OTD 100%)
                   </span>
                 </td>
               </tr>
-              <tr className="hover:bg-[#fafbff]">
-                <td className="p-3 font-bold text-[#004ac6]">
+              <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+                <td className="p-3 font-bold text-blue-700 dark:text-blue-400">
                   BC-1015 • Bank Mandiri Syariah
                 </td>
-                <td className="p-3 text-[#525e7d]">150 Box Brownies Almond</td>
+                <td className="p-3 text-slate-500 dark:text-slate-400">150 Box Brownies Almond</td>
                 <td className="p-3">
-                  <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold border border-blue-200">
+                  <span className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold border border-blue-200 dark:border-blue-800">
                     Bahan Baku Kacang Almond Kurang 12kg
                   </span>
                 </td>
-                <td className="p-3 text-[#0b1c30] font-medium">
+                <td className="p-3 text-slate-800 dark:text-slate-200 font-medium">
                   PO Cepat ke Supplier Mitra Sukabumi (Express)
                 </td>
                 <td className="p-3 text-right">
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-800">
                     Tepat Waktu (OTD 100%)
                   </span>
                 </td>

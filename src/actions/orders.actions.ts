@@ -61,7 +61,7 @@ export async function createOrderAction(
       product: {
         workerHoursPerUnit: product.workerHoursPerUnit,
         machineHoursPerUnit: product.machineHoursPerUnit,
-        materials: product.materials.map((pm) => ({
+        materials: product.materials.map((pm: any) => ({
           materialId: pm.materialId,
           quantityPerUnit: pm.quantityPerUnit,
         })),

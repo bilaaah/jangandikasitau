@@ -58,7 +58,7 @@ export async function checkFeasibilityPreviewAction(
       product: {
         workerHoursPerUnit: product.workerHoursPerUnit,
         machineHoursPerUnit: product.machineHoursPerUnit,
-        materials: product.materials.map((pm) => ({
+        materials: product.materials.map((pm: any) => ({
           materialId: pm.materialId,
           quantityPerUnit: pm.quantityPerUnit,
         })),

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { logout } from "@/actions/auth.actions";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface AppSidebarProps {
   activeCount?: number;
@@ -150,8 +151,8 @@ export function AppSidebar({ activeCount = 18, isOpen, onClose, onOpenHelp }: Ap
         }`}
       >
         {/* ── Logo Header ───────────────────────────── */}
-        <div className="h-16 px-5 flex items-center justify-between flex-shrink-0 border-b border-[#1E293B]">
-          <BrandLogo variant="dark" size="sm" subtitleText="Sistem Kapasitas UMKM" />
+        <div className="h-16 px-5 flex items-center justify-between flex-shrink-0 border-b border-slate-200/80 dark:border-white/[0.06]">
+          <BrandLogo variant="light" size="sm" subtitleText="Sistem Kapasitas UMKM" />
 
           {/* Mobile close */}
           {onClose && (
@@ -159,7 +160,7 @@ export function AppSidebar({ activeCount = 18, isOpen, onClose, onOpenHelp }: Ap
               type="button"
               onClick={onClose}
               aria-label="Tutup menu"
-              className="lg:hidden p-1.5 rounded-lg text-[#64748B] hover:bg-white/5 hover:text-white transition-colors"
+              className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-500 dark:text-[#64748B] hover:text-slate-800 dark:hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
             </button>
@@ -190,15 +191,15 @@ export function AppSidebar({ activeCount = 18, isOpen, onClose, onOpenHelp }: Ap
                     <div className="flex items-center gap-3 min-w-0">
                       <span
                         className={`material-symbols-outlined text-[19px] transition-colors flex-shrink-0 ${
-                          active ? "text-[#93C5FD]" : "text-[#64748B]"
+                          active ? "text-blue-600 dark:text-[#93C5FD]" : "text-slate-400 dark:text-[#64748B]"
                         }`}
                         style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}
                       >
                         {item.icon}
                       </span>
                       <div className="min-w-0 leading-tight">
-                        <div className={`truncate ${active ? "text-white" : "text-[#CBD5E1]"}`}>{item.name}</div>
-                        <div className="text-[10.5px] text-[#475569] truncate">{item.hint}</div>
+                        <div className={`truncate ${active ? "text-blue-700 dark:text-white font-semibold" : "text-slate-700 dark:text-[#CBD5E1]"}`}>{item.name}</div>
+                        <div className="text-[10.5px] text-slate-400 dark:text-[#64748B] truncate">{item.hint}</div>
                       </div>
                     </div>
 
@@ -206,10 +207,9 @@ export function AppSidebar({ activeCount = 18, isOpen, onClose, onOpenHelp }: Ap
                       <span
                         className={`px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide flex-shrink-0 ml-1 ${
                           active
-                            ? "bg-blue-500/30 text-blue-300"
-                            : "bg-white/8 text-[#64748B]"
+                            ? "bg-blue-100 text-blue-700 dark:bg-blue-500/30 dark:text-blue-300"
+                            : "bg-slate-100 text-slate-500 dark:bg-white/[0.08] dark:text-[#94A3B8]"
                         }`}
-                        style={active ? {} : { background: "rgba(255,255,255,0.06)" }}
                       >
                         {item.badge}
                       </span>
@@ -222,34 +222,39 @@ export function AppSidebar({ activeCount = 18, isOpen, onClose, onOpenHelp }: Ap
         </nav>
 
         {/* ── Bottom: Business Profile ───────────────── */}
-        <div className="p-3 border-t border-[#1E293B] flex flex-col gap-2 flex-shrink-0">
+        <div className="p-3 border-t border-slate-200/80 dark:border-white/[0.06] flex flex-col gap-2 flex-shrink-0">
           {/* Business card — nama usaha dari localStorage / settings */}
           <Link
             href="/settings"
             title="Buka Pengaturan Usaha"
-            className="sidebar-profile-card block hover:bg-white/5 transition-colors group cursor-pointer"
+            className="sidebar-profile-card block hover:bg-slate-100 dark:hover:bg-white/5 transition-colors group cursor-pointer"
           >
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
                   <span className="material-symbols-outlined text-white text-[14px]">storefront</span>
                 </div>
-                <span className="text-[13px] font-semibold text-[#F1F5F9] truncate group-hover:text-blue-300 transition-colors">
+                <span className="text-[13px] font-semibold text-slate-800 dark:text-[#F1F5F9] truncate group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">
                   {bizName}
                 </span>
               </div>
             </div>
-            <p className="text-[11px] text-[#64748B] truncate pl-9">
+            <p className="text-[11px] text-slate-500 dark:text-[#64748B] truncate pl-9">
               {bizType} &bull; Edit
             </p>
           </Link>
+
+          {/* Theme Toggle */}
+          <div className="pt-1 pb-0.5 border-t border-slate-100 dark:border-white/[0.04]">
+            <ThemeToggle variant="sidebar" />
+          </div>
 
           {/* Quick links */}
           <div className="flex items-center justify-between px-1">
             <button
               type="button"
               onClick={onOpenHelp}
-              className="flex items-center gap-1.5 text-[11.5px] text-[#64748B] hover:text-blue-400 transition-colors py-1 cursor-pointer"
+              className="flex items-center gap-1.5 text-[11.5px] text-slate-500 dark:text-[#64748B] hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[15px]">help_outline</span>
               <span>Panduan</span>
@@ -257,7 +262,7 @@ export function AppSidebar({ activeCount = 18, isOpen, onClose, onOpenHelp }: Ap
             <form action={logout}>
               <button
                 type="submit"
-                className="flex items-center gap-1.5 text-[11.5px] text-[#64748B] hover:text-red-400 transition-colors py-1"
+                className="flex items-center gap-1.5 text-[11.5px] text-slate-500 dark:text-[#64748B] hover:text-red-500 dark:hover:text-red-400 transition-colors py-1"
               >
                 <span className="material-symbols-outlined text-[15px]">logout</span>
                 <span>Keluar</span>

@@ -17,6 +17,13 @@ export type {
   UpdateOrderStatusInput,
 } from "@/schemas/orders.schema";
 
+export type OrderStatus =
+  | "DRAFT"
+  | "CONFIRMED"
+  | "IN_PROGRESS"
+  | "COMPLETED"
+  | "CANCELLED";
+
 export type {
   WhatIfAdjustments,
   WhatIfSimulationInput,

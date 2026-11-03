@@ -7,9 +7,17 @@ import { getOrders } from "@/queries/orders.queries";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { OrdersDashboardView } from "@/components/orders/OrdersDashboardView";
 
+export const instant = false;
+
 export default async function OrdersPage() {
   const businessId = await getBusinessId();
-  const orders = await getOrders(businessId);
+  let orders: any[] = [];
+  try {
+    orders = await getOrders(businessId);
+  } catch (err) {
+    console.warn("[OrdersPage] DB query fallback:", err);
+    orders = [];
+  }
 
   return (
     <DashboardShell activeCount={orders.length > 0 ? orders.length : 18}>

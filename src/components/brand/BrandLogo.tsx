@@ -60,21 +60,17 @@ export function BrandLogo({
       <div className="flex flex-col min-w-0">
         <div className="flex items-center gap-2">
           <span
-            className={`font-black tracking-tight leading-none ${sizeConfig.title} ${
-              isDark ? "text-white" : "text-[#0F172A]"
-            }`}
+            className={`font-black tracking-tight leading-none ${sizeConfig.title} text-slate-900 dark:text-white`}
           >
             BizCapacity
           </span>
           {/* Live pulsing status beacon */}
           <span className="relative flex h-2 w-2 flex-shrink-0">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-60" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600 dark:bg-blue-500" />
           </span>
           <span
-            className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
-              isDark ? "bg-blue-500/20 text-blue-300 border border-blue-400/30" : "bg-blue-50 text-[#1D4ED8] border border-blue-200"
-            }`}
+            className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-400/30"
           >
             UMKM
           </span>
@@ -82,9 +78,7 @@ export function BrandLogo({
 
         {showSubtitle && (
           <span
-            className={`font-medium tracking-wide leading-tight mt-1 truncate ${sizeConfig.sub} ${
-              isDark ? "text-slate-400" : "text-[#64748B]"
-            }`}
+            className={`font-medium tracking-wide leading-tight mt-1 truncate ${sizeConfig.sub} text-slate-500 dark:text-slate-400`}
           >
             {subtitleText}
           </span>

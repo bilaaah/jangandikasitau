@@ -16,15 +16,6 @@ const nextConfig: NextConfig = {
   experimental: {
     turbopackMemoryEviction: "auto",
   },
-
-  turbopack: {
-    rules: {
-      "*.css": {
-        loaders: ["@tailwindcss/turbopack"],
-        as: "*.css",
-      },
-    },
-  },
 };
 
 export default nextConfig;

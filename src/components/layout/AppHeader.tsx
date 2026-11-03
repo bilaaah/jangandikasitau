@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { logout } from "@/actions/auth.actions";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface AppHeaderProps {
   onToggleSidebar?: () => void;
@@ -109,7 +110,7 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
       unread: true,
       href: "/orders/bc-1024",
       icon: "warning",
-      color: "text-amber-600 bg-amber-50",
+      color: "text-amber-400 bg-amber-500/[0.10]",
     },
     {
       id: "n-2",
@@ -119,7 +120,7 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
       unread: true,
       href: "/resources",
       icon: "inventory_2",
-      color: "text-rose-600 bg-rose-50",
+      color: "text-rose-400 bg-rose-500/[0.10]",
     },
     {
       id: "n-3",
@@ -129,7 +130,7 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
       unread: true,
       href: "/orders/bc-1023",
       icon: "task_alt",
-      color: "text-emerald-600 bg-emerald-50",
+      color: "text-emerald-400 bg-emerald-500/[0.10]",
     },
   ]);
 
@@ -176,7 +177,7 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
 
   return (
     <>
-      <header className="app-header fixed top-0 left-0 lg:left-64 right-0 h-16 z-40 flex items-center justify-between px-3 sm:px-6 bg-white/95 backdrop-blur-md border-b border-[#E2E8F0]">
+      <header className="app-header fixed top-0 left-0 lg:left-64 right-0 h-16 z-40 flex items-center justify-between px-3 sm:px-6 bg-[#0B1120]/90 backdrop-blur-md border-b border-white/[0.08]">
         {/* ── Left: Mobile Hamburger + Business Badge ── */}
         <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
           {onToggleSidebar && (
@@ -188,7 +189,7 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
                 onToggleSidebar();
               }}
               aria-label="Buka menu navigasi"
-              className="lg:hidden p-1.5 rounded-xl text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0F172A] transition-colors shrink-0"
+              className="lg:hidden p-1.5 rounded-xl text-[#94A3B8] hover:bg-white/[0.06] hover:text-white transition-colors shrink-0"
             >
               <span className="material-symbols-outlined text-[22px]">menu</span>
             </button>
@@ -198,7 +199,7 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
           <Link
             href="/settings"
             title="Klik untuk buka Pengaturan Usaha"
-            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#F1F5F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#0F172A] text-[11.5px] sm:text-[12px] font-semibold transition-colors select-none group min-w-0"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.10] border border-slate-200 dark:border-white/[0.08] text-slate-800 dark:text-[#F1F5F9] text-[11.5px] sm:text-[12px] font-semibold transition-colors select-none group min-w-0"
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse-dot flex-shrink-0" />
             <span className="truncate max-w-[95px] sm:max-w-[220px]">{bizName}</span>
@@ -210,7 +211,7 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
           {/* 🔍 Global Interactive Search */}
           <div ref={searchRef} className="relative hidden md:block">
             <div className="relative flex items-center">
-              <span className="material-symbols-outlined absolute left-3 text-[#94A3B8] text-[17px] pointer-events-none">
+              <span className="material-symbols-outlined absolute left-3 text-slate-400 dark:text-[#94A3B8] text-[17px] pointer-events-none">
                 search
               </span>
               <input
@@ -223,13 +224,13 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
                   setSearchQuery(e.target.value);
                   setIsSearchFocused(true);
                 }}
-                className="w-64 h-9 pl-9 pr-8 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-[#0F172A] placeholder:text-[#94A3B8] text-[13px] transition-all outline-none focus:ring-2 focus:ring-blue-400/30 focus:border-blue-400 focus:bg-white focus:w-80"
+                className="w-64 h-9 pl-9 pr-8 rounded-xl bg-slate-100/90 dark:bg-white/[0.06] border border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-[#F1F5F9] placeholder:text-slate-400 dark:placeholder:text-[#64748B] text-[13px] transition-all outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-500 focus:bg-white dark:focus:bg-white/[0.08] focus:w-80"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 text-[#94A3B8] hover:text-[#0F172A] text-xs font-bold"
+                  className="absolute right-2.5 text-slate-400 hover:text-slate-700 dark:text-[#94A3B8] dark:hover:text-white text-xs font-bold"
                 >
                   ✕
                 </button>
@@ -238,14 +239,14 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
 
             {/* Live Autocomplete Dropdown */}
             {isSearchFocused && (
-              <div className="absolute right-0 top-11 w-96 max-h-[380px] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-[#E2E8F0] p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-                <div className="px-3 py-1.5 text-[11px] font-bold text-[#64748B] uppercase tracking-wider flex items-center justify-between border-b border-[#F1F5F9] mb-1">
+              <div className="absolute right-0 top-11 w-96 max-h-[380px] overflow-y-auto bg-white/95 dark:bg-[#0F172A]/90 backdrop-blur-2xl rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-black/30 border border-slate-200 dark:border-white/[0.08] p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                <div className="px-3 py-1.5 text-[11px] font-bold text-slate-500 dark:text-[#64748B] uppercase tracking-wider flex items-center justify-between border-b border-slate-100 dark:border-white/[0.06] mb-1">
                   <span>Hasil Pencarian Cepat</span>
                   <span className="text-[10px] lowercase font-normal">Tekan untuk buka</span>
                 </div>
 
                 {filteredSearch.length === 0 ? (
-                  <div className="p-4 text-center text-xs text-[#94A3B8]">
+                  <div className="p-4 text-center text-xs text-slate-500 dark:text-[#94A3B8]">
                     Tidak menemukan &ldquo;{searchQuery}&rdquo;. Coba kata kunci pesanan, produk, atau mesin.
                   </div>
                 ) : (
@@ -255,18 +256,18 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
                         key={item.id}
                         type="button"
                         onClick={() => handleSelectSearchItem(item.href)}
-                        className="w-full text-left p-2.5 rounded-xl hover:bg-[#F8FAFC] transition-colors flex items-center gap-3 group"
+                        className="w-full text-left p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors flex items-center gap-3 group"
                       >
-                        <span className="w-8 h-8 rounded-lg bg-blue-50 text-[#1D4ED8] flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <span className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                           <span className="material-symbols-outlined text-[17px]">{item.icon}</span>
                         </span>
                         <div className="min-w-0 flex-1">
-                          <p className="text-[13px] font-semibold text-[#0F172A] truncate group-hover:text-[#1D4ED8]">
+                          <p className="text-[13px] font-semibold text-slate-800 dark:text-[#F1F5F9] truncate group-hover:text-blue-600 dark:group-hover:text-blue-400">
                             {item.title}
                           </p>
-                          <p className="text-[11px] text-[#64748B] truncate">{item.subtitle}</p>
+                          <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] truncate">{item.subtitle}</p>
                         </div>
-                        <span className="material-symbols-outlined text-[15px] text-[#CBD5E1] group-hover:text-[#1D4ED8]">
+                        <span className="material-symbols-outlined text-[15px] text-slate-400 dark:text-[#475569] group-hover:text-blue-500 dark:group-hover:text-blue-400">
                           arrow_forward
                         </span>
                       </button>
@@ -277,16 +278,19 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
             )}
           </div>
 
+          {/* ☀️ / 🌙 Theme Toggle Button */}
+          <ThemeToggle />
+
           {/* 📖 Panduan Penggunaan Modal Trigger */}
           <button
             type="button"
             onClick={() => setShowHelpModal(true)}
             title="Panduan Sistem Kapasitas UMKM"
             aria-label="Panduan & Bantuan"
-            className="p-2 rounded-xl text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#1D4ED8] transition-colors flex items-center gap-1.5"
+            className="p-2 rounded-xl text-slate-600 dark:text-[#94A3B8] hover:bg-slate-100 dark:hover:bg-white/[0.06] hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1.5"
           >
             <span className="material-symbols-outlined text-[20px]">help_outline</span>
-            <span className="hidden xl:inline text-xs font-semibold text-[#64748B]">Panduan</span>
+            <span className="hidden xl:inline text-xs font-semibold text-slate-600 dark:text-[#94A3B8]">Panduan</span>
           </button>
 
           {/* 🔔 Notifications Dropdown */}
@@ -296,7 +300,7 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
               onClick={() => setShowNotifications((prev) => !prev)}
               aria-label={`Notifikasi (${unreadCount} belum dibaca)`}
               className={`relative p-2 rounded-xl transition-colors flex items-center ${
-                showNotifications ? "bg-[#EFF6FF] text-[#1D4ED8]" : "text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#1D4ED8]"
+                showNotifications ? "bg-blue-500/15 text-blue-600 dark:text-blue-400" : "text-slate-600 dark:text-[#94A3B8] hover:bg-slate-100 dark:hover:bg-white/[0.06] hover:text-blue-600 dark:hover:text-blue-400"
               }`}
             >
               <span className="material-symbols-outlined text-[20px]">notifications</span>
@@ -308,18 +312,18 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 top-11 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-[#E2E8F0] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute right-0 top-11 w-80 sm:w-96 bg-white/95 dark:bg-[#0F172A]/90 backdrop-blur-2xl rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-black/30 border border-slate-200 dark:border-white/[0.08] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
                 {/* Header */}
-                <div className="p-3.5 border-b border-[#F1F5F9] flex items-center justify-between bg-[#F8FAFC]">
+                <div className="p-3.5 border-b border-slate-100 dark:border-white/[0.06] flex items-center justify-between bg-slate-50/50 dark:bg-white/[0.02]">
                   <div>
-                    <h4 className="text-sm font-bold text-[#0F172A]">Notifikasi Produksi</h4>
-                    <p className="text-[11px] text-[#64748B]">{unreadCount} pemberitahuan baru</p>
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-[#F1F5F9]">Notifikasi Produksi</h4>
+                    <p className="text-[11px] text-slate-500 dark:text-[#94A3B8]">{unreadCount} pemberitahuan baru</p>
                   </div>
                   {unreadCount > 0 && (
                     <button
                       type="button"
                       onClick={markAllNotificationsRead}
-                      className="text-[11px] font-semibold text-[#1D4ED8] hover:underline"
+                      className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
                     >
                       Tandai dibaca
                     </button>
@@ -327,14 +331,14 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
                 </div>
 
                 {/* Notification Items */}
-                <div className="divide-y divide-[#F1F5F9] max-h-80 overflow-y-auto">
+                <div className="divide-y divide-slate-100 dark:divide-white/[0.06] max-h-80 overflow-y-auto">
                   {notifications.map((n) => (
                     <Link
                       key={n.id}
                       href={n.href}
                       onClick={() => setShowNotifications(false)}
-                      className={`p-3.5 flex items-start gap-3 hover:bg-[#F8FAFC] transition-colors block ${
-                        n.unread ? "bg-blue-50/30" : ""
+                      className={`p-3.5 flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors block ${
+                        n.unread ? "bg-blue-50/50 dark:bg-blue-500/[0.06]" : ""
                       }`}
                     >
                       <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${n.color}`}>
@@ -342,12 +346,12 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-1">
-                          <p className={`text-xs font-bold leading-tight ${n.unread ? "text-[#0F172A]" : "text-[#475569]"}`}>
+                          <p className={`text-xs font-bold leading-tight ${n.unread ? "text-slate-900 dark:text-[#F1F5F9]" : "text-slate-500 dark:text-[#94A3B8]"}`}>
                             {n.title}
                           </p>
-                          <span className="text-[10px] text-[#94A3B8] shrink-0">{n.time}</span>
+                          <span className="text-[10px] text-slate-400 dark:text-[#64748B] shrink-0">{n.time}</span>
                         </div>
-                        <p className="text-[11px] text-[#64748B] mt-0.5 line-clamp-2 leading-relaxed">
+                        <p className="text-[11px] text-slate-600 dark:text-[#94A3B8] mt-0.5 line-clamp-2 leading-relaxed">
                           {n.desc}
                         </p>
                       </div>
@@ -356,11 +360,11 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
                 </div>
 
                 {/* Footer */}
-                <div className="p-2.5 border-t border-[#F1F5F9] bg-[#F8FAFC] text-center">
+                <div className="p-2.5 border-t border-slate-100 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.02] text-center">
                   <Link
                     href="/orders"
                     onClick={() => setShowNotifications(false)}
-                    className="text-xs font-bold text-[#1D4ED8] hover:text-[#1E40AF]"
+                    className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     Buka Semua Pesanan &rarr;
                   </Link>
@@ -370,7 +374,7 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
           </div>
 
           {/* Divider */}
-          <div className="h-5 w-px bg-[#E2E8F0]" aria-hidden="true" />
+          <div className="h-5 w-px bg-slate-200 dark:bg-white/[0.08]" aria-hidden="true" />
 
           {/* 👤 Profile Button & Dropdown */}
           <div ref={profileRef} className="relative">
@@ -379,65 +383,65 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
               onClick={() => setShowProfile((prev) => !prev)}
               aria-label="Profil pengguna & pengaturan"
               className={`flex items-center gap-2.5 pl-1 rounded-xl pr-2 py-1 transition-colors group ${
-                showProfile ? "bg-[#EFF6FF]" : "hover:bg-[#F1F5F9]"
+                showProfile ? "bg-blue-500/15" : "hover:bg-slate-100 dark:hover:bg-white/[0.06]"
               }`}
             >
               {/* Avatar */}
               <div className="relative flex-shrink-0">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#1D4ED8] text-white font-bold flex items-center justify-center text-[12px] shadow-sm shadow-blue-300/30">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold flex items-center justify-center text-[12px] shadow-sm shadow-blue-500/30">
                   {session?.user?.name?.slice(0, 2).toUpperCase() ?? "BC"}
                 </div>
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#0B1120]" />
               </div>
 
               {/* Name info */}
               <div className="hidden sm:flex flex-col text-left">
-                <span className="text-[13px] font-semibold text-[#0F172A] leading-tight">
+                <span className="text-[13px] font-semibold text-slate-800 dark:text-[#F1F5F9] leading-tight">
                   {session?.user?.name ?? "Pengguna BizCapacity"}
                 </span>
-                <span className="text-[10.5px] text-[#64748B] leading-none">
+                <span className="text-[10.5px] text-slate-500 dark:text-[#94A3B8] leading-none">
                   {session?.user?.role === "OWNER" ? "Owner" : "Staff"}
                 </span>
               </div>
 
-              <span className={`material-symbols-outlined text-[16px] text-[#94A3B8] hidden sm:block transition-transform ${
-                showProfile ? "rotate-180 text-[#1D4ED8]" : ""
+              <span className={`material-symbols-outlined text-[16px] text-slate-400 dark:text-[#94A3B8] hidden sm:block transition-transform ${
+                showProfile ? "rotate-180 text-blue-600 dark:text-blue-400" : ""
               }`}>
                 expand_more
               </span>
             </button>
 
             {showProfile && (
-              <div className="absolute right-0 top-11 w-64 bg-white rounded-2xl shadow-2xl border border-[#E2E8F0] p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute right-0 top-11 w-64 bg-white/95 dark:bg-[#0F172A]/90 backdrop-blur-2xl rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-black/30 border border-slate-200 dark:border-white/[0.08] p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
                 {/* Business identity */}
-                <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#F1F5F9] mb-1">
-                  <p className="text-xs font-bold text-[#0F172A]">SweetCrumbs Bakery</p>
-                  <p className="text-[11px] text-[#64748B]">Semarang • Operasional Aktif</p>
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/60 dark:border-white/[0.06] mb-1">
+                  <p className="text-xs font-bold text-slate-900 dark:text-[#F1F5F9]">SweetCrumbs Bakery</p>
+                  <p className="text-[11px] text-slate-500 dark:text-[#94A3B8]">Semarang • Operasional Aktif</p>
                 </div>
 
                 <div className="space-y-0.5">
                   <Link
                     href="/settings"
                     onClick={() => setShowProfile(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-[#0F172A] hover:bg-[#F1F5F9] transition-colors"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-[#F1F5F9] hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
                   >
-                    <span className="material-symbols-outlined text-[18px] text-[#64748B]">settings</span>
+                    <span className="material-symbols-outlined text-[18px] text-slate-500 dark:text-[#94A3B8]">settings</span>
                     <span>Pengaturan Usaha</span>
                   </Link>
                   <Link
                     href="/resources"
                     onClick={() => setShowProfile(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-[#0F172A] hover:bg-[#F1F5F9] transition-colors"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-[#F1F5F9] hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
                   >
-                    <span className="material-symbols-outlined text-[18px] text-[#64748B]">group</span>
+                    <span className="material-symbols-outlined text-[18px] text-slate-500 dark:text-[#94A3B8]">group</span>
                     <span>Data Staf &amp; Mesin</span>
                   </Link>
                   <Link
                     href="/simulations"
                     onClick={() => setShowProfile(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-[#0F172A] hover:bg-[#F1F5F9] transition-colors"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-[#F1F5F9] hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
                   >
-                    <span className="material-symbols-outlined text-[18px] text-[#64748B]">calculate</span>
+                    <span className="material-symbols-outlined text-[18px] text-slate-500 dark:text-[#94A3B8]">calculate</span>
                     <span>Simulasi Kapasitas</span>
                   </Link>
                   <button
@@ -446,19 +450,19 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
                       setShowProfile(false);
                       setShowHelpModal(true);
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-[#0F172A] hover:bg-[#F1F5F9] transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-[#F1F5F9] hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors text-left"
                   >
-                    <span className="material-symbols-outlined text-[18px] text-[#64748B]">help</span>
+                    <span className="material-symbols-outlined text-[18px] text-slate-500 dark:text-[#94A3B8]">help</span>
                     <span>Panduan Penggunaan</span>
                   </button>
                 </div>
 
-                <div className="my-1 border-t border-[#F1F5F9]" />
+                <div className="my-1 border-t border-slate-100 dark:border-white/[0.06]" />
 
                 <form action={logout}>
                   <button
                     type="submit"
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/[0.08] transition-colors text-left"
                   >
                     <span className="material-symbols-outlined text-[18px]">logout</span>
                     <span>Keluar Akun</span>
@@ -473,76 +477,76 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
       {/* ── Panduan Singkat Modal (Quick Guide) ── */}
       {showHelpModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-[#E2E8F0] space-y-5 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-[#F1F5F9]">
+          <div className="bg-white dark:bg-[#0F172A]/95 backdrop-blur-2xl rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl dark:shadow-black/30 border border-slate-200 dark:border-white/[0.08] space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/[0.06]">
               <div className="flex items-center gap-2.5">
-                <span className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                <span className="w-10 h-10 rounded-2xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                   <span className="material-symbols-outlined text-[24px]">school</span>
                 </span>
                 <div>
-                  <h3 className="text-lg font-extrabold text-[#0F172A]">Panduan Pemilik Usaha</h3>
-                  <p className="text-xs text-[#64748B]">Panduan Penggunaan Sistem Keputusan Kapasitas UMKM</p>
+                  <h3 className="text-lg font-extrabold text-slate-900 dark:text-[#F1F5F9]">Panduan Pemilik Usaha</h3>
+                  <p className="text-xs text-slate-500 dark:text-[#94A3B8]">Panduan Penggunaan Sistem Keputusan Kapasitas UMKM</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowHelpModal(false)}
-                className="w-8 h-8 rounded-full bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0] flex items-center justify-center font-bold"
+                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-white/[0.06] dark:text-[#94A3B8] dark:hover:bg-white/[0.10] flex items-center justify-center font-bold"
               >
                 ✕
               </button>
             </div>
 
             <div className="space-y-3.5 text-xs">
-              <div className="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 flex gap-3 items-start">
+              <div className="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-500/[0.10] border border-blue-200 dark:border-blue-500/20 flex gap-3 items-start">
                 <span className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">
                   1
                 </span>
                 <div>
-                  <h5 className="font-bold text-blue-950 text-sm">Cek Pesanan Sebelum Bilang Iya</h5>
-                  <p className="text-blue-800 mt-0.5 leading-relaxed">
+                  <h5 className="font-bold text-blue-800 dark:text-blue-300 text-sm">Cek Pesanan Sebelum Bilang Iya</h5>
+                  <p className="text-blue-900/80 dark:text-blue-300/80 mt-0.5 leading-relaxed">
                     Saat pelanggan minta order banyak atau deadline mepet, buka menu <strong>&ldquo;Cek Pesanan Baru&rdquo;</strong>. Sistem akan langsung hitung apakah jam kerja oven dan bahanmu cukup.
                   </p>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 flex gap-3 items-start">
+              <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-500/[0.10] border border-amber-200 dark:border-amber-500/20 flex gap-3 items-start">
                 <span className="w-6 h-6 rounded-full bg-amber-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">
                   2
                 </span>
                 <div>
-                  <h5 className="font-bold text-amber-950 text-sm">Gunakan Simulator Jika Kapasitas Padat</h5>
-                  <p className="text-amber-800 mt-0.5 leading-relaxed">
+                  <h5 className="font-bold text-amber-800 dark:text-amber-300 text-sm">Gunakan Simulator Jika Kapasitas Padat</h5>
+                  <p className="text-amber-900/80 dark:text-amber-300/80 mt-0.5 leading-relaxed">
                     Jika ada tanda <strong>⚠️ Perlu Perhatian</strong> atau <strong>🔴 Antrian Padat</strong>, jangan buru-buru tolak! Buka menu <strong>Simulasi</strong> untuk coba opsi lembur atau tambah pekerja harian.
                   </p>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex gap-3 items-start">
+              <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-500/[0.10] border border-emerald-200 dark:border-emerald-200/20 flex gap-3 items-start">
                 <span className="w-6 h-6 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">
                   3
                 </span>
                 <div>
-                  <h5 className="font-bold text-emerald-950 text-sm">Perbarui Data Tim &amp; Bahan Secara Berkala</h5>
-                  <p className="text-emerald-800 mt-0.5 leading-relaxed">
+                  <h5 className="font-bold text-emerald-800 dark:text-emerald-300 text-sm">Perbarui Data Tim &amp; Bahan Secara Berkala</h5>
+                  <p className="text-emerald-900/80 dark:text-emerald-300/80 mt-0.5 leading-relaxed">
                     Di menu <strong>&ldquo;Staf, Mesin &amp; Bahan&rdquo;</strong>, kamu bisa tambah karyawan baru, catat mesin oven yang aktif, dan isi ulang stok bahan saat baru belanja dari supplier.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-[#F1F5F9]">
+            <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-white/[0.06]">
               <Link
                 href="/orders/new"
                 onClick={() => setShowHelpModal(false)}
-                className="text-xs font-bold text-[#1D4ED8] hover:underline"
+                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
               >
                 Coba Cek Pesanan &rarr;
               </Link>
               <button
                 type="button"
                 onClick={() => setShowHelpModal(false)}
-                className="px-5 py-2.5 rounded-xl bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold shadow-sm transition-all"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white text-xs font-bold shadow-sm shadow-blue-500/30 transition-all"
               >
                 Saya Mengerti, Tutup
               </button>

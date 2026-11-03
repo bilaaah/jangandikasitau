@@ -152,17 +152,17 @@ export function ProductionPlanningView() {
   return (
     <div className="container max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e5eeff]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-700">
         <div>
-          <div className="flex items-center gap-2 text-xs text-[#525e7d]">
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
             <span>Operasional</span>
             <span>/</span>
-            <span className="text-[#0b1c30] font-semibold">Jadwal Gantt Multi-Stasiun</span>
+            <span className="text-slate-800 dark:text-slate-200 font-semibold">Jadwal Gantt Multi-Stasiun</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0b1c30] mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 mt-1">
             Jadwal Produksi Mingguan
           </h1>
-          <p className="mt-1 text-sm text-[#525e7d]">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Pantau alokasi mesin dan operator secara visual untuk mencegah bentrok jadwal sebelum PO dikonfirmasi.
           </p>
         </div>
@@ -170,14 +170,14 @@ export function ProductionPlanningView() {
         <div className="flex items-center gap-3">
           <Link
             href="/simulations"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#eff4ff] border border-[#dbe1ff] text-[#004ac6] text-xs sm:text-sm font-bold hover:bg-[#e0ebff] transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 text-xs sm:text-sm font-bold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all"
           >
             <span className="material-symbols-outlined text-[18px]">science</span>
             <span>Simulasi What-If</span>
           </Link>
           <Link
             href="/orders/new"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#2563eb] text-white text-xs sm:text-sm font-bold shadow-sm shadow-[#2563eb]/20 hover:bg-[#004ac6] transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white text-xs sm:text-sm font-bold shadow-sm shadow-blue-600/20 hover:bg-blue-700 transition-all"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             <span>+ Cek PO Baru</span>
@@ -187,58 +187,58 @@ export function ProductionPlanningView() {
 
       {/* KPI Highlights Bar */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl bg-white border border-[#e5eeff] shadow-xs">
-          <span className="text-[11px] font-bold text-[#737686] uppercase">Kapasitas Terpakai</span>
+        <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
+          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase">Kapasitas Terpakai</span>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-2xl font-black text-[#0b1c30]">82.4%</span>
-            <span className="text-xs text-amber-600 font-bold">Mendekati Limit</span>
+            <span className="text-2xl font-black text-slate-900 dark:text-slate-50">82.4%</span>
+            <span className="text-xs text-amber-600 dark:text-amber-400 font-bold">Mendekati Limit</span>
           </div>
-          <div className="w-full bg-[#e2e8f0] h-1.5 rounded-full mt-2 overflow-hidden">
+          <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full mt-2 overflow-hidden">
             <div className="bg-amber-500 h-full rounded-full" style={{ width: "82.4%" }} />
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white border border-[#e5eeff] shadow-xs">
-          <span className="text-[11px] font-bold text-[#737686] uppercase">Titik Macet Aktif</span>
+        <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
+          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase">Titik Macet Aktif</span>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-2xl font-black text-rose-600">Stasiun 4</span>
-            <span className="text-xs bg-rose-50 text-rose-700 px-2 py-0.5 rounded-full font-bold border border-rose-200">
+            <span className="text-2xl font-black text-rose-600 dark:text-rose-400">Stasiun 4</span>
+            <span className="text-xs bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 px-2 py-0.5 rounded-full font-bold border border-rose-200 dark:border-rose-800">
               Packaging (95.8%)
             </span>
           </div>
-          <p className="text-[11px] text-[#525e7d] mt-2">Dampak: Potensi telat PO BC-1024</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2">Dampak: Potensi telat PO BC-1024</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white border border-[#e5eeff] shadow-xs">
-          <span className="text-[11px] font-bold text-[#737686] uppercase">Pesanan Berjalan</span>
+        <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
+          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase">Pesanan Berjalan</span>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-2xl font-black text-[#004ac6]">18 PO</span>
-            <span className="text-xs text-[#525e7d]">Pekan Ini</span>
+            <span className="text-2xl font-black text-blue-700 dark:text-blue-400">18 PO</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Pekan Ini</span>
           </div>
-          <p className="text-[11px] text-[#525e7d] mt-2">12 On-Track • 4 Terjadwal • 2 At-Risk</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2">12 On-Track • 4 Terjadwal • 2 At-Risk</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white border border-[#e5eeff] shadow-xs">
-          <span className="text-[11px] font-bold text-[#737686] uppercase">Rasio Tepat Waktu (OTD)</span>
+        <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
+          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase">Rasio Tepat Waktu (OTD)</span>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-2xl font-black text-emerald-600">98.2%</span>
-            <span className="text-xs text-emerald-600 font-bold">Target &gt;95%</span>
+            <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">98.2%</span>
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">Target &gt;95%</span>
           </div>
-          <p className="text-[11px] text-[#525e7d] mt-2">Akurasi janji kapasitas terjaga</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2">Akurasi janji kapasitas terjaga</p>
         </div>
       </div>
 
       {/* Filter and View Controls */}
-      <div className="bg-white border border-[#e5eeff] rounded-2xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
         {/* Workstation Filter */}
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-bold text-[#525e7d] mr-1">Filter Stasiun:</span>
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 mr-1">Filter Stasiun:</span>
           <button
             onClick={() => setSelectedStation("all")}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
               selectedStation === "all"
-                ? "bg-[#004ac6] text-white shadow-xs"
-                : "bg-[#f8f9ff] text-[#525e7d] hover:bg-[#eff4ff]"
+                ? "bg-blue-700 dark:bg-blue-600 text-white shadow-xs"
+                : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-slate-600"
             }`}
           >
             Semua Stasiun
@@ -249,8 +249,8 @@ export function ProductionPlanningView() {
               onClick={() => setSelectedStation(st.id)}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 selectedStation === st.id
-                  ? "bg-[#004ac6] text-white shadow-xs"
-                  : "bg-[#f8f9ff] text-[#525e7d] hover:bg-[#eff4ff]"
+                  ? "bg-blue-700 dark:bg-blue-600 text-white shadow-xs"
+                  : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-slate-600"
               }`}
             >
               {st.name.split(". ")[1]}
@@ -266,7 +266,7 @@ export function ProductionPlanningView() {
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
               onlyLockedCapacity
                 ? "bg-amber-600 text-white shadow-xs"
-                : "bg-[#f8f9ff] text-[#525e7d] border border-[#e5eeff] hover:bg-[#eff4ff]"
+                : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600 hover:bg-slate-200 dark:hover:bg-slate-600"
             }`}
           >
             <span className="material-symbols-outlined text-[15px]">
@@ -276,11 +276,11 @@ export function ProductionPlanningView() {
           </button>
 
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-bold text-[#525e7d]">Status:</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Status:</span>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="text-xs font-medium px-3 py-1.5 rounded-lg bg-[#f8f9ff] border border-[#e5eeff] text-[#0b1c30] focus:outline-none focus:ring-1 focus:ring-[#004ac6]"
+              className="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="all">Semua Status</option>
               <option value="at_risk">⚠️ Perlu Tindakan / At-Risk</option>
@@ -293,34 +293,34 @@ export function ProductionPlanningView() {
       </div>
 
       {/* Info Banner: Rule Kapasitas Terkunci */}
-      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-blue-50/80 border border-blue-200 text-xs text-blue-900">
-        <span className="material-symbols-outlined text-[18px] text-blue-600 shrink-0">info</span>
+      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-xs text-blue-900 dark:text-blue-300">
+        <span className="material-symbols-outlined text-[18px] text-blue-600 dark:text-blue-400 shrink-0">info</span>
         <span>
           <strong>Aturan Kapasitas UMKM:</strong> Hanya pesanan berstatus <strong>CONFIRMED</strong> dan <strong>IN_PROGRESS</strong> yang mengunci slot mesin &amp; jam staf secara permanen. Pesanan baru berstatus simulasi/draft tidak memblokir kuota.
         </span>
       </div>
 
       {/* Visual Gantt Chart Table with Horizontal Scroll for Mobile */}
-      <div className="bg-white border border-[#e5eeff] rounded-2xl shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <div className="min-w-[820px]">
             {/* Gantt Header */}
-            <div className="grid grid-cols-12 bg-[#f8f9ff] border-b border-[#e5eeff] text-xs font-bold text-[#525e7d]">
-              <div className="col-span-4 p-3.5 border-r border-[#e5eeff]">
+            <div className="grid grid-cols-12 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 dark:text-slate-400">
+              <div className="col-span-4 p-3.5 border-r border-slate-200 dark:border-slate-700">
                 Workstation / Antrean Batch
               </div>
-              <div className="col-span-8 grid grid-cols-6 divide-x divide-[#e5eeff]">
+              <div className="col-span-8 grid grid-cols-6 divide-x divide-slate-200 dark:divide-slate-700">
                 {DAYS.map((d) => (
                   <div key={d.index} className="p-3 text-center">
-                    <span className="block font-bold text-[#0b1c30]">{d.name}</span>
-                    <span className="text-[10px] text-[#737686]">{d.date}</span>
+                    <span className="block font-bold text-slate-800 dark:text-slate-200">{d.name}</span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500">{d.date}</span>
                   </div>
                 ))}
               </div>
             </div>
 
         {/* Gantt Rows per Workstation */}
-        <div className="divide-y divide-[#e5eeff]">
+        <div className="divide-y divide-slate-200 dark:divide-slate-700">
           {STATIONS.filter((st) => selectedStation === "all" || st.id === selectedStation).map((station) => {
             const stationItems = filteredSchedule.filter((item) => item.station === station.id);
             const utilPct = Math.round((station.usedHours / station.totalHours) * 100);
@@ -329,27 +329,27 @@ export function ProductionPlanningView() {
             return (
               <div key={station.id} className="grid grid-cols-12 min-h-[105px]">
                 {/* Station Info Column */}
-                <div className="col-span-4 p-4 border-r border-[#e5eeff] bg-[#fafbff] flex flex-col justify-between">
+                <div className="col-span-4 p-4 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-sm text-[#0b1c30]">{station.name}</span>
+                      <span className="font-bold text-sm text-slate-900 dark:text-slate-100">{station.name}</span>
                       <span
                         className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
                           isOverloaded
-                            ? "bg-rose-100 text-rose-700 border border-rose-200"
-                            : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                            ? "bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800"
+                            : "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
                         }`}
                       >
                         {utilPct}% Utilized
                       </span>
                     </div>
-                    <p className="text-xs text-[#525e7d] mt-1">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       Kapasitas: {station.usedHours}j / {station.totalHours}j terpakai
                     </p>
                   </div>
 
                   {isOverloaded && (
-                    <div className="mt-2 text-[11px] text-rose-700 bg-rose-50 border border-rose-200 p-1.5 rounded-lg flex items-center gap-1.5">
+                    <div className="mt-2 text-[11px] text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800 p-1.5 rounded-lg flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-[14px]">warning</span>
                       <span>Kapasitas kritis! Disarankan lembur atau re-route.</span>
                     </div>
@@ -357,7 +357,7 @@ export function ProductionPlanningView() {
                 </div>
 
                 {/* Days Grid Column */}
-                <div className="col-span-8 grid grid-cols-6 divide-x divide-[#e5eeff] relative p-2 bg-white">
+                <div className="col-span-8 grid grid-cols-6 divide-x divide-slate-200 dark:divide-slate-700 relative p-2 bg-white dark:bg-slate-800">
                   {/* Grid background lines */}
                   {DAYS.map((d) => (
                     <div key={d.index} className="h-full min-h-[90px]" />
@@ -366,7 +366,7 @@ export function ProductionPlanningView() {
                   {/* Schedule Bars Layer */}
                   <div className="absolute inset-0 p-2 flex flex-col justify-center gap-2 pointer-events-none">
                     {stationItems.length === 0 ? (
-                      <div className="text-center text-xs text-[#94a3b8] italic py-4">
+                      <div className="text-center text-xs text-slate-400 dark:text-slate-500 italic py-4">
                         Tidak ada antrean pesanan di stasiun ini.
                       </div>
                     ) : (
@@ -384,12 +384,12 @@ export function ProductionPlanningView() {
                             onClick={() => setSelectedItem(item)}
                             className={`pointer-events-auto cursor-pointer p-2 rounded-xl text-left shadow-xs border transition-all hover:scale-[1.01] hover:shadow-md ${
                               item.status === "at_risk"
-                                ? "bg-rose-50 border-rose-300 text-rose-900 ring-1 ring-rose-400"
+                                ? "bg-rose-50 dark:bg-rose-900/30 border-rose-300 dark:border-rose-700 text-rose-900 dark:text-rose-200 ring-1 ring-rose-400 dark:ring-rose-700"
                                 : item.status === "completed"
-                                ? "bg-emerald-50 border-emerald-300 text-emerald-900"
+                                ? "bg-emerald-50 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200"
                                 : item.status === "in_progress"
-                                ? "bg-blue-50 border-blue-300 text-blue-900"
-                                : "bg-slate-50 border-slate-300 text-slate-800"
+                                ? "bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-900 dark:text-blue-200"
+                                : "bg-slate-50 dark:bg-slate-700/50 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200"
                             }`}
                           >
                             <div className="flex items-center justify-between gap-1 text-[11px]">
@@ -405,19 +405,19 @@ export function ProductionPlanningView() {
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center justify-between text-[10px] text-[#525e7d] mt-1">
+                            <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 mt-1">
                               <span>{item.qty} pcs</span>
                               <span className="font-mono">{item.progress}%</span>
                             </div>
                             {/* Progress bar */}
-                            <div className="w-full bg-black/10 h-1 rounded-full mt-1 overflow-hidden">
+                            <div className="w-full bg-black/10 dark:bg-white/10 h-1 rounded-full mt-1 overflow-hidden">
                               <div
                                 className={`h-full rounded-full ${
                                   item.status === "at_risk"
                                     ? "bg-rose-600"
                                     : item.status === "completed"
                                     ? "bg-emerald-600"
-                                    : "bg-[#004ac6]"
+                                    : "bg-blue-600"
                                 }`}
                                 style={{ width: `${item.progress}%` }}
                               />
@@ -439,48 +439,48 @@ export function ProductionPlanningView() {
       {/* Selected Item Modal / Drawer */}
       {selectedItem && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#e5eeff] space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-[#f1f5f9] pb-3">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
               <div>
-                <span className="text-xs font-bold text-[#004ac6] uppercase">{selectedItem.id}</span>
-                <h3 className="text-lg font-extrabold text-[#0b1c30]">
+                <span className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase">{selectedItem.id}</span>
+                <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-50">
                   {selectedItem.orderId} — {selectedItem.customer}
                 </h3>
               </div>
               <button
                 onClick={() => setSelectedItem(null)}
-                className="w-8 h-8 rounded-lg bg-[#f1f5f9] text-[#525e7d] hover:bg-[#e2e8f0] flex items-center justify-center"
+                className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 flex items-center justify-center"
               >
                 ✕
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="grid grid-cols-2 gap-3 bg-[#f8f9ff] p-3 rounded-xl border border-[#e5eeff]">
+              <div className="grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl border border-slate-200 dark:border-slate-600">
                 <div>
-                  <span className="text-[#737686] block text-[10px] uppercase font-bold">Produk</span>
-                  <strong className="text-[#0b1c30] text-sm">{selectedItem.product}</strong>
+                  <span className="text-slate-500 dark:text-slate-400 block text-[10px] uppercase font-bold">Produk</span>
+                  <strong className="text-slate-900 dark:text-slate-100 text-sm">{selectedItem.product}</strong>
                 </div>
                 <div>
-                  <span className="text-[#737686] block text-[10px] uppercase font-bold">Kuantitas</span>
-                  <strong className="text-[#0b1c30] text-sm">{selectedItem.qty} Unit</strong>
+                  <span className="text-slate-500 dark:text-slate-400 block text-[10px] uppercase font-bold">Kuantitas</span>
+                  <strong className="text-slate-900 dark:text-slate-100 text-sm">{selectedItem.qty} Unit</strong>
                 </div>
                 <div>
-                  <span className="text-[#737686] block text-[10px] uppercase font-bold">Stasiun</span>
-                  <strong className="text-[#0b1c30]">
+                  <span className="text-slate-500 dark:text-slate-400 block text-[10px] uppercase font-bold">Stasiun</span>
+                  <strong className="text-slate-900 dark:text-slate-100">
                     {STATIONS.find((s) => s.id === selectedItem.station)?.name}
                   </strong>
                 </div>
                 <div>
-                  <span className="text-[#737686] block text-[10px] uppercase font-bold">Operator PIC</span>
-                  <strong className="text-[#0b1c30]">{selectedItem.operator}</strong>
+                  <span className="text-slate-500 dark:text-slate-400 block text-[10px] uppercase font-bold">Operator PIC</span>
+                  <strong className="text-slate-900 dark:text-slate-100">{selectedItem.operator}</strong>
                 </div>
-                <div className="col-span-2 pt-2 border-t border-[#e5eeff] flex items-center justify-between">
-                  <span className="text-[#737686] text-[10px] uppercase font-bold">Status Alokasi Kapasitas:</span>
+                <div className="col-span-2 pt-2 border-t border-slate-200 dark:border-slate-600 flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold">Status Alokasi Kapasitas:</span>
                   <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
                     selectedItem.isCapacityLocked
-                      ? "bg-amber-50 text-amber-800 border border-amber-300"
-                      : "bg-slate-100 text-slate-700 border border-slate-300"
+                      ? "bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-700"
+                      : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600"
                   }`}>
                     <span>{selectedItem.isCapacityLocked ? "🔒" : "⏳"}</span>
                     <span>{selectedItem.isCapacityLocked ? "Kapasitas Terkunci (PO Terkonfirmasi)" : "Belum Mengunci (Draft/Simulasi)"}</span>
@@ -489,13 +489,13 @@ export function ProductionPlanningView() {
               </div>
 
               <div>
-                <span className="text-[#737686] block text-[10px] uppercase font-bold mb-1">
+                <span className="text-slate-500 dark:text-slate-400 block text-[10px] uppercase font-bold mb-1">
                   Progres Penyelesaian ({selectedItem.progress}%)
                 </span>
-                <div className="w-full bg-[#e2e8f0] h-2 rounded-full overflow-hidden">
+                <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full ${
-                      selectedItem.status === "at_risk" ? "bg-rose-600" : "bg-[#004ac6]"
+                      selectedItem.status === "at_risk" ? "bg-rose-600" : "bg-blue-600"
                     }`}
                     style={{ width: `${selectedItem.progress}%` }}
                   />
@@ -503,8 +503,8 @@ export function ProductionPlanningView() {
               </div>
 
               {selectedItem.status === "at_risk" && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 space-y-1">
-                  <div className="flex items-center gap-1.5 font-bold text-rose-900">
+                <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-rose-900 dark:text-rose-200">
                     <span className="material-symbols-outlined text-[16px]">error</span>
                     <span>Peringatan DSS: Bottleneck Terdeteksi!</span>
                   </div>
@@ -516,10 +516,10 @@ export function ProductionPlanningView() {
               )}
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#f1f5f9]">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
               <button
                 onClick={() => setSelectedItem(null)}
-                className="px-4 py-2 rounded-xl border border-[#e5eeff] text-xs font-bold text-[#525e7d] hover:bg-[#f8f9ff]"
+                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
               >
                 Tutup
               </button>
@@ -534,7 +534,7 @@ export function ProductionPlanningView() {
               ) : (
                 <Link
                   href={`/orders/${selectedItem.orderId}`}
-                  className="px-4 py-2 rounded-xl bg-[#004ac6] text-white text-xs font-bold hover:bg-[#003ca2] shadow-sm transition-all"
+                  className="px-4 py-2 rounded-xl bg-blue-700 dark:bg-blue-600 text-white text-xs font-bold hover:bg-blue-800 dark:hover:bg-blue-500 shadow-sm transition-all"
                 >
                   Detail Order
                 </Link>

@@ -3,6 +3,8 @@ import { ProductManagementView } from "@/components/products/ProductManagementVi
 import { getBusinessId } from "@/lib/context";
 import { getManagedProducts, getManagedResources } from "@/queries/resources.queries";
 
+export const instant = false;
+
 export default async function ProductsPage() {
   const businessId = await getBusinessId();
   const [products, resources] = await Promise.all([

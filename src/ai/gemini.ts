@@ -94,7 +94,11 @@ export async function callGeminiAdvisory(
   analysis: CapacityEngineResult,
 ): Promise<AiOrderAdvice> {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return generateLocalFallbackAdvice(analysis);
+  if (!apiKey) {
+    // Jeda 1.2 detik agar progress step dan animasi loading terbaca dengan mulus di UI
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+    return generateLocalFallbackAdvice(analysis);
+  }
 
   for (const plan of getModelChain()) {
     const rawText = await requestGeminiJson(plan, apiKey, prompt);
@@ -121,6 +125,7 @@ export async function callGeminiAdvisory(
     }
   }
 
+  await new Promise((resolve) => setTimeout(resolve, 800));
   return generateLocalFallbackAdvice(analysis);
 }
 

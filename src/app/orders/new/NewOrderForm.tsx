@@ -219,10 +219,10 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* ── Form Column ─────────────────────────────────────── */}
-        <div className="lg:col-span-5 bg-card border rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+        <div className="lg:col-span-5 bg-white dark:bg-white/[0.04] backdrop-blur-2xl border border-slate-200 dark:border-white/[0.08] rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-xl space-y-6">
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-[#0F172A]">Spesifikasi Pesanan Klien</h2>
-            <p className="text-xs text-[#64748B] mt-1 leading-relaxed">
+            <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-[#F1F5F9]">Spesifikasi Pesanan Klien</h2>
+            <p className="text-xs text-slate-500 dark:text-[#64748B] mt-1 leading-relaxed">
               Masukkan rincian pesanan pelanggan untuk diuji langsung terhadap ketersediaan jam kerja,
               kapasitas mesin/oven, dan stok bahan baku.
             </p>
@@ -253,7 +253,7 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Customer Name */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-[#64748B]">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-[#64748B]">
                 Nama Klien / Perusahaan Pemesan *
               </label>
               <input
@@ -262,7 +262,7 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 placeholder="contoh: PT Nusantara Sentosa atau Ibu Ratna"
-                className="w-full px-3.5 py-2.5 rounded-xl border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/40 transition-shadow"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-shadow"
               />
               {fieldErrors.customerName && (
                 <p className="text-xs text-rose-500">{fieldErrors.customerName[0]}</p>
@@ -272,7 +272,7 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
             {/* Product Select */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#64748B]">
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-[#64748B]">
                   Pilih Produk / Paket *
                 </label>
                 <Link
@@ -291,7 +291,7 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
                   setPreviewResult(null);
                   setShowFeasibilityWarning(false);
                 }}
-                className="w-full px-3.5 py-2.5 rounded-xl border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/40 transition-shadow"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-shadow"
               >
                 {products.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -327,7 +327,7 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
             {/* Quantity */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#64748B]">
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-[#64748B]">
                   Jumlah Pesanan (Unit / Box) *
                 </label>
                 <span className="text-xs text-[#64748B]">Angka bulat</span>
@@ -342,14 +342,14 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
                   setPreviewResult(null);
                   setShowFeasibilityWarning(false);
                 }}
-                className="w-full px-3.5 py-2.5 rounded-xl border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/40 transition-shadow"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-shadow"
               />
             </div>
 
             {/* Delivery Date */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#64748B]">
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-[#64748B]">
                   Target Tanggal Kirim *
                 </label>
                 <span className="text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-medium border border-amber-200">
@@ -366,7 +366,7 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
                   setPreviewResult(null);
                   setShowFeasibilityWarning(false);
                 }}
-                className="w-full px-3.5 py-2.5 rounded-xl border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/40 transition-shadow"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-shadow"
               />
               <p className="text-[11px] text-[#64748B]">
                 Engine menghitung hari kerja aktif (Senin–Jumat) untuk mencegah janji deadline yang meleset.
@@ -375,7 +375,7 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
 
             {/* Notes */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-[#64748B]">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-[#64748B]">
                 Catatan Internal / Khusus (Opsional)
               </label>
               <textarea
@@ -383,7 +383,7 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="contoh: Permintaan pita emas, kartu ucapan custom..."
-                className="w-full px-3.5 py-2 rounded-xl border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-[#1D4ED8]/40 transition-shadow resize-none"
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-shadow resize-none"
               />
             </div>
 
@@ -460,13 +460,13 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
               deliveryDateStr={deliveryDate ? new Date(deliveryDate).toISOString() : new Date().toISOString()}
             />
           ) : (
-            <div className="rounded-2xl border border-dashed border-[#cbd5e1] bg-white p-10 text-center space-y-4 shadow-xs">
+            <div className="rounded-2xl border border-dashed border-slate-300 dark:border-white/[0.15] bg-white dark:bg-white/[0.03] backdrop-blur-xl p-10 text-center space-y-4 shadow-sm dark:shadow-xl">
               <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[#1D4ED8] mx-auto flex items-center justify-center shadow-xs">
                 <span className="material-symbols-outlined text-[26px]">analytics</span>
               </div>
               <div className="space-y-1">
-                <h4 className="font-bold text-base text-[#0F172A]">Simulasi Kapasitas Siap Dijalankan</h4>
-                <p className="text-xs text-[#64748B] max-w-md mx-auto leading-relaxed">
+                <h4 className="font-bold text-base text-slate-900 dark:text-[#F1F5F9]">Simulasi Kapasitas Siap Dijalankan</h4>
+                <p className="text-xs text-slate-600 dark:text-[#64748B] max-w-md mx-auto leading-relaxed">
                   Klik tombol <strong>&quot;Uji Kelayakan Kapasitas&quot;</strong> di formulir sebelah kiri
                   untuk menghitung ketersediaan jam kerja operator, jam oven, stok packaging, dan buffer
                   waktu pengiriman secara presisi.
@@ -474,7 +474,7 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
               </div>
               <div className="flex flex-wrap justify-center gap-2 text-xs text-[#64748B]">
                 {["Jam Kerja Staf", "Kapasitas Oven", "Stok Bahan", "Buffer Deadline"].map((label) => (
-                  <span key={label} className="px-2.5 py-1 bg-slate-100 rounded-full font-medium">
+                  <span key={label} className="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-full font-medium">
                     ⏳ {label}
                   </span>
                 ))}

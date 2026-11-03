@@ -312,25 +312,25 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
         <div className="flex flex-col gap-1 max-w-2xl">
           {/* Breadcrumb */}
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] text-[#1D4ED8] uppercase tracking-widest font-bold">Operasional</span>
-            <span className="material-symbols-outlined text-[#94A3B8] text-[14px]">chevron_right</span>
-            <span className="text-[11px] text-[#64748B] font-semibold">Antrean Pesanan</span>
-            <span className="material-symbols-outlined text-[#94A3B8] text-[14px]">chevron_right</span>
-            <span className="text-[11px] text-[#64748B]">SweetCrumbs Hub Semarang</span>
+            <span className="text-[11px] text-blue-400 uppercase tracking-widest font-bold">Operasional</span>
+            <span className="material-symbols-outlined text-[#64748B] text-[14px]">chevron_right</span>
+            <span className="text-[11px] text-slate-600 dark:text-[#94A3B8] font-semibold">Antrean Pesanan</span>
+            <span className="material-symbols-outlined text-[#64748B] text-[14px]">chevron_right</span>
+            <span className="text-[11px] text-slate-500 dark:text-[#94A3B8]">SweetCrumbs Hub Semarang</span>
           </div>
 
           {/* Title row */}
           <div className="flex items-center gap-3 flex-wrap mt-0.5">
-            <h1 className="text-2xl sm:text-[28px] text-[#0F172A] font-extrabold tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-[28px] text-slate-900 dark:text-[#F1F5F9] font-extrabold tracking-tight leading-tight">
               Daftar Pesanan
             </h1>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#1D4ED8] text-[12px] font-bold">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/[0.12] border border-blue-500/20 text-blue-300 text-[12px] font-bold">
               <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse flex-shrink-0"></span>
               {totalCount} Pesanan Aktif
             </span>
           </div>
 
-          <p className="text-[13px] text-[#64748B] leading-relaxed mt-1">
+          <p className="text-[13px] text-slate-600 dark:text-[#94A3B8] leading-relaxed mt-1">
             Pantau status kapasitas, kesiapan bahan &amp; workstation, serta progres jadwal produksi di seluruh lini.
           </p>
         </div>
@@ -367,7 +367,7 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
             </div>
           </div>
           <div className="metric-number">{totalCount}</div>
-          <p className="text-[11px] text-[#94A3B8] mt-1">total order</p>
+          <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] mt-1">total order</p>
         </div>
 
         {/* Feasible */}
@@ -387,7 +387,7 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
             </div>
           </div>
           <div className="metric-number" style={{color: '#059669'}}>{feasibleCount}</div>
-          <p className="text-[11px] text-[#94A3B8] mt-1">{Math.round((feasibleCount / (totalCount || 1)) * 100)}% kapasitas aman</p>
+          <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] mt-1">{Math.round((feasibleCount / (totalCount || 1)) * 100)}% kapasitas aman</p>
         </div>
 
         {/* At Risk */}
@@ -407,7 +407,7 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
             </div>
           </div>
           <div className="metric-number" style={{color: '#D97706'}}>{atRiskCount}</div>
-          <p className="text-[11px] text-[#94A3B8] mt-1">potensi telat</p>
+          <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] mt-1">potensi telat</p>
         </div>
 
         {/* Not Feasible */}
@@ -427,7 +427,7 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
             </div>
           </div>
           <div className="metric-number" style={{color: '#DC2626'}}>{notFeasibleCount}</div>
-          <p className="text-[11px] text-[#94A3B8] mt-1">kapasitas tidak cukup</p>
+          <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] mt-1">kapasitas tidak cukup</p>
         </div>
 
         {/* Draft */}
@@ -447,17 +447,17 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
             </div>
           </div>
           <div className="metric-number" style={{color: '#4B5563'}}>{draftCount}</div>
-          <p className="text-[11px] text-[#94A3B8] mt-1">butuh validasi</p>
+          <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] mt-1">butuh validasi</p>
         </div>
 
       </div>
 
       {/* Main Filter Bar & Controls */}
       <div className="px-4 sm:px-8 pb-5">
-        <div className="bg-white rounded-2xl p-4 border border-[#e5eeff] shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+        <div className="bg-white/85 dark:bg-white/[0.04] backdrop-blur-xl rounded-2xl p-4 border border-slate-200/80 dark:border-white/[0.08] shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
           {/* Search Input */}
           <div className="relative flex-1 min-w-[260px]">
-            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#737686] text-[18px]">
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#64748B] text-[18px]">
               search
             </span>
             <input
@@ -465,7 +465,7 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari berdasarkan ID Pesanan, Nama Klien, atau Produk..."
-              className="w-full h-10 pl-10 pr-4 rounded-xl bg-[#f8f9ff] border border-[#e5eeff] text-[#0b1c30] placeholder:text-[#737686] text-[13px] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/30 focus:bg-white transition-all"
+              className="w-full h-10 pl-10 pr-4 rounded-xl bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.10] text-slate-900 dark:text-[#F1F5F9] placeholder:text-slate-400 dark:placeholder:text-[#64748B] text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-500 focus:bg-white dark:focus:bg-white/[0.08] transition-all"
             />
           </div>
 
@@ -476,15 +476,15 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
               <select
                 value={capacityFilter}
                 onChange={(e) => setCapacityFilter(e.target.value)}
-                className="h-10 pl-3 pr-8 rounded-xl bg-[#f8f9ff] border border-[#e5eeff] text-[#0b1c30] text-[13px] font-medium focus:outline-none focus:ring-2 focus:ring-[#2563eb]/30 appearance-none cursor-pointer"
+                className="h-10 pl-3 pr-8 rounded-xl bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.10] text-slate-800 dark:text-[#F1F5F9] text-[13px] font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/25 appearance-none cursor-pointer"
               >
-                <option value="all">Kapasitas: Semua</option>
-                <option value="feasible">FEASIBLE (Aman)</option>
-                <option value="at_risk">AT RISK (Perlu Review)</option>
-                <option value="not_feasible">NOT FEASIBLE (Kurang)</option>
-                <option value="draft">Draft</option>
+                <option value="all" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Kapasitas: Semua</option>
+                <option value="feasible" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">FEASIBLE (Aman)</option>
+                <option value="at_risk" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">AT RISK (Perlu Review)</option>
+                <option value="not_feasible" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">NOT FEASIBLE (Kurang)</option>
+                <option value="draft" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Draft</option>
               </select>
-              <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[#737686] pointer-events-none text-[18px]">
+              <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#64748B] pointer-events-none text-[18px]">
                 expand_more
               </span>
             </div>
@@ -494,15 +494,15 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
               <select
                 value={productionFilter}
                 onChange={(e) => setProductionFilter(e.target.value)}
-                className="h-10 pl-3 pr-8 rounded-xl bg-[#f8f9ff] border border-[#e5eeff] text-[#0b1c30] text-[13px] font-medium focus:outline-none focus:ring-2 focus:ring-[#2563eb]/30 appearance-none cursor-pointer"
+                className="h-10 pl-3 pr-8 rounded-xl bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.10] text-slate-800 dark:text-[#F1F5F9] text-[13px] font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/25 appearance-none cursor-pointer"
               >
-                <option value="all">Status: Semua</option>
-                <option value="draft">Draft</option>
-                <option value="planned">Terjadwal (Planned)</option>
-                <option value="in_progress">Dalam Proses</option>
-                <option value="completed">Selesai</option>
+                <option value="all" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Status: Semua</option>
+                <option value="draft" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Draft</option>
+                <option value="planned" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Terjadwal (Planned)</option>
+                <option value="in_progress" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Dalam Proses</option>
+                <option value="completed" className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white">Selesai</option>
               </select>
-              <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[#737686] pointer-events-none text-[18px]">
+              <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#64748B] pointer-events-none text-[18px]">
                 expand_more
               </span>
             </div>
@@ -510,9 +510,9 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
             {/* Date Range Picker Pill */}
             <button
               type="button"
-              className="h-10 px-4 rounded-xl bg-[#eff4ff] border border-[#dbe1ff] text-[#004ac6] text-[13px] font-semibold hover:bg-[#dbe1ff] transition-colors inline-flex items-center gap-2 cursor-pointer"
+              className="h-10 px-4 rounded-xl bg-blue-50 dark:bg-blue-500/[0.12] border border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-300 text-[13px] font-semibold hover:bg-blue-100 dark:hover:bg-blue-500/[0.20] transition-colors inline-flex items-center gap-2 cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[#004ac6] text-[18px]">
+              <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[18px]">
                 date_range
               </span>
               <span>22 Okt - 31 Okt 2026</span>
@@ -523,7 +523,7 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
               type="button"
               onClick={handleResetFilters}
               title="Reset Semua Filter"
-              className="h-10 w-10 flex items-center justify-center rounded-xl bg-[#f8f9ff] border border-[#e5eeff] text-[#525e7d] hover:text-[#0b1c30] hover:bg-[#e5eeff] transition-colors"
+              className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.10] text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.10] transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">filter_alt_off</span>
             </button>
@@ -534,7 +534,7 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
       {/* ── Mobile Card List (visible <md) ───────────────────────── */}
       <div className="px-4 pb-4 md:hidden space-y-3">
         {filteredOrders.length === 0 ? (
-          <div className="py-12 text-center text-[#525e7d] bg-white rounded-2xl border border-[#e5eeff]">
+          <div className="py-12 text-center text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
             <span className="material-symbols-outlined text-[36px] text-[#94A3B8] block mb-2">inbox</span>
             <p className="font-semibold text-sm">Tidak ada pesanan yang sesuai filter.</p>
             <button onClick={handleResetFilters} className="text-sm text-[#2563eb] hover:underline font-medium mt-1">
@@ -549,10 +549,11 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
             return (
               <div
                 key={order.id}
-                className={`bg-white rounded-2xl border shadow-xs p-4 space-y-3 ${
-                  isNotFeasible ? "border-rose-300 bg-rose-50/20"
-                  : isAtRisk    ? "border-amber-300 bg-amber-50/20"
-                  :               "border-[#e5eeff]"
+                className={`bg-white dark:bg-slate-800 rounded-2xl border shadow-xs p-4 space-y-3 ${
+                  isNotFeasible ? "border-rose-300 dark:border-rose-900 bg-rose-50/30 dark:bg-rose-950/20"
+                  : isAtRisk    ? "border-amber-300 dark:border-amber-900 bg-amber-50/30 dark:bg-amber-950/20"
+                  :               "border-slate-200 dark:border-slate-700"
+                  
                 }`}
               >
                 {/* Row 1: Order number + status badge */}
@@ -572,17 +573,17 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
 
                 {/* Row 2: Client + product */}
                 <div>
-                  <p className="font-semibold text-[#0b1c30] text-sm">{order.clientName}</p>
-                  <p className="text-xs text-[#525e7d] mt-0.5">{order.productName} • {order.quantityText}</p>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{order.clientName}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{order.productName} • {order.quantityText}</p>
                 </div>
 
                 {/* Row 3: Progress bar */}
                 <div>
                   <div className="flex items-center justify-between text-[11px] mb-1">
-                    <span className="text-[#525e7d]">{order.productionStatusLabel}</span>
-                    <span className="font-mono font-bold text-[#0b1c30]">{order.progressPercent}%</span>
+                    <span className="text-slate-500 dark:text-slate-400">{order.productionStatusLabel}</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-slate-100">{order.progressPercent}%</span>
                   </div>
-                  <div className="w-full bg-[#e5eeff] h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
                         order.progressPercent === 100 ? "bg-emerald-500" : "bg-[#2563eb]"
@@ -593,7 +594,7 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
                 </div>
 
                 {/* Row 4: Deadline + actions */}
-                <div className="flex items-center justify-between pt-1 border-t border-[#f1f5f9]">
+                <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-700">
                   <p className="text-[11px] text-[#64748B]">
                     <span className="material-symbols-outlined text-[13px] align-middle mr-0.5">schedule</span>
                     {order.deadlineText}
@@ -623,11 +624,11 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
 
       {/* Comprehensive Orders Table (hidden <md, shown md+) */}
       <div className="hidden md:block px-4 sm:px-8">
-        <div className="bg-white rounded-2xl border border-[#e5eeff] shadow-xs overflow-hidden scroll-hint">
+        <div className="bg-white/85 dark:bg-white/[0.04] backdrop-blur-2xl rounded-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs overflow-hidden scroll-hint">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="text-[#64748B] text-[10.5px] font-bold uppercase tracking-widest border-b border-[#E2E8F0]" style={{background: '#F8FAFC'}}>
+                <tr className="text-slate-500 dark:text-[#94A3B8] text-[10.5px] font-bold uppercase tracking-widest border-b border-slate-200/80 dark:border-white/[0.08] bg-slate-50/80 dark:bg-white/[0.03]">
                   <th className="py-3 pl-6 pr-4">Order ID</th>
                   <th className="py-3 px-4">Klien / Pemesan</th>
                   <th className="py-3 px-4">Produk &amp; Kuantitas</th>
@@ -637,18 +638,18 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
                   <th className="py-3 pr-6 pl-4 text-right">Tindakan Cepat</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F1F5F9] text-[#0F172A] text-[13px]">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06] text-slate-800 dark:text-[#F1F5F9] text-[13px]">
                 {filteredOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-[#525e7d]">
+                    <td colSpan={7} className="py-12 text-center text-slate-500 dark:text-[#94A3B8]">
                       <div className="flex flex-col items-center justify-center gap-2">
-                        <span className="material-symbols-outlined text-[#737686] text-[36px]">
+                        <span className="material-symbols-outlined text-slate-400 dark:text-[#64748B] text-[36px]">
                           inbox
                         </span>
                         <p className="font-semibold text-[15px]">Tidak ada pesanan yang sesuai filter.</p>
                         <button
                           onClick={handleResetFilters}
-                          className="text-[13px] text-[#2563eb] hover:underline font-medium"
+                          className="text-[13px] text-blue-600 dark:text-blue-400 hover:underline font-medium"
                         >
                           Reset Filter
                         </button>
@@ -664,30 +665,30 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
                     return (
                       <tr
                         key={order.id}
-                        className={`hover:bg-[#f8f9ff] transition-colors group ${
+                        className={`hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors group ${
                           isNotFeasible
-                            ? "bg-[#fee2e2]/25"
+                            ? "bg-rose-50/60 dark:bg-rose-500/[0.06]"
                             : isAtRisk
-                            ? "bg-[#fef3c7]/20"
+                            ? "bg-amber-50/60 dark:bg-amber-500/[0.06]"
                             : ""
                         }`}
                       >
                         {/* Order ID */}
                         <td className="py-4 pl-6 pr-4 align-top">
                           <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-[#737686] text-[18px] opacity-0 group-hover:opacity-100 transition-opacity cursor-grab">
+                            <span className="material-symbols-outlined text-[#64748B] text-[18px] opacity-0 group-hover:opacity-100 transition-opacity cursor-grab">
                               drag_indicator
                             </span>
                             <div>
                               <Link
                                 href={`/orders/${order.id}`}
                                 className={`font-bold text-[16px] tracking-tight block hover:underline ${
-                                  isNotFeasible ? "text-[#ba1a1a]" : "text-[#004ac6]"
+                                  isNotFeasible ? "text-rose-600 dark:text-rose-400" : "text-blue-600 dark:text-blue-400"
                                 }`}
                               >
                                 {order.orderNumber}
                               </Link>
-                              <span className="text-[11px] text-[#525e7d] font-mono">
+                              <span className="text-[11px] text-[#94A3B8] font-mono">
                                 {order.poNumber}
                               </span>
                             </div>
@@ -698,11 +699,11 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
                         <td className="py-4 px-4 align-top">
                           <Link
                             href={`/orders/${order.id}`}
-                            className="font-bold text-[#0b1c30] text-[14px] hover:text-[#004ac6] hover:underline block"
+                            className="font-bold text-slate-900 dark:text-[#F1F5F9] text-[14px] hover:text-blue-600 dark:hover:text-blue-400 hover:underline block"
                           >
                             {order.clientName}
                           </Link>
-                          <div className="flex items-center gap-1 text-[11px] text-[#525e7d] mt-0.5">
+                          <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-[#94A3B8] mt-0.5">
                             <span className="material-symbols-outlined text-[14px]">
                               business
                             </span>
@@ -712,27 +713,27 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
 
                         {/* Product & Qty */}
                         <td className="py-4 px-4 align-top">
-                          <div className="font-semibold text-[#0b1c30] text-[13px]">
+                          <div className="font-semibold text-slate-900 dark:text-[#F1F5F9] text-[13px]">
                             {order.productName}
                           </div>
-                          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 mt-1 rounded-md bg-[#e5eeff] text-[11px] text-[#0b1c30] font-bold">
+                          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 mt-1 rounded-md bg-slate-100 dark:bg-white/[0.06] text-[11px] text-slate-800 dark:text-[#F1F5F9] font-bold border border-slate-200/80 dark:border-white/[0.06]">
                             <span>{order.quantityText}</span>
-                            <span className="text-[#525e7d] font-normal">• {order.skuDetails}</span>
+                            <span className="text-slate-500 dark:text-[#94A3B8] font-normal">• {order.skuDetails}</span>
                           </div>
                         </td>
 
                         {/* Deadline */}
                         <td className="py-4 px-4 align-top">
-                          <div className="font-semibold text-[#0b1c30] text-[13px]">
+                          <div className="font-semibold text-slate-900 dark:text-[#F1F5F9] text-[13px]">
                             {order.deadlineText}
                           </div>
                           <div
                             className={`inline-flex items-center gap-1 px-2 py-0.5 mt-1 rounded-full text-[11px] font-bold ${
                               order.urgencyLevel === "critical"
-                                ? "bg-[#fef3c7] text-[#b45309]"
+                                ? "bg-amber-100 dark:bg-amber-500/[0.15] text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/25"
                                 : order.urgencyLevel === "completed"
-                                ? "bg-[#dcfce7] text-[#15803d]"
-                                : "bg-[#eff4ff] text-[#525e7d]"
+                                ? "bg-emerald-100 dark:bg-emerald-500/[0.15] text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/25"
+                                : "bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-[#94A3B8] border border-slate-200/80 dark:border-white/[0.06]"
                             }`}
                           >
                             <span className="material-symbols-outlined text-[13px]">
@@ -750,30 +751,30 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
                         <td className="py-4 px-4 align-top">
                           <div className="flex flex-col gap-1 max-w-[210px]">
                             {isFeasible && (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#dcfce7] text-[#15803d] text-[11px] font-bold w-fit">
-                                <span className="w-2 h-2 rounded-full bg-[#15803d]"></span>
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/[0.15] text-emerald-300 border border-emerald-500/25 text-[11px] font-bold w-fit">
+                                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                                 Aman
                               </span>
                             )}
                             {isAtRisk && (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#fef3c7] text-[#b45309] text-[11px] font-bold w-fit">
-                                <span className="w-2 h-2 rounded-full bg-[#b45309]"></span>
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/[0.15] text-amber-300 border border-amber-500/25 text-[11px] font-bold w-fit">
+                                <span className="w-2 h-2 rounded-full bg-amber-400"></span>
                                 Perlu Perhatian
                               </span>
                             )}
                             {isNotFeasible && (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#fee2e2] text-[#ba1a1a] text-[11px] font-bold w-fit">
-                                <span className="w-2 h-2 rounded-full bg-[#ba1a1a]"></span>
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-500/[0.15] text-rose-300 border border-rose-500/25 text-[11px] font-bold w-fit">
+                                <span className="w-2 h-2 rounded-full bg-rose-400"></span>
                                 Kapasitas Kurang
                               </span>
                             )}
                             <span
                               className={`text-[11px] leading-tight mt-0.5 ${
                                 isNotFeasible
-                                  ? "text-[#ba1a1a] font-medium"
+                                  ? "text-rose-400 font-medium"
                                   : isAtRisk
-                                  ? "text-[#b45309]"
-                                  : "text-[#525e7d]"
+                                  ? "text-amber-400"
+                                  : "text-[#94A3B8]"
                               }`}
                             >
                               {order.capacityDetail}
@@ -788,27 +789,27 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
                               <span
                                 className={`font-semibold ${
                                   order.progressPercent === 100
-                                    ? "text-[#15803d]"
-                                    : "text-[#004ac6]"
+                                    ? "text-emerald-400"
+                                    : "text-blue-400"
                                 }`}
                               >
                                 {order.productionStatusLabel}
                               </span>
-                              <span className="font-mono font-bold text-[#525e7d]">
+                              <span className="font-mono font-bold text-[#94A3B8]">
                                 {order.progressPercent}%
                               </span>
                             </div>
-                            <div className="w-28 bg-[#e5eeff] h-2 rounded-full overflow-hidden">
+                            <div className="w-28 bg-slate-200 dark:bg-white/[0.08] h-2 rounded-full overflow-hidden">
                               <div
                                 className={`h-full rounded-full transition-all duration-500 ${
                                   order.progressPercent === 100
-                                    ? "bg-[#15803d]"
-                                    : "bg-[#2563eb]"
+                                    ? "bg-emerald-500"
+                                    : "bg-blue-500"
                                 }`}
                                 style={{ width: `${order.progressPercent}%` }}
                               ></div>
                             </div>
-                            <span className="text-[10px] text-[#525e7d]">
+                            <span className="text-[10px] text-[#94A3B8]">
                               {order.productionNote}
                             </span>
                           </div>
@@ -822,8 +823,8 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
                                 href={`/simulations?order=${order.id}`}
                                 className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-white font-semibold text-[11px] transition-all shadow-xs ${
                                   isNotFeasible
-                                    ? "bg-rose-600 hover:bg-rose-700"
-                                    : "bg-[#bc4800] hover:bg-[#943700]"
+                                    ? "bg-rose-600 hover:bg-rose-500"
+                                    : "bg-amber-600 hover:bg-amber-500"
                                 }`}
                               >
                                 <span className="material-symbols-outlined text-[15px]">
@@ -837,7 +838,7 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
                               <button
                                 type="button"
                                 onClick={() => setSuratJalanOrder(order)}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[11px] font-semibold transition-colors border border-emerald-200"
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/[0.15] text-emerald-300 hover:bg-emerald-500/[0.25] text-[11px] font-semibold transition-colors border border-emerald-500/25"
                               >
                                 <span className="material-symbols-outlined text-[15px]">
                                   receipt
@@ -848,12 +849,9 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
 
                             <Link
                               href={`/orders/${order.id}`}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#eff4ff] text-[#004ac6] hover:bg-[#dbe1ff] text-[11px] font-semibold transition-colors"
+                              className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-white/[0.05] text-slate-700 dark:text-[#F1F5F9] text-[11px] font-semibold hover:bg-slate-200 dark:hover:bg-white/[0.10] border border-slate-200 dark:border-white/[0.08] transition-colors"
                             >
-                              <span className="material-symbols-outlined text-[15px]">
-                                visibility
-                              </span>
-                              <span>Detail</span>
+                              Detail
                             </Link>
                           </div>
                         </td>
@@ -866,11 +864,11 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
           </div>
 
           {/* Table Footer / Pagination */}
-          <div className="p-4 bg-white border-t border-[#e5eeff] flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-[#525e7d] text-[12px]">
+          <div className="p-4 bg-slate-50/80 dark:bg-white/[0.03] border-t border-slate-200/80 dark:border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-[#94A3B8] text-[12px]">
               <span>
-                Menampilkan <strong className="text-[#0b1c30] font-bold">1-{filteredOrders.length}</strong> dari{" "}
-                <strong className="text-[#0b1c30] font-bold">{totalCount}</strong> pesanan
+                Menampilkan <strong className="text-slate-900 dark:text-[#F1F5F9] font-bold">1-{filteredOrders.length}</strong> dari{" "}
+                <strong className="text-slate-900 dark:text-[#F1F5F9] font-bold">{totalCount}</strong> pesanan
               </span>
               <span>•</span>
               <span>Halaman 1 dari 1</span>
@@ -878,17 +876,17 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
             <div className="flex items-center gap-1">
               <button
                 disabled
-                className="h-8 px-3 rounded-lg bg-[#f8f9ff] text-[#737686] text-[12px] font-medium disabled:opacity-40 cursor-not-allowed flex items-center gap-1"
+                className="h-8 px-3 rounded-lg bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] text-slate-500 dark:text-[#64748B] text-[12px] font-medium disabled:opacity-40 cursor-not-allowed flex items-center gap-1"
               >
                 <span className="material-symbols-outlined text-[16px]">chevron_left</span>
                 <span>Sebelumnya</span>
               </button>
-              <button className="h-8 w-8 rounded-lg bg-[#004ac6] text-white text-[12px] font-bold shadow-xs">
+              <button className="h-8 w-8 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 text-white text-[12px] font-bold shadow-sm shadow-blue-500/30">
                 1
               </button>
               <button
                 disabled
-                className="h-8 px-3 rounded-lg bg-[#f8f9ff] text-[#737686] text-[12px] font-medium disabled:opacity-40 cursor-not-allowed flex items-center gap-1"
+                className="h-8 px-3 rounded-lg bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] text-slate-500 dark:text-[#64748B] text-[12px] font-medium disabled:opacity-40 cursor-not-allowed flex items-center gap-1"
               >
                 <span>Selanjutnya</span>
                 <span className="material-symbols-outlined text-[16px]">chevron_right</span>
@@ -904,37 +902,37 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
         <div className="fixed inset-0 z-50 flex justify-end">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => setSelectedOrder(null)}
           />
 
           {/* Drawer Content — full-width on mobile, max-w-md on sm+ */}
-          <div className="relative w-full sm:max-w-md bg-white shadow-2xl z-10 p-5 sm:p-6 flex flex-col justify-between overflow-y-auto">
+          <div className="relative w-full sm:max-w-md bg-white dark:bg-[#0F172A] border-l border-slate-200 dark:border-white/[0.08] text-slate-900 dark:text-[#F1F5F9] shadow-2xl z-10 p-5 sm:p-6 flex flex-col justify-between overflow-y-auto">
             <div className="flex flex-col gap-5">
               {/* Drawer Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-[#e5eeff]">
-                <div className="flex items-center gap-2 text-[#004ac6] font-bold text-[16px]">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/[0.06]">
+                <div className="flex items-center gap-2 text-blue-400 font-bold text-[16px]">
                   <span className="material-symbols-outlined text-[22px]">auto_fix_high</span>
                   <span>Simulasi Solusi Kapasitas</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedOrder(null)}
-                  className="p-1.5 rounded-lg text-[#525e7d] hover:bg-[#eff4ff] transition-colors"
+                  className="p-1.5 rounded-lg text-[#94A3B8] hover:bg-white/[0.06] hover:text-white transition-colors"
                 >
                   <span className="material-symbols-outlined text-[20px]">close</span>
                 </button>
               </div>
 
               {/* Order Info Card */}
-              <div className="p-4 rounded-xl bg-[#eff4ff] border border-[#dbe1ff] flex flex-col gap-1">
-                <span className="text-[11px] text-[#525e7d] uppercase font-bold tracking-wider">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] flex flex-col gap-1">
+                <span className="text-[11px] text-[#94A3B8] uppercase font-bold tracking-wider">
                   Pesanan Terpilih
                 </span>
-                <span className="text-[16px] text-[#0b1c30] font-extrabold">
+                <span className="text-[16px] text-slate-900 dark:text-[#F1F5F9] font-extrabold">
                   {selectedOrder.orderNumber} • {selectedOrder.productName}
                 </span>
-                <span className="text-[12px] text-[#b45309] font-medium flex items-center gap-1 mt-0.5">
+                <span className="text-[12px] text-amber-400 font-medium flex items-center gap-1 mt-0.5">
                   <span className="material-symbols-outlined text-[16px]">warning</span>
                   <span>
                     Bottleneck: {selectedOrder.bottleneckStation || "Workstation"} (
@@ -945,7 +943,7 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
 
               {/* Options */}
               <div className="flex flex-col gap-3">
-                <label className="text-[13px] font-bold text-[#0b1c30]">
+                <label className="text-[13px] font-bold text-slate-800 dark:text-[#F1F5F9]">
                   Pilih Penyesuaian Cepat (What-If Sandbox):
                 </label>
 
@@ -954,8 +952,8 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
                   onClick={() => setSelectedSolution("overtime")}
                   className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-3 ${
                     selectedSolution === "overtime"
-                      ? "border-[#004ac6] bg-[#eff4ff]/60 ring-2 ring-[#004ac6]/20"
-                      : "border-[#e5eeff] bg-white hover:bg-[#f8f9ff]"
+                      ? "border-blue-500 bg-blue-500/[0.12] ring-2 ring-blue-500/25"
+                      : "border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06]"
                   }`}
                 >
                   <input
@@ -963,13 +961,13 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
                     name="solusi"
                     checked={selectedSolution === "overtime"}
                     onChange={() => setSelectedSolution("overtime")}
-                    className="mt-1 text-[#004ac6] focus:ring-[#004ac6]"
+                    className="mt-1 text-blue-500 focus:ring-blue-500"
                   />
                   <div className="flex flex-col">
-                    <span className="text-[13px] font-bold text-[#0b1c30]">
+                    <span className="text-[13px] font-bold text-[#F1F5F9]">
                       Lembur Shift Tambahan (+4 Jam)
                     </span>
-                    <span className="text-[12px] text-[#525e7d] mt-0.5 leading-relaxed">
+                    <span className="text-[12px] text-[#94A3B8] mt-0.5 leading-relaxed">
                       Estimasi upah lembur Rp 280.000, deadline pesanan tetap aman dan margin laba tetap di 34%.
                     </span>
                   </div>
@@ -980,8 +978,8 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
                   onClick={() => setSelectedSolution("reschedule")}
                   className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-3 ${
                     selectedSolution === "reschedule"
-                      ? "border-[#004ac6] bg-[#eff4ff]/60 ring-2 ring-[#004ac6]/20"
-                      : "border-[#e5eeff] bg-white hover:bg-[#f8f9ff]"
+                      ? "border-blue-500 bg-blue-500/[0.12] ring-2 ring-blue-500/25"
+                      : "border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06]"
                   }`}
                 >
                   <input
@@ -989,13 +987,13 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
                     name="solusi"
                     checked={selectedSolution === "reschedule"}
                     onChange={() => setSelectedSolution("reschedule")}
-                    className="mt-1 text-[#004ac6] focus:ring-[#004ac6]"
+                    className="mt-1 text-blue-500 focus:ring-blue-500"
                   />
                   <div className="flex flex-col">
-                    <span className="text-[13px] font-bold text-[#0b1c30]">
+                    <span className="text-[13px] font-bold text-[#F1F5F9]">
                       Mundurkan Deadline (+1 Hari)
                     </span>
-                    <span className="text-[12px] text-[#525e7d] mt-0.5 leading-relaxed">
+                    <span className="text-[12px] text-[#94A3B8] mt-0.5 leading-relaxed">
                       Kirim draf notifikasi negosiasi otomatis ke WhatsApp {selectedOrder.clientName}.
                     </span>
                   </div>
@@ -1006,8 +1004,8 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
                   onClick={() => setSelectedSolution("subcontract")}
                   className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-3 ${
                     selectedSolution === "subcontract"
-                      ? "border-[#004ac6] bg-[#eff4ff]/60 ring-2 ring-[#004ac6]/20"
-                      : "border-[#e5eeff] bg-white hover:bg-[#f8f9ff]"
+                      ? "border-blue-500 bg-blue-500/[0.12] ring-2 ring-blue-500/25"
+                      : "border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06]"
                   }`}
                 >
                   <input
@@ -1015,13 +1013,13 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
                     name="solusi"
                     checked={selectedSolution === "subcontract"}
                     onChange={() => setSelectedSolution("subcontract")}
-                    className="mt-1 text-[#004ac6] focus:ring-[#004ac6]"
+                    className="mt-1 text-blue-500 focus:ring-blue-500"
                   />
                   <div className="flex flex-col">
-                    <span className="text-[13px] font-bold text-[#0b1c30]">
+                    <span className="text-[13px] font-bold text-[#F1F5F9]">
                       Alihkan ke Subkontraktor Partner
                     </span>
-                    <span className="text-[12px] text-[#525e7d] mt-0.5 leading-relaxed">
+                    <span className="text-[12px] text-[#94A3B8] mt-0.5 leading-relaxed">
                       Kirim 100 pcs ke Mitra Box Packaging Tangerang untuk menjaga jadwal rilis.
                     </span>
                   </div>
@@ -1030,14 +1028,14 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
             </div>
 
             {/* Drawer Actions */}
-            <div className="flex flex-col gap-2 pt-6 border-t border-[#e5eeff]">
-              <p className="text-[11px] text-[#64748B] text-center mb-0.5">
+            <div className="flex flex-col gap-2 pt-6 border-t border-white/[0.06]">
+              <p className="text-[11px] text-[#94A3B8] text-center mb-0.5">
                 Simulasi ini akan memperbarui status kapasitas pesanan pada sesi saat ini.
               </p>
               <button
                 type="button"
                 onClick={handleApplySolution}
-                className="w-full py-3 rounded-xl bg-[#2563eb] text-white text-[13px] font-bold hover:bg-[#004ac6] shadow-sm shadow-[#2563eb]/25 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white text-[13px] font-bold shadow-lg shadow-blue-500/25 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">check</span>
                 <span>Terapkan Solusi (Simulasi)</span>
@@ -1045,7 +1043,7 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
               <button
                 type="button"
                 onClick={() => setSelectedOrder(null)}
-                className="w-full py-2.5 rounded-xl bg-[#f8f9ff] text-[#525e7d] hover:bg-[#e5eeff] text-[13px] font-semibold transition-colors"
+                className="w-full py-2.5 rounded-xl bg-white/[0.05] text-[#94A3B8] hover:bg-white/[0.10] hover:text-white text-[13px] font-semibold transition-colors"
               >
                 Batalkan
               </button>
@@ -1055,50 +1053,50 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
       )}
       {/* ── Surat Jalan Modal (Delivery Note) ── */}
       {suratJalanOrder && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#e5eeff] space-y-5 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0F172A]/95 backdrop-blur-2xl rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-white/[0.08] text-[#F1F5F9] space-y-5 animate-in fade-in zoom-in-95 duration-150 print:bg-white print:text-black">
             {/* Header Surat Jalan */}
-            <div className="flex items-start justify-between border-b pb-4 border-[#e2e8f0]">
+            <div className="flex items-start justify-between border-b pb-4 border-white/[0.08] print:border-gray-200">
               <div>
-                <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-bold uppercase">
+                <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/[0.15] px-2 py-0.5 rounded border border-emerald-500/25 font-bold uppercase print:bg-emerald-50 print:text-emerald-700">
                   Surat Jalan Pengiriman Resmi
                 </span>
-                <h3 className="text-lg font-extrabold text-[#0b1c30] mt-1">
+                <h3 className="text-lg font-extrabold text-[#F1F5F9] mt-1 print:text-black">
                   SweetCrumbs Artisan Bakery
                 </h3>
-                <p className="text-xs text-[#525e7d]">
+                <p className="text-xs text-[#94A3B8] print:text-gray-600">
                   No. Dokumen: SJ-2026-{suratJalanOrder.orderNumber} &bull; Tgl: {suratJalanOrder.deadlineText}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setSuratJalanOrder(null)}
-                className="w-8 h-8 rounded-full bg-[#f1f5f9] text-[#525e7d] hover:bg-[#e2e8f0] flex items-center justify-center font-bold"
+                className="w-8 h-8 rounded-full bg-white/[0.06] text-[#94A3B8] hover:bg-white/[0.10] hover:text-white flex items-center justify-center font-bold print:hidden"
               >
                 ✕
               </button>
             </div>
 
             {/* Recipient info */}
-            <div className="p-3.5 rounded-xl bg-[#f8fafc] border border-[#e2e8f0] text-xs space-y-1">
-              <span className="text-[10px] uppercase font-bold text-[#64748b] block">Tujuan Pengiriman:</span>
-              <p className="font-bold text-[#0F172A] text-sm">{suratJalanOrder.clientName}</p>
-              <p className="text-[#64748B]">{suratJalanOrder.clientType}</p>
-              <p className="text-[#64748B] font-mono">Nomor PO: {suratJalanOrder.poNumber}</p>
+            <div className="p-3.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-xs space-y-1 print:bg-gray-50 print:border-gray-200">
+              <span className="text-[10px] uppercase font-bold text-[#64748B] block">Tujuan Pengiriman:</span>
+              <p className="font-bold text-[#F1F5F9] text-sm print:text-black">{suratJalanOrder.clientName}</p>
+              <p className="text-[#94A3B8] print:text-gray-600">{suratJalanOrder.clientType}</p>
+              <p className="text-[#94A3B8] font-mono print:text-gray-600">Nomor PO: {suratJalanOrder.poNumber}</p>
             </div>
 
             {/* Product breakdown */}
-            <div className="border rounded-xl overflow-hidden border-[#e2e8f0] text-xs">
-              <div className="bg-[#f1f5f9] p-2.5 font-bold text-[#0F172A] flex justify-between">
+            <div className="border rounded-xl overflow-hidden border-white/[0.08] text-xs print:border-gray-200">
+              <div className="bg-white/[0.06] p-2.5 font-bold text-[#F1F5F9] flex justify-between print:bg-gray-100 print:text-black">
                 <span>Rincian Barang</span>
                 <span>Jumlah</span>
               </div>
-              <div className="p-3 flex items-center justify-between bg-white">
+              <div className="p-3 flex items-center justify-between bg-white/[0.02] print:bg-white">
                 <div>
-                  <span className="font-bold text-[#0F172A] block">{suratJalanOrder.productName}</span>
-                  <span className="text-[11px] text-[#64748B]">{suratJalanOrder.skuDetails}</span>
+                  <span className="font-bold text-[#F1F5F9] block print:text-black">{suratJalanOrder.productName}</span>
+                  <span className="text-[11px] text-[#94A3B8] print:text-gray-600">{suratJalanOrder.skuDetails}</span>
                 </div>
-                <span className="font-mono font-bold text-[#004ac6] text-sm">
+                <span className="font-mono font-bold text-blue-400 text-sm print:text-blue-700">
                   {suratJalanOrder.quantityText}
                 </span>
               </div>
@@ -1106,26 +1104,26 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
 
             {/* Signatures */}
             <div className="grid grid-cols-2 gap-4 pt-2 text-center text-xs">
-              <div className="border border-dashed border-[#cbd5e1] p-3 rounded-xl">
+              <div className="border border-dashed border-white/[0.15] p-3 rounded-xl print:border-gray-300">
                 <span className="text-[10px] text-[#64748B] block mb-8">Yang Menyerahkan (Gudang/Dapur):</span>
-                <span className="font-bold text-[#0F172A] border-t border-[#cbd5e1] pt-1 block">
+                <span className="font-bold text-[#F1F5F9] border-t border-white/[0.15] pt-1 block print:text-black print:border-gray-300">
                   Bilah (SweetCrumbs)
                 </span>
               </div>
-              <div className="border border-dashed border-[#cbd5e1] p-3 rounded-xl">
+              <div className="border border-dashed border-white/[0.15] p-3 rounded-xl print:border-gray-300">
                 <span className="text-[10px] text-[#64748B] block mb-8">Penerima / Driver Kurir:</span>
-                <span className="font-bold text-[#0F172A] border-t border-[#cbd5e1] pt-1 block">
+                <span className="font-bold text-[#F1F5F9] border-t border-white/[0.15] pt-1 block print:text-black print:border-gray-300">
                   ( ............................ )
                 </span>
               </div>
             </div>
 
             {/* Action buttons */}
-            <div className="flex items-center justify-between pt-3 border-t border-[#f1f5f9]">
+            <div className="flex items-center justify-between pt-3 border-t border-white/[0.08] print:hidden">
               <button
                 type="button"
                 onClick={() => setSuratJalanOrder(null)}
-                className="px-4 py-2 rounded-xl border border-[#e2e8f0] text-xs font-bold text-[#64748B] hover:bg-[#f8fafc]"
+                className="px-4 py-2 rounded-xl border border-white/[0.10] text-xs font-bold text-[#94A3B8] hover:bg-white/[0.06] hover:text-white"
               >
                 Tutup
               </button>
@@ -1134,7 +1132,7 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
                 onClick={() => {
                   window.print();
                 }}
-                className="px-5 py-2.5 rounded-xl bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-blue-500/25"
               >
                 <span className="material-symbols-outlined text-[16px]">print</span>
                 <span>Cetak Surat Jalan</span>

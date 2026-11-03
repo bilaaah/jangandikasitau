@@ -6,7 +6,7 @@
 
 import React, { useTransition } from "react";
 import { updateOrderStatus } from "@/actions/orders.actions";
-import { OrderStatus } from "@prisma/client";
+import type { OrderStatus } from "@/types";
 
 interface OrderStatusSelectProps {
   orderId: string;

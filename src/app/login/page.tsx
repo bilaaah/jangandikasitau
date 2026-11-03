@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { login } from "@/actions/auth.actions";
 
 export default function LoginPage() {
@@ -10,22 +11,23 @@ export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(login, undefined);
 
   return (
-    <main className="w-full min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#f8f9ff]">
-      <div className="w-full max-w-6xl mx-auto my-auto flex flex-col lg:flex-row items-stretch rounded-2xl shadow-xl overflow-hidden bg-white border border-[#e5eeff]">
+    <main className="w-full min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#F8FAFC] dark:bg-[#0B1120] text-slate-900 dark:text-[#F1F5F9] transition-colors duration-200">
+      <div className="w-full max-w-6xl mx-auto my-auto flex flex-col lg:flex-row items-stretch rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-black/30 overflow-hidden bg-white/85 dark:bg-white/[0.04] backdrop-blur-2xl border border-slate-200/80 dark:border-white/[0.08]">
         {/* Left Column: Form & Interaction */}
-        <div className="w-full lg:w-7/12 p-6 sm:p-10 lg:p-12 flex flex-col justify-between relative bg-white">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#dbe1ff]/30 via-transparent to-transparent rounded-full blur-3xl pointer-events-none -mr-16 -mt-16"></div>
+        <div className="w-full lg:w-7/12 p-6 sm:p-10 lg:p-12 flex flex-col justify-between relative bg-white/60 dark:bg-white/[0.03]">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-500/10 via-transparent to-transparent rounded-full blur-3xl pointer-events-none -mr-16 -mt-16"></div>
 
           {/* Top Branding Section */}
           <div>
             <div className="flex items-center justify-between mb-6">
               <Link
                 href="/"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#525e7d] hover:text-[#0052cc] transition-colors py-1 px-2.5 rounded-lg hover:bg-[#eff4ff]"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-[#94A3B8] hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1 px-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.06]"
               >
                 <span className="material-symbols-outlined text-[16px]">arrow_back</span>
                 <span>Kembali ke Beranda</span>
               </Link>
+              <ThemeToggle />
             </div>
 
             <div className="mb-6">
@@ -34,22 +36,22 @@ export default function LoginPage() {
 
             {/* Heading & Context */}
             <div className="mb-6">
-              <h1 className="text-2xl sm:text-3xl text-[#0b1c30] font-black tracking-tight mb-2">
+              <h1 className="text-2xl sm:text-3xl text-slate-900 dark:text-[#F1F5F9] font-black tracking-tight mb-2">
                 Selamat Datang Kembali
               </h1>
-              <p className="text-[14px] text-[#525e7d] leading-relaxed">
+              <p className="text-[14px] text-slate-600 dark:text-[#94A3B8] leading-relaxed">
                 Kelola jadwal produksi dan pastikan setiap janji pesanan terpenuhi tepat waktu tanpa beban lembur tak terduga.
               </p>
             </div>
 
-            <div className="w-full rounded-xl bg-[#eff4ff] px-4 py-3 text-center text-[13px] font-medium text-[#525e7d] border border-[#dbe1ff]">
+            <div className="w-full rounded-xl bg-slate-100/80 dark:bg-white/[0.06] px-4 py-3 text-center text-[13px] font-medium text-slate-600 dark:text-[#94A3B8] border border-slate-200 dark:border-white/[0.08]">
               Masuk menggunakan akun Owner atau Staff yang diberikan oleh usaha Anda.
             </div>
 
             {/* Divider */}
             <div className="relative my-6 flex items-center justify-center">
-              <div className="w-full h-px bg-[#e5eeff]"></div>
-              <span className="absolute px-3 bg-white text-[11px] text-[#737686] uppercase font-bold tracking-wider">
+              <div className="w-full h-px bg-slate-200 dark:bg-white/[0.08]"></div>
+              <span className="absolute px-3 bg-[#F8FAFC] dark:bg-[#0B1120] text-[11px] text-slate-500 dark:text-[#64748B] uppercase font-bold tracking-wider">
                 atau masuk dengan email bisnis
               </span>
             </div>
@@ -57,11 +59,11 @@ export default function LoginPage() {
             {/* Form */}
             <form action={formAction} className="space-y-4">
               <div>
-                <label className="block text-[13px] text-[#0b1c30] mb-1.5 font-bold" htmlFor="businessEmail">
+                <label className="block text-[13px] text-slate-800 dark:text-[#F1F5F9] mb-1.5 font-bold" htmlFor="businessEmail">
                   Email Bisnis / Akun
                 </label>
                 <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-3.5 text-[#737686] text-[20px] pointer-events-none">
+                  <span className="material-symbols-outlined absolute left-3.5 text-slate-400 dark:text-[#64748B] text-[20px] pointer-events-none">
                     mail
                   </span>
                   <input
@@ -71,22 +73,22 @@ export default function LoginPage() {
                     required
                     autoComplete="username"
                     placeholder="contoh: bilah@sweetcrumbs.id"
-                    className="w-full h-11 pl-10 pr-4 rounded-xl bg-[#f8f9ff] text-[#0b1c30] text-[14px] border border-[#e5eeff] shadow-xs outline-none transition-all focus:bg-white focus:border-[#004ac6] focus:ring-2 focus:ring-[#004ac6]/20 placeholder:text-[#737686]"
+                    className="w-full h-11 pl-10 pr-4 rounded-xl bg-white dark:bg-white/[0.05] text-slate-900 dark:text-[#F1F5F9] text-[14px] border border-slate-200 dark:border-white/[0.10] shadow-xs outline-none transition-all focus:bg-white dark:focus:bg-white/[0.06] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25 placeholder:text-slate-400 dark:placeholder:text-[#64748B]"
                   />
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-[13px] text-[#0b1c30] font-bold" htmlFor="password">
+                  <label className="block text-[13px] text-slate-800 dark:text-[#F1F5F9] font-bold" htmlFor="password">
                     Kata Sandi
                   </label>
-                  <span className="text-[12px] text-[#737686] font-medium">
+                  <span className="text-[12px] text-slate-400 dark:text-[#64748B] font-medium">
                     Hubungi Owner jika lupa kata sandi
                   </span>
                 </div>
                 <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-3.5 text-[#737686] text-[20px] pointer-events-none">
+                  <span className="material-symbols-outlined absolute left-3.5 text-slate-400 dark:text-[#64748B] text-[20px] pointer-events-none">
                     lock
                   </span>
                   <input
@@ -96,12 +98,12 @@ export default function LoginPage() {
                     required
                     autoComplete="current-password"
                     placeholder="••••••••"
-                    className="w-full h-11 pl-10 pr-10 rounded-xl bg-[#f8f9ff] text-[#0b1c30] text-[14px] border border-[#e5eeff] shadow-xs outline-none transition-all focus:bg-white focus:border-[#004ac6] focus:ring-2 focus:ring-[#004ac6]/20 placeholder:text-[#737686]"
+                    className="w-full h-11 pl-10 pr-10 rounded-xl bg-white dark:bg-white/[0.05] text-slate-900 dark:text-[#F1F5F9] text-[14px] border border-slate-200 dark:border-white/[0.10] shadow-xs outline-none transition-all focus:bg-white dark:focus:bg-white/[0.06] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25 placeholder:text-slate-400 dark:placeholder:text-[#64748B]"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 text-[#737686] hover:text-[#0b1c30] transition-colors p-1"
+                    className="absolute right-3 text-[#64748B] hover:text-white transition-colors p-1"
                     aria-label="Tampilkan atau sembunyikan kata sandi"
                   >
                     <span className="material-symbols-outlined text-[20px]">
@@ -113,11 +115,11 @@ export default function LoginPage() {
 
               <div className="flex items-center justify-between pt-1">
                 <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <span className="text-[13px] text-[#525e7d] font-medium">
+                  <span className="text-[13px] text-[#94A3B8] font-medium">
                     Sesi berakhir otomatis setelah 8 jam
                   </span>
                 </label>
-                <div className="flex items-center gap-1 text-[#737686] text-[12px]">
+                <div className="flex items-center gap-1 text-[#64748B] text-[12px]">
                   <span className="material-symbols-outlined text-[15px]">verified_user</span>
                   <span>256-bit SSL</span>
                 </div>
@@ -126,7 +128,7 @@ export default function LoginPage() {
               {state?.error && (
                 <p
                   role="alert"
-                  className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-[13px] font-medium text-rose-700"
+                  className="rounded-lg border border-rose-500/20 bg-rose-500/[0.08] px-3 py-2 text-[13px] font-medium text-rose-400"
                 >
                   {state.error}
                 </p>
@@ -135,7 +137,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isPending}
-                className="w-full h-11 mt-3 rounded-xl bg-[#004ac6] hover:bg-[#2563eb] text-white text-[14px] font-bold flex items-center justify-center gap-2 shadow-md shadow-[#004ac6]/25 transition-all duration-200 active:scale-[0.99] group disabled:opacity-75 cursor-pointer"
+                className="w-full h-11 mt-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white text-[14px] font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 transition-all duration-200 active:scale-[0.99] group disabled:opacity-75 cursor-pointer"
               >
                 {isPending ? (
                   <>
@@ -157,8 +159,8 @@ export default function LoginPage() {
           </div>
 
           {/* Footer Registration Pitch */}
-          <div className="mt-8 pt-4 bg-[#eff4ff] border border-[#dbe1ff] rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between text-center sm:text-left gap-2">
-            <span className="text-[13px] text-[#525e7d]">
+          <div className="mt-8 pt-4 bg-white/[0.06] border border-white/[0.08] rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between text-center sm:text-left gap-2">
+            <span className="text-[13px] text-[#94A3B8]">
               Belum memiliki akses? Minta undangan kepada Owner usaha Anda.
             </span>
           </div>
@@ -167,8 +169,8 @@ export default function LoginPage() {
         {/* Right Column: Visual Value Panel & Storytelling */}
         <div className="w-full lg:w-5/12 bg-[#213145] text-[#eaf1ff] p-6 sm:p-10 lg:p-12 flex flex-col justify-between relative overflow-hidden">
           {/* Glow effects */}
-          <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-[#004ac6]/30 blur-3xl pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-[#cdd9fe]/10 blur-3xl pointer-events-none"></div>
+          <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-blue-500/30 blur-3xl pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-violet-500/10 blur-3xl pointer-events-none"></div>
 
           {/* Header Tag & Engine State */}
           <div className="relative z-10 flex items-center justify-between">
@@ -180,7 +182,7 @@ export default function LoginPage() {
           </div>
 
           {/* Center Micro-Dashboard Simulation */}
-          <div className="relative z-10 my-8 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-md shadow-xl space-y-4">
+          <div className="relative z-10 my-8 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-md shadow-2xl shadow-black/30 space-y-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[18px] text-[#dbe1ff]">tune</span>
@@ -258,7 +260,7 @@ export default function LoginPage() {
               &ldquo;Kami tidak lagi menebak-nebak apakah sanggup menyelesaikan 300 hampers dalam 2 hari. BizCapacity langsung menunjukkan bottleneck di stasiun packaging sebelum kami tanda tangan PO.&rdquo;
             </blockquote>
             <div className="flex items-center gap-3 pt-1">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#2563eb] to-emerald-400 text-white font-bold flex items-center justify-center text-sm shadow-md">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#2563eb] to-emerald-400 text-white font-bold flex items-center justify-center text-sm shadow-lg shadow-black/20">
                 BL
               </div>
               <div>

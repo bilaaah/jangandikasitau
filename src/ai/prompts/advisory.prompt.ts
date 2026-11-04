@@ -4,6 +4,14 @@
 // Guides the LLM to act as a senior SME operations consultant (Konsultan Operasional UMKM).
 
 import type { CapacityEngineResult } from "@/engine/types";
+const QUESTION_FOCUS: Record<string, string> = {
+  general: "Berikan ringkasan kondisi dan saran tindakan yang paling penting.",
+  why_risk: "Jelaskan MENGAPA pesanan ini berstatus demikian, sebutkan penyebab utama dari angka engine dengan bahasa sederhana.",
+  bottleneck: "Jelaskan bottleneck mana yang paling membatasi dan mengapa, urutkan dari yang paling berat.",
+  how_fix: "Berikan 2-3 langkah paling murah dan realistis agar pesanan ini layak, urut dari yang termurah.",
+  priority: "Tentukan satu resource yang harus diprioritaskan lebih dulu dan alasannya.",
+  add_worker: "Jelaskan secara kualitatif apakah menambah satu pekerja akan membantu, berdasarkan bottleneck yang ada. JANGAN menghitung angka baru; sebutkan bahwa angka pastinya dapat dicek di Simulasi What-If.",
+};
 
 export function buildAdvisoryPrompt(params: {
   productName: string;
@@ -11,9 +19,13 @@ export function buildAdvisoryPrompt(params: {
   customerName: string;
   deliveryDateStr: string;
   analysis: CapacityEngineResult;
+  question?: string;
 }): string {
-  const { productName, quantity, customerName, deliveryDateStr, analysis } = params;
-
+  const { productName, quantity, customerName, deliveryDateStr, analysis, question } = params;
+  const focus =
+  question && Object.prototype.hasOwnProperty.call(QUESTION_FOCUS, question)
+    ? QUESTION_FOCUS[question]
+    : QUESTION_FOCUS.general;
   return `
 Anda adalah Konsultan Ahli Operasional & Manajemen Kapasitas UMKM Make-to-Order Indonesia untuk aplikasi BizCapacity.
 Tugas Anda: Menganalisis hasil kalkulasi teknis dari mesin kapasitas deterministik dan menerjemahkannya menjadi saran bisnis operasional yang praktis, cerdas, solutif, dan ramah pengguna.
@@ -35,11 +47,16 @@ HASIL MESIN ANALISIS KAPASITAS:
 BOTTLENECKS (KENDALA TERDETEKSI):
 ${analysis.bottlenecks.map((b, i) => `${i + 1}. [${b.severity}] ${b.resourceType}: ${b.description}`).join("\n") || "Tidak ada kendala kritis."}
 
+LANGKAH PENALARAN ENGINE:
+${analysis.reasoning.map((r, i) => `${i + 1}. ${r}`).join("\n")}
+
+FOKUS PERTANYAAN PEMILIK USAHA:
+${focus}
+
 FORMAT OUTPUT HARUS BERUPA JSON VALID dengan struktur:
 {
   "headline": "Judul rekomendasi singkat dan tegas (maks 8 kata)",
   "summary": "Ringkasan analisis situasi operasional dalam 2-3 kalimat yang jelas dan solutif.",
-  "riskAssessment": "LOW" | "MODERATE" | "HIGH" | "CRITICAL",
   "actionItems": [
     {
       "category": "WORKFORCE" | "MACHINERY" | "MATERIAL" | "DEADLINE" | "STRATEGY",

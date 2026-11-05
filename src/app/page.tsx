@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 export default function HomePage() {
   const router = useRouter();
@@ -166,14 +167,14 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Left Column: Copy & CTAs */}
             <div className="lg:col-span-7 flex flex-col gap-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/[0.12] text-blue-700 dark:text-blue-300 w-fit shadow-xs border border-blue-200 dark:border-blue-500/20">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/[0.12] text-blue-700 dark:text-blue-300 w-fit shadow-xs border border-blue-200 dark:border-blue-500/20 animate-slide-down shimmer-badge">
                 <span className="material-symbols-outlined text-[18px]">verified_user</span>
                 <span className="text-[12px] font-bold">
                   Sistem Keputusan Kapasitas #1 untuk UMKM Produsen
                 </span>
               </div>
 
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 animate-slide-up">
                 <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-900 dark:text-[#F1F5F9] leading-tight sm:leading-tight">
                   Ketahui Kapasitas Nyata Toko &amp; Bengkel Anda{" "}
                   <span className="text-blue-600 dark:text-blue-400 underline decoration-blue-500/30 decoration-4 underline-offset-8">
@@ -187,7 +188,7 @@ export default function HomePage() {
               </div>
 
               {/* Dual CTA */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2 animate-slide-up stagger-2">
                 <Link
                   href="/register"
                   className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold text-[15px] shadow-lg shadow-blue-500/25 hover:from-blue-500 hover:to-blue-400 transition-all active:scale-[0.99] text-center"
@@ -207,7 +208,7 @@ export default function HomePage() {
               </div>
 
               {/* Trust Badges */}
-              <div className="flex flex-wrap items-center gap-4 text-slate-500 dark:text-[#94A3B8] text-[12px] font-medium pt-1">
+              <div className="flex flex-wrap items-center gap-4 text-slate-500 dark:text-[#94A3B8] text-[12px] font-medium pt-1 animate-slide-up stagger-3">
                 <div className="flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[18px]">
                     check_circle
@@ -229,7 +230,7 @@ export default function HomePage() {
               </div>
 
               {/* SME Social Proof Avatars */}
-              <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-4 bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] p-4 rounded-2xl shadow-xs">
+              <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-4 bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] p-4 rounded-2xl shadow-xs animate-slide-up stagger-4 hover-lift">
                 <div className="flex -space-x-3 overflow-hidden">
                   <div className="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-[#0B1120] bg-blue-600 text-white font-bold flex items-center justify-center text-xs">
                     BL
@@ -261,7 +262,7 @@ export default function HomePage() {
             </div>
 
             {/* Right Column: Live Simulation Card Preview */}
-            <div className="lg:col-span-5 flex flex-col" id="interactive-preview">
+            <div className="lg:col-span-5 flex flex-col animate-float hover-lift" id="interactive-preview">
               <div className="bg-white/90 dark:bg-white/[0.04] backdrop-blur-2xl rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-black/40 border border-slate-200 dark:border-white/[0.08] overflow-hidden">
                 {/* Simulated App Header */}
                 <div className="bg-slate-900 dark:bg-[#0F172A]/90 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800 dark:border-white/[0.06]">
@@ -442,31 +443,31 @@ export default function HomePage() {
               Disesuaikan Khusus Alur Kerja:
             </span>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap items-center gap-3 w-full md:w-auto">
-              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] text-slate-900 dark:text-[#F1F5F9] text-[13px] font-bold">
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] text-slate-900 dark:text-[#F1F5F9] text-[13px] font-bold hover-lift-sm transition-transform cursor-default">
                 <span className="material-symbols-outlined text-blue-400 text-[18px]">
                   bakery_dining
                 </span>
                 <span>Commercial Bakery</span>
               </div>
-              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] text-slate-900 dark:text-[#F1F5F9] text-[13px] font-bold">
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] text-slate-900 dark:text-[#F1F5F9] text-[13px] font-bold hover-lift-sm transition-transform cursor-default">
                 <span className="material-symbols-outlined text-blue-400 text-[18px]">
                   restaurant
                 </span>
                 <span>Catering &amp; Kitchen</span>
               </div>
-              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] text-slate-900 dark:text-[#F1F5F9] text-[13px] font-bold">
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] text-slate-900 dark:text-[#F1F5F9] text-[13px] font-bold hover-lift-sm transition-transform cursor-default">
                 <span className="material-symbols-outlined text-blue-400 text-[18px]">
                   styler
                 </span>
                 <span>Konveksi &amp; Garment</span>
               </div>
-              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] text-slate-900 dark:text-[#F1F5F9] text-[13px] font-bold">
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] text-slate-900 dark:text-[#F1F5F9] text-[13px] font-bold hover-lift-sm transition-transform cursor-default">
                 <span className="material-symbols-outlined text-blue-400 text-[18px]">
                   print
                 </span>
                 <span>Percetakan &amp; Sablon</span>
               </div>
-              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] text-slate-900 dark:text-[#F1F5F9] text-[13px] font-bold">
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] text-slate-900 dark:text-[#F1F5F9] text-[13px] font-bold hover-lift-sm transition-transform cursor-default">
                 <span className="material-symbols-outlined text-blue-400 text-[18px]">
                   featured_seasonal_and_gifts
                 </span>
@@ -492,9 +493,10 @@ export default function HomePage() {
             </p>
           </div>
 
+          <ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Card 1 */}
-            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-6 shadow-sm flex flex-col gap-4 hover:border-white/[0.15] hover:shadow-lg transition-all">
+            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-6 shadow-sm flex flex-col gap-4 hover-lift hover:border-blue-500/30 transition-all">
               <div className="w-12 h-12 rounded-xl bg-rose-500/[0.15] text-rose-400 flex items-center justify-center">
                 <span className="material-symbols-outlined text-[28px]">
                   sentiment_very_dissatisfied
@@ -515,7 +517,7 @@ export default function HomePage() {
             </div>
 
             {/* Card 2 */}
-            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-6 shadow-sm flex flex-col gap-4 hover:border-white/[0.15] hover:shadow-lg transition-all">
+            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-6 shadow-sm flex flex-col gap-4 hover-lift hover:border-blue-500/30 transition-all">
               <div className="w-12 h-12 rounded-xl bg-blue-500/[0.15] text-blue-400 flex items-center justify-center">
                 <span className="material-symbols-outlined text-[28px]">calendar_clock</span>
               </div>
@@ -534,7 +536,7 @@ export default function HomePage() {
             </div>
 
             {/* Card 3 */}
-            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-6 shadow-sm flex flex-col gap-4 hover:border-white/[0.15] hover:shadow-lg transition-all">
+            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-6 shadow-sm flex flex-col gap-4 hover-lift hover:border-blue-500/30 transition-all">
               <div className="w-12 h-12 rounded-xl bg-amber-500/[0.15] text-amber-400 flex items-center justify-center">
                 <span className="material-symbols-outlined text-[28px]">inventory_2</span>
               </div>
@@ -553,7 +555,7 @@ export default function HomePage() {
             </div>
 
             {/* Card 4 */}
-            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-6 shadow-sm flex flex-col gap-4 hover:border-white/[0.15] hover:shadow-lg transition-all">
+            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-6 shadow-sm flex flex-col gap-4 hover-lift hover:border-blue-500/30 transition-all">
               <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-white/[0.08] text-slate-800 dark:text-[#F1F5F9] flex items-center justify-center">
                 <span className="material-symbols-outlined text-[28px]">group_off</span>
               </div>
@@ -571,6 +573,7 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -595,9 +598,10 @@ export default function HomePage() {
             </div>
           </div>
 
+          <ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Step 1 */}
-            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl p-6 rounded-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm flex flex-col gap-4">
+            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl p-6 rounded-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm flex flex-col gap-4 hover-lift hover:border-blue-500/30 transition-all">
               <div className="flex items-center justify-between">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white flex items-center justify-center text-[16px] font-black">
                   01
@@ -616,7 +620,7 @@ export default function HomePage() {
             </div>
 
             {/* Step 2 */}
-            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl p-6 rounded-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm flex flex-col gap-4">
+            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl p-6 rounded-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm flex flex-col gap-4 hover-lift hover:border-blue-500/30 transition-all">
               <div className="flex items-center justify-between">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white flex items-center justify-center text-[16px] font-black">
                   02
@@ -637,7 +641,7 @@ export default function HomePage() {
             </div>
 
             {/* Step 3 */}
-            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl p-6 rounded-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm flex flex-col gap-4">
+            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl p-6 rounded-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm flex flex-col gap-4 hover-lift hover:border-blue-500/30 transition-all">
               <div className="flex items-center justify-between">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white flex items-center justify-center text-[16px] font-black">
                   03
@@ -660,7 +664,7 @@ export default function HomePage() {
             </div>
 
             {/* Step 4 */}
-            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl p-6 rounded-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm flex flex-col gap-4">
+            <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl p-6 rounded-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm flex flex-col gap-4 hover-lift hover:border-blue-500/30 transition-all">
               <div className="flex items-center justify-between">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white flex items-center justify-center text-[16px] font-black">
                   04
@@ -682,13 +686,15 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+          </ScrollReveal>
         </div>
       </section>
 
       {/* SME Case Study Banner: SweetCrumbs Bakery Jakarta */}
       <section className="w-full py-16 bg-slate-50/60 dark:bg-[#0B1120]" id="studi-kasus">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-2xl border border-slate-200 dark:border-white/[0.08] rounded-3xl p-6 sm:p-10 lg:p-12 shadow-sm dark:shadow-xl">
+          <ScrollReveal>
+          <div className="bg-white/80 dark:bg-white/[0.04] backdrop-blur-2xl border border-slate-200 dark:border-white/[0.08] rounded-3xl p-6 sm:p-10 lg:p-12 shadow-sm dark:shadow-xl hover-lift">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-5 relative">
                 <div className="relative w-full h-80 rounded-2xl overflow-hidden shadow-md bg-gradient-to-tr from-blue-700 to-indigo-600 border border-white/[0.08] flex items-center justify-center p-6 text-white text-center">
@@ -752,6 +758,7 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+          </ScrollReveal>
         </div>
       </section>
 

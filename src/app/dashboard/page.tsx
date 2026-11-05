@@ -52,7 +52,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ── Panduan Singkat (untuk user baru) ─── */}
-        <div className="p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-500/[0.10] border border-blue-200/80 dark:border-blue-500/20 backdrop-blur-xl flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-500/[0.10] border border-blue-200/80 dark:border-blue-500/20 backdrop-blur-xl flex flex-col sm:flex-row sm:items-center gap-4 animate-slide-up stagger-1 hover-lift-sm">
           <div className="flex items-center gap-3 flex-shrink-0">
             <span className="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center">
               <span className="material-symbols-outlined text-[22px]">lightbulb</span>
@@ -93,7 +93,7 @@ export default function DashboardPage() {
             <Link
               href="/production-planning"
               title="Buka Jadwal & Beban Produksi"
-              className="p-5 rounded-2xl bg-white/85 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs flex flex-col justify-between hover:border-blue-500/40 hover:shadow-md transition-all group"
+              className="p-5 rounded-2xl bg-white/85 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs flex flex-col justify-between hover-lift hover:border-blue-500/40 transition-all group animate-slide-up stagger-1"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500 dark:text-[#94A3B8] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Kapasitas Terpakai</span>
@@ -122,7 +122,7 @@ export default function DashboardPage() {
             <Link
               href="/resources"
               title="Buka Data Staf & Jam Kerja"
-              className="p-5 rounded-2xl bg-white/85 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs flex flex-col justify-between hover:border-blue-500/40 hover:shadow-md transition-all group"
+              className="p-5 rounded-2xl bg-white/85 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs flex flex-col justify-between hover-lift hover:border-blue-500/40 transition-all group animate-slide-up stagger-1"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500 dark:text-[#94A3B8] group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Jam Kerja Staf</span>
@@ -136,7 +136,7 @@ export default function DashboardPage() {
                   <span className="text-xs text-slate-500 dark:text-[#94A3B8]">dari 180 jam/hari</span>
                 </div>
                 <div className="w-full bg-slate-100 dark:bg-white/[0.08] h-2 rounded-full mt-2 overflow-hidden">
-                  <div className="bg-emerald-500 h-full rounded-full" style={{ width: "82%" }} />
+                  <div className="bg-emerald-500 h-full rounded-full animate-bar-fill" style={{ width: "82%" }} />
                 </div>
                 <p className="text-xs text-slate-600 dark:text-[#94A3B8] mt-1">Sisa 32 jam bebas hari ini.</p>
                 <div className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -150,7 +150,7 @@ export default function DashboardPage() {
             <Link
               href="/resources"
               title="Buka Data Oven & Mesin"
-              className="p-5 rounded-2xl bg-white/85 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs flex flex-col justify-between hover:border-blue-500/40 hover:shadow-md transition-all group"
+              className="p-5 rounded-2xl bg-white/85 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs flex flex-col justify-between hover-lift hover:border-blue-500/40 transition-all group animate-slide-up stagger-1"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500 dark:text-[#94A3B8] group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Penggunaan Oven & Mesin</span>
@@ -178,7 +178,7 @@ export default function DashboardPage() {
             <Link
               href="/simulations?order=bc-1024"
               title="Buka Simulasi untuk Cari Solusi"
-              className="p-5 rounded-2xl bg-rose-50/80 dark:bg-rose-500/[0.08] backdrop-blur-xl border border-rose-200 dark:border-rose-500/20 shadow-xs flex flex-col justify-between hover:border-rose-400 dark:hover:border-rose-500/40 hover:shadow-md transition-all group"
+              className="p-5 rounded-2xl bg-rose-50/80 dark:bg-rose-500/[0.08] backdrop-blur-xl border border-rose-200 dark:border-rose-500/20 shadow-xs flex flex-col justify-between hover-lift hover:border-rose-400 dark:hover:border-rose-500/40 transition-all group animate-slide-up stagger-4"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-rose-700 dark:text-rose-300">🔴 Antrian Padat</span>
@@ -233,7 +233,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="w-full bg-slate-100 dark:bg-white/[0.08] h-2.5 rounded-full overflow-hidden">
-                  <div className="bg-rose-500 h-full rounded-full" style={{ width: "92%" }} />
+                  <div className="bg-rose-500 h-full rounded-full animate-bar-fill" style={{ width: "92%" }} />
                 </div>
                 <p className="text-[11px] text-rose-600 dark:text-rose-400 font-medium">
                   ⚠️ Penyebab: 2 pesanan hampers besar jatuh tempo 24 Okt. Perlu solusi jika mau terima order tambahan.
@@ -256,7 +256,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="w-full bg-slate-100 dark:bg-white/[0.08] h-2.5 rounded-full overflow-hidden">
-                  <div className="bg-blue-600 h-full rounded-full" style={{ width: "68%" }} />
+                  <div className="bg-blue-600 h-full rounded-full animate-bar-fill" style={{ width: "68%" }} />
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-[#94A3B8]">
                   Masih bisa muat brownies atau roti artisan di batch siang.
@@ -279,7 +279,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="w-full bg-slate-100 dark:bg-white/[0.08] h-2.5 rounded-full overflow-hidden">
-                  <div className="bg-emerald-500 h-full rounded-full" style={{ width: "45%" }} />
+                  <div className="bg-emerald-500 h-full rounded-full animate-bar-fill" style={{ width: "45%" }} />
                 </div>
               </div>
 
@@ -309,7 +309,7 @@ export default function DashboardPage() {
           <div className="lg:col-span-5 space-y-5">
 
             {/* Rekomendasi Sistem */}
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-lg space-y-4 border border-slate-700">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-lg space-y-4 border border-slate-700 hover-lift animate-slide-up stagger-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs text-blue-300 font-bold uppercase tracking-wider">
                   <span className="material-symbols-outlined text-[16px]">auto_awesome</span>

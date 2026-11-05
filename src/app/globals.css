@@ -1199,3 +1199,187 @@ body::after {
     padding: 16pt;
   }
 }
+
+/* ═══════════════════════════════════════════════
+   INTERACTIVE ANIMATION SYSTEM (60FPS GPU)
+═══════════════════════════════════════════════ */
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes floatSlowAlt {
+  0%, 100% {
+    transform: translateY(-6px);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@keyframes shimmerSweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+@keyframes barFill {
+  from {
+    width: 0%;
+  }
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ── Animation Utility Classes ── */
+.animate-slide-up {
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-down {
+  animation: slideDownFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-float {
+  animation: floatSlow 5s ease-in-out infinite;
+}
+
+.animate-float-alt {
+  animation: floatSlowAlt 6s ease-in-out infinite;
+}
+
+.animate-pulse-subtle {
+  animation: pulseSubtle 3s ease-in-out infinite;
+}
+
+.animate-pop-in {
+  animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-bar-fill {
+  animation: barFill 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Stagger Delays ── */
+.stagger-1 { animation-delay: 80ms; }
+.stagger-2 { animation-delay: 160ms; }
+.stagger-3 { animation-delay: 240ms; }
+.stagger-4 { animation-delay: 320ms; }
+.stagger-5 { animation-delay: 400ms; }
+.stagger-6 { animation-delay: 480ms; }
+
+/* ── Interactive Hover Lift & Glow ── */
+.hover-lift {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease;
+  will-change: transform, box-shadow;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.12);
+}
+
+.dark .hover-lift:hover {
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.15);
+}
+
+.hover-lift-sm {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.hover-lift-sm:hover {
+  transform: translateY(-2.5px);
+}
+
+/* ── Shimmer Effect for Badges / CTA ── */
+.shimmer-badge {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-badge::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: shimmerSweep 3.5s ease-in-out infinite;
+}
+
+/* ── Accessibility: Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-up,
+  .animate-slide-down,
+  .animate-float,
+  .animate-float-alt,
+  .animate-pulse-subtle,
+  .animate-pop-in,
+  .animate-bar-fill,
+  .hover-lift,
+  .hover-lift-sm {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+  .shimmer-badge::after {
+    display: none !important;
+  }
+}
+

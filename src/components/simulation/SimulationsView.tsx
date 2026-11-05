@@ -314,7 +314,7 @@ export function SimulationsView({
         {/* ── 2-Column Layout ───────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* ── Controls Column (5 cols) ─────────────────────────── */}
-          <div className="lg:col-span-5 bg-white/85 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-6 sm:p-7 shadow-xs space-y-5">
+          <div className="lg:col-span-5 bg-white/85 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-6 sm:p-7 shadow-xs space-y-5 animate-slide-up stagger-1">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/[0.06]">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-[#F1F5F9]">
@@ -457,9 +457,9 @@ export function SimulationsView({
           </div>
 
           {/* ── Result & Comparison Column (7 cols) ──────────────── */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 space-y-6 animate-slide-up stagger-2">
             {/* Before vs After Comparison Card */}
-            <div className="bg-white/85 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-6 sm:p-7 shadow-xs space-y-6">
+            <div className="bg-white/85 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-6 sm:p-7 shadow-xs space-y-6 hover-lift-sm">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/[0.06]">
                 <div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-[#F1F5F9]">
@@ -853,7 +853,7 @@ function SliderControl({
   costNoteColor = "text-rose-600 dark:text-rose-400",
 }: SliderControlProps) {
   return (
-    <div className="space-y-2 p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06]">
+    <div className="space-y-2 p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] hover-lift-sm transition-all">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-[18px] text-blue-600 dark:text-blue-400">
@@ -915,7 +915,7 @@ function ToggleControl({
 }: ToggleControlProps) {
   return (
     <div
-      className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+      className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer hover-lift-sm ${
         checked
           ? "bg-blue-50 dark:bg-blue-500/15 border-blue-300 dark:border-blue-500/40 shadow-xs"
           : "bg-slate-50/80 dark:bg-white/[0.03] border-slate-200/80 dark:border-white/[0.06]"

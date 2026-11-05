@@ -15,6 +15,8 @@ export interface GenerateAdviceInput {
   customerName: string;
   deliveryDateStr: string;
   analysis: CapacityEngineResult;
+  /** id pertanyaan cepat dari UI: general | why_risk | bottleneck | how_fix | add_worker | priority */
+  question?: string;
 }
 
 /**

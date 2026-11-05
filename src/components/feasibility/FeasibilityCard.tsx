@@ -123,6 +123,7 @@ export function FeasibilityCard({
         customerName,
         deliveryDateStr,
         analysis,
+        question: questionId,
       });
 
       if (result.success && result.data) {

@@ -27,9 +27,9 @@ const inputClass =
 
 function getFreshness(updatedAt: Date): Freshness {
   const ageHours = Math.max(0, Date.now() - new Date(updatedAt).getTime()) / 3_600_000;
-  if (ageHours <= 24) return { label: "Terkini Â· < 24 jam", className: "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400" };
-  if (ageHours <= 24 * 7) return { label: "Perlu diperbarui Â· < 7 hari", className: "bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400" };
-  return { label: "Usang Â· lebih dari 7 hari", className: "bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400" };
+  if (ageHours <= 24) return { label: "Terkini · < 24 jam", className: "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400" };
+  if (ageHours <= 24 * 7) return { label: "Perlu diperbarui · < 7 hari", className: "bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400" };
+  return { label: "Usang · lebih dari 7 hari", className: "bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400" };
 }
 
 export function ResourceManagementView({
@@ -217,14 +217,11 @@ export function ResourceManagementView({
       {isFormOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-4">
           <form onSubmit={handleSave} className="my-auto w-full max-w-lg space-y-4 rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase text-blue-700">{editing ? "Ubah data" : "Data baru"}</p>
-                <h2 className="text-lg font-extrabold text-slate-900 dark:text-slate-50">
-                  {activeTab === "workers" ? "Pekerja" : activeTab === "machines" ? "Mesin" : "Bahan Baku"}
-                </h2>
-              </div>
-              <button type="button" onClick={() => setIsFormOpen(false)} aria-label="Tutup formulir" className="rounded-lg px-2 py-1 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">âœ•</button>
+            <div>
+              <p className="text-xs font-bold uppercase text-blue-700">{editing ? "Ubah data" : "Data baru"}</p>
+              <h2 className="text-lg font-extrabold text-slate-900 dark:text-slate-50">
+                {activeTab === "workers" ? "Pekerja" : activeTab === "machines" ? "Mesin" : "Bahan Baku"}
+              </h2>
             </div>
             <label className="block space-y-1 text-xs font-semibold text-slate-700 dark:text-slate-300">
               Nama

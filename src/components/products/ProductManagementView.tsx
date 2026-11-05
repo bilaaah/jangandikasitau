@@ -177,13 +177,10 @@ export function ProductManagementView({
       {isFormOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-4">
           <form onSubmit={handleSave} className="my-auto max-h-[92vh] w-full max-w-xl space-y-4 overflow-y-auto rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
-            <div className="flex items-start justify-between">
-              <div>
+            <div>
                 <p className="text-xs font-bold uppercase text-blue-700 dark:text-blue-400">{editing ? "Ubah produk" : "Produk baru"}</p>
                 <h2 className="text-lg font-extrabold text-slate-900 dark:text-slate-50">Detail Produk &amp; BOM</h2>
               </div>
-              <button type="button" onClick={closeForm} aria-label="Tutup formulir" className="rounded-lg px-2 py-1 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">✕</button>
-            </div>
             <label className="block space-y-1 text-xs font-semibold text-slate-700 dark:text-slate-300">
               Nama produk
               <input required maxLength={120} value={name} onChange={(event) => setName(event.target.value)} className={inputClass} />

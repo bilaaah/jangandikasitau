@@ -92,7 +92,7 @@ export default function RegisterPage() {
             <div className="hidden sm:flex items-center space-x-2 bg-blue-50 dark:bg-blue-500/[0.10] border border-blue-200 dark:border-blue-500/20 px-4 py-1.5 rounded-full">
               <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[12px] text-blue-700 dark:text-blue-300 font-semibold">
-                Live Engine v4.2 â€¢ Kapasitas Cloud UMKM
+                Live Engine v4.2 • Kapasitas Cloud UMKM
               </span>
             </div>
           </div>
@@ -104,7 +104,7 @@ export default function RegisterPage() {
           <div className="lg:col-span-7 bg-white/85 dark:bg-white/[0.04] backdrop-blur-2xl rounded-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-xl dark:shadow-2xl dark:shadow-black/30 p-6 sm:p-10">
             <div className="mb-6">
               <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-500/[0.10] px-2.5 py-1 rounded-full border border-blue-200 dark:border-blue-500/20">
-                Mulai Gratis â€¢ Paket Berlangganan UMKM Mulai Rp 49.000/bln
+                Mulai Gratis • Paket Berlangganan UMKM Mulai Rp 49.000/bln
               </span>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-[#F1F5F9] tracking-tight mt-3 mb-2">
                 Mulai Kendalikan Kapasitas Produksi Anda
@@ -248,7 +248,7 @@ export default function RegisterPage() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                    placeholder="••••••••••••"
                     className="w-full h-11 px-4 pr-10 rounded-xl bg-white dark:bg-white/[0.05] text-slate-900 dark:text-[#F1F5F9] border border-slate-200 dark:border-white/[0.10] placeholder:text-slate-400 dark:placeholder:text-[#64748B] focus:bg-white dark:focus:bg-white/[0.08] focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/25 transition-all text-[14px]"
                   />
                   <button
@@ -518,7 +518,7 @@ export default function RegisterPage() {
                 </p>
                 <div className="mt-1 flex items-center gap-1.5 text-[11px]">
                   <span className="font-bold text-slate-900 dark:text-[#F1F5F9]">Ratna Kusuma</span>
-                  <span className="text-[#64748B]">â€¢</span>
+                  <span className="text-[#64748B]">•</span>
                   <span className="text-slate-500 dark:text-[#94A3B8]">Founder Dapur Rasa Artisan</span>
                 </div>
               </div>

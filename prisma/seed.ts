@@ -1,6 +1,11 @@
 import { randomBytes } from "node:crypto";
 import bcrypt from "bcryptjs";
-import { BusinessRole, PrismaClient } from "@prisma/client";
+import {
+  BusinessRole,
+  OrderStatus,
+  PrismaClient,
+} from "@prisma/client";
+import { runCapacityEngine } from "../src/engine/capacity/calculator";
 
 const prisma = new PrismaClient();
 const BUSINESS_NAME = "SweetCrumbs Bakery";
@@ -39,7 +44,7 @@ async function ensureDemoUser(input: {
       },
     });
   }
-
+ 
   await prisma.userBusiness.upsert({
     where: {
       userId_businessId: {
@@ -128,6 +133,8 @@ async function ensureProduct(
       materialId: { notIn: billOfMaterials.map((item) => item.materialId) },
     },
   });
+
+  return product;
 }
 
 async function ensureWorker(businessId: string, name: string, dailyAvailableHours: number) {
@@ -158,6 +165,165 @@ async function ensureMachine(businessId: string, name: string, dailyAvailableHou
     : prisma.machine.create({
         data: { businessId, name, dailyAvailableHours },
       });
+}
+
+function getDeliveryDateAfterWorkDays(startDate: Date, workDays: number) {
+  const deliveryDate = new Date(startDate);
+  let countedDays = 0;
+
+  while (countedDays < workDays) {
+    deliveryDate.setDate(deliveryDate.getDate() + 1);
+    const weekday = deliveryDate.getDay();
+    if (weekday >= 1 && weekday <= 5) countedDays++;
+  }
+
+  deliveryDate.setHours(17, 0, 0, 0);
+  return deliveryDate;
+}
+
+async function seedAtRiskDemoOrder(
+  businessId: string,
+  productId: string,
+  packagingMaterial: { id: string; currentStock: number; unit: string },
+  workers: { id: string; dailyAvailableHours: number }[],
+  machines: { id: string; dailyAvailableHours: number }[],
+) {
+  const analysisDate = new Date();
+  const requiredDeliveryDate = getDeliveryDateAfterWorkDays(analysisDate, 5);
+  const quantity = 300;
+  const analysis = runCapacityEngine({
+    newOrder: {
+      quantity,
+      productId,
+      analysisDate,
+      requiredDeliveryDate,
+    },
+    product: {
+      workerHoursPerUnit: 0.45,
+      machineHoursPerUnit: 0.1,
+      materials: [{ materialId: packagingMaterial.id, quantityPerUnit: 1 }],
+    },
+    workforce: { workers },
+    machinery: { machines },
+    inventory: {
+      materials: [
+        {
+          id: packagingMaterial.id,
+          currentStock: packagingMaterial.currentStock,
+          unit: packagingMaterial.unit,
+        },
+      ],
+    },
+    activeCommitments: {
+      workerHoursCommitted: 0,
+      machineHoursCommitted: 0,
+      materialCommitments: [],
+    },
+  });
+
+  if (analysis.status !== "AT_RISK") {
+    throw new Error(
+      `The 300-unit demo order must be AT_RISK, got ${analysis.status}.`,
+    );
+  }
+
+  const customerName = "Demo AT_RISK - 300 gift boxes";
+  const notes = "Demo fixture: 90% worker utilization with zero delivery buffer.";
+
+  await prisma.$transaction(async (tx) => {
+    const existing = await tx.order.findFirst({
+      where: { businessId, customerName, notes },
+      include: {
+        items: true,
+        capacityAnalyses: {
+          orderBy: { analyzedAt: "desc" },
+          take: 1,
+        },
+      },
+    });
+
+    const order = existing
+      ? await tx.order.update({
+          where: { id: existing.id },
+          data: { status: OrderStatus.DRAFT, requiredDeliveryDate },
+        })
+      : await tx.order.create({
+          data: {
+            businessId,
+            customerName,
+            notes,
+            status: OrderStatus.DRAFT,
+            requiredDeliveryDate,
+          },
+        });
+
+    const existingItem = existing?.items[0];
+    if (existingItem) {
+      await tx.orderItem.update({
+        where: { id: existingItem.id },
+        data: { productId, quantity },
+      });
+      await tx.orderItem.deleteMany({
+        where: { orderId: order.id, id: { not: existingItem.id } },
+      });
+    } else {
+      await tx.orderItem.create({
+        data: { orderId: order.id, productId, quantity },
+      });
+    }
+
+    const existingAnalysis = existing?.capacityAnalyses[0];
+    if (existingAnalysis) {
+      await tx.bottleneck.deleteMany({ where: { analysisId: existingAnalysis.id } });
+      await tx.capacityAnalysis.update({
+        where: { id: existingAnalysis.id },
+        data: {
+          status: analysis.status,
+          workerUtilizationPercent: analysis.workerAnalysis.utilizationPercent,
+          machineUtilizationPercent: analysis.machineAnalysis.utilizationPercent,
+          availableWorkDays: analysis.availableWorkDays,
+          estimatedProductionDays: analysis.estimatedProductionDays,
+          bufferDays: analysis.bufferDays,
+          reasoning: analysis.reasoning,
+          analyzedAt: analysisDate,
+          bottlenecks: {
+            create: analysis.bottlenecks.map((bottleneck) => ({
+              resourceType: bottleneck.resourceType,
+              resourceId: bottleneck.resourceId ?? null,
+              severity: bottleneck.severity,
+              description: bottleneck.description,
+            })),
+          },
+        },
+      });
+    } else {
+      await tx.capacityAnalysis.create({
+        data: {
+          orderId: order.id,
+          status: analysis.status,
+          workerUtilizationPercent: analysis.workerAnalysis.utilizationPercent,
+          machineUtilizationPercent: analysis.machineAnalysis.utilizationPercent,
+          availableWorkDays: analysis.availableWorkDays,
+          estimatedProductionDays: analysis.estimatedProductionDays,
+          bufferDays: analysis.bufferDays,
+          reasoning: analysis.reasoning,
+          analyzedAt: analysisDate,
+          bottlenecks: {
+            create: analysis.bottlenecks.map((bottleneck) => ({
+              resourceType: bottleneck.resourceType,
+              resourceId: bottleneck.resourceId ?? null,
+              severity: bottleneck.severity,
+              description: bottleneck.description,
+            })),
+          },
+        },
+      });
+    }
+  });
+
+  console.log(
+    `Skenario order demo tersimpan: ${quantity} unit, ${analysis.status} (${analysis.bottlenecks.length} bottleneck).`,
+  );
 }
 
 async function main() {
@@ -195,6 +361,7 @@ async function main() {
     brownieBox,
     flour,
     yeastStarter,
+    demoPackaging,
   ] = await Promise.all([
     ensureMaterial(business.id, { name: "Hardbox Rigid Satin", unit: "box", currentStock: 250 }),
     ensureMaterial(business.id, { name: "Pita Satin Emas", unit: "meter", currentStock: 600 }),
@@ -204,9 +371,10 @@ async function main() {
     ensureMaterial(business.id, { name: "Brownie Packaging Box", unit: "box", currentStock: 500 }),
     ensureMaterial(business.id, { name: "Premium Bread Flour", unit: "kg", currentStock: 120 }),
     ensureMaterial(business.id, { name: "Wild Yeast Starter", unit: "kg", currentStock: 30 }),
+    ensureMaterial(business.id, { name: "Demo Gift Box Packaging", unit: "box", currentStock: 350 }),
   ]);
 
-  await Promise.all([
+  const [, , , demoAtRiskProduct] = await Promise.all([
     ensureProduct(business.id, {
       name: "Custom Gift Boxes Lebaran (4 SKU Set)",
       description: "Paket hampers premium dengan hardbox satin, pita, dan jar.",
@@ -239,20 +407,37 @@ async function main() {
         { materialId: yeastStarter.id, quantityPerUnit: 0.15 },
       ],
     }),
+    ensureProduct(business.id, {
+      name: "Demo Rush Gift Box (300-unit AT_RISK)",
+      description: "Skenario demo dengan utilisasi pekerja 90% dan buffer pengiriman nol.",
+      workerHoursPerUnit: 0.45,
+      machineHoursPerUnit: 0.1,
+      billOfMaterials: [{ materialId: demoPackaging.id, quantityPerUnit: 1 }],
+    }),
   ]);
 
-  await Promise.all([
+  const demoWorkers = await Promise.all([
     ensureWorker(business.id, "Budi Santoso", 8),
     ensureWorker(business.id, "Chef Aris", 8),
     ensureWorker(business.id, "Siti Rahma", 8),
     ensureWorker(business.id, "Dita", 6),
+  ]);
+  const demoMachines = await Promise.all([
     ensureMachine(business.id, "Oven Deck Gas 3-Deck", 10),
     ensureMachine(business.id, "Mesin Band Sealer", 8),
   ]);
 
+  await seedAtRiskDemoOrder(
+    business.id,
+    demoAtRiskProduct.id,
+    demoPackaging,
+    demoWorkers.map(({ id, dailyAvailableHours }) => ({ id, dailyAvailableHours })),
+    demoMachines.map(({ id, dailyAvailableHours }) => ({ id, dailyAvailableHours })),
+  );
+
   console.log(`Data demo berhasil disiapkan untuk ${business.name}.`);
   console.log("Seed tidak menghapus data usaha atau pesanan lain.");
-  console.log("Jumlah fixture: 1 usaha, 3 produk+BOM, 4 pekerja, 2 mesin, 8 bahan baku.");
+  console.log("Jumlah fixture: 1 usaha, 4 produk+BOM, 4 pekerja, 2 mesin, 9 bahan baku, 1 order AT_RISK.");
 }
 
 main()

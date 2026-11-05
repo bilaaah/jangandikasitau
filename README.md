@@ -35,6 +35,7 @@ UMKM seringkali menerima pesanan tanpa mengetahui apakah kapasitas produksi mere
 ### 4. Manajemen Order & Log Bottleneck (`/orders`)
 - Lifecycle: `DRAFT` → `CONFIRMED` → `IN_PROGRESS` → `COMPLETED` / `CANCELLED`
 - Hanya order `CONFIRMED` dan `IN_PROGRESS` yang mengkonsumsi kapasitas terpooling
+- Pembuatan order menyimpan snapshot analisis secara atomik; saat diterima, kapasitas dicek ulang dan dikunci lewat status `CONFIRMED`. Pembatalan melepas komitmen kapasitas.
 
 ### 5. Dashboard Analytics (`/dashboard`)
 - Ringkasan utilisasi kapasitas real-time
@@ -169,10 +170,12 @@ npm run db:generate    # Generate Prisma Client
 npm run db:migrate -- --name init # Buat/jalankan migrasi awal
 npm run db:seed        # Seed data awal
 ```
-Seed membuat atau memperbarui satu usaha demo, tiga produk beserta BOM,
+Seed membuat atau memperbarui satu usaha demo, empat produk beserta BOM,
 pekerja, mesin, bahan baku, serta akun Owner dan Staff tanpa menghapus data
-usaha lain. Saat akun pertama kali dibuat, kata sandi acak dicetak di terminal;
-simpan kata sandi tersebut dengan aman.
+usaha lain. Seed juga menyiapkan order `DRAFT` 300 unit dengan status kapasitas
+`AT_RISK`, bottleneck utilisasi pekerja 90%, dan buffer tenggat nol hari.
+Saat akun pertama kali dibuat, kata sandi acak dicetak di terminal; simpan kata
+sandi tersebut dengan aman.
 
 ### 4. Jalankan Development Server
 ```bash

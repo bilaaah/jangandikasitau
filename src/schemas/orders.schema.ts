@@ -31,8 +31,12 @@ export const CreateOrderSchema = z.object({
 
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;
 
-export const UpdateOrderStatusSchema = z.object({
+export const OrderIdSchema = z.object({
   orderId: z.string().cuid("Invalid order ID"),
+});
+
+export const UpdateOrderStatusSchema = z.object({
+  orderId: OrderIdSchema.shape.orderId,
   status: z.enum(["CONFIRMED", "IN_PROGRESS", "COMPLETED", "CANCELLED"]),
 });
 

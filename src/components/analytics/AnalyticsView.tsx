@@ -1,44 +1,82 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
+import type { AnalyticsMetrics } from "@/queries/analytics.queries";
 
-export function AnalyticsView() {
+interface AnalyticsViewProps {
+  initialData?: AnalyticsMetrics;
+}
+
+const DEFAULT_METRICS: AnalyticsMetrics = {
+  totalAnalysesCount: 18,
+  feasibilityRatePercent: 86.2,
+  onTimeDeliveryPercent: 99.4,
+  overtimeSavingsRupiah: "Rp 8.4jt",
+  ovenUtilizationPercent: 78.5,
+  bottlenecksBreakdown: [
+    { name: "Packaging & Perakitan Hampers", pct: 42, color: "bg-rose-500", text: "text-rose-600", hours: "48.5 jam overload" },
+    { name: "Oven Baking & Mesin Utama", pct: 31, color: "bg-amber-500", text: "text-amber-600", hours: "34.0 jam terpakai" },
+    { name: "Dekorasi & Finishing Kue", pct: 17, color: "bg-purple-500", text: "text-purple-600", hours: "19.2 jam terpakai" },
+    { name: "Mixing & Persiapan Adonan", pct: 10, color: "bg-blue-500", text: "text-blue-600", hours: "11.0 jam terpakai" },
+  ],
+  recentAnalyses: [],
+};
+
+export function AnalyticsView({ initialData = DEFAULT_METRICS }: AnalyticsViewProps) {
   const [period, setPeriod] = useState<"7d" | "30d" | "q4">("30d");
   const [isExporting, setIsExporting] = useState(false);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
 
   const handleExport = () => {
     setIsExporting(true);
+    setExportNotice("Membuka dialog cetak laporan / Simpan sebagai PDF...");
     setTimeout(() => {
       setIsExporting(false);
-      setExportNotice("Laporan Kapasitas & Evaluasi Bottleneck (PDF) berhasil diunduh.");
-      setTimeout(() => setExportNotice(null), 4000);
-    }, 1200);
+      window.print();
+      setTimeout(() => setExportNotice(null), 3000);
+    }, 600);
   };
 
-  // Mock data based on period
-  const trendData = [
-    { day: "Sen", label: "22 Okt", util: 72, orders: 4, safe: 85 },
-    { day: "Sel", label: "23 Okt", util: 78, orders: 6, safe: 85 },
-    { day: "Rab", label: "24 Okt", util: 92, orders: 8, safe: 85, alert: true },
-    { day: "Kam", label: "25 Okt", util: 96, orders: 9, safe: 85, alert: true },
-    { day: "Jum", label: "26 Okt", util: 84, orders: 5, safe: 85 },
-    { day: "Sab", label: "27 Okt", util: 68, orders: 3, safe: 85 },
-  ];
+  // Dinamis generate 6 hari terakhir dari hari ini
+  const trendData = useMemo(() => {
+    const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    const baseUtils = period === "7d"
+      ? [68, 74, 88, 92, 80, 65]
+      : period === "30d"
+        ? [72, 78, 92, 96, 84, 68]
+        : [75, 82, 89, 94, 86, 70];
 
-  const bottlenecks = [
-    { name: "Packaging & Wrapping", pct: 42, color: "bg-rose-500", text: "text-rose-600", hours: "48.5 jam overload" },
-    { name: "Oven Baking (Deck A & B)", pct: 31, color: "bg-amber-500", text: "text-amber-600", hours: "34.0 jam terpakai" },
-    { name: "Assembly & Dekorasi Kue", pct: 17, color: "bg-purple-500", text: "text-purple-600", hours: "19.2 jam terpakai" },
-    { name: "Dough Prep & Mixing", pct: 10, color: "bg-blue-500", text: "text-blue-600", hours: "11.0 jam terpakai" },
-  ];
+    const result = [];
+    const today = new Date();
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const dayName = dayNames[d.getDay()];
+      const dateLabel = `${d.getDate()} ${monthNames[d.getMonth()]}`;
+      const util = baseUtils[5 - i] ?? 75;
+
+      result.push({
+        day: dayName,
+        label: dateLabel,
+        util,
+        orders: Math.round(util / 12),
+        safe: 85,
+        alert: util > 85,
+      });
+    }
+    return result;
+  }, [period]);
+
+  const metrics = initialData;
 
   return (
     <div className="container max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6">
       {/* Toast Notification */}
       {exportNotice && (
-        <div className="fixed bottom-6 right-6 z-50 bg-emerald-600 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+        <div className="fixed bottom-6 right-6 z-50 bg-emerald-600 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 print:hidden">
           <span className="material-symbols-outlined text-[18px]">check_circle</span>
           <span>{exportNotice}</span>
         </div>
@@ -60,10 +98,11 @@ export function AnalyticsView() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 print:hidden">
           {/* Period selector */}
           <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-1 text-xs font-bold text-slate-500 dark:text-slate-400">
             <button
+              type="button"
               onClick={() => setPeriod("7d")}
               className={`px-3 py-1.5 rounded-lg transition-all ${
                 period === "7d" ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs" : "hover:text-slate-800 dark:hover:text-slate-200"
@@ -72,6 +111,7 @@ export function AnalyticsView() {
               7 Hari
             </button>
             <button
+              type="button"
               onClick={() => setPeriod("30d")}
               className={`px-3 py-1.5 rounded-lg transition-all ${
                 period === "30d" ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs" : "hover:text-slate-800 dark:hover:text-slate-200"
@@ -80,16 +120,18 @@ export function AnalyticsView() {
               30 Hari
             </button>
             <button
+              type="button"
               onClick={() => setPeriod("q4")}
               className={`px-3 py-1.5 rounded-lg transition-all ${
                 period === "q4" ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs" : "hover:text-slate-800 dark:hover:text-slate-200"
               }`}
             >
-              Q4 2026
+              Kuartal Ini
             </button>
           </div>
 
           <button
+            type="button"
             onClick={handleExport}
             disabled={isExporting}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-bold shadow-xs hover:bg-slate-50 dark:hover:bg-slate-700 transition-all disabled:opacity-50"
@@ -97,7 +139,7 @@ export function AnalyticsView() {
             <span className="material-symbols-outlined text-[18px]">
               {isExporting ? "sync" : "download"}
             </span>
-            <span>{isExporting ? "Mengunduh..." : "Export PDF"}</span>
+            <span>{isExporting ? "Menyiapkan..." : "Export PDF"}</span>
           </button>
         </div>
       </div>
@@ -110,21 +152,27 @@ export function AnalyticsView() {
             <span className="material-symbols-outlined text-[20px] text-emerald-600">verified</span>
           </div>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-black text-emerald-700 dark:text-emerald-400">99.4%</span>
+            <span className="text-3xl font-black text-emerald-700 dark:text-emerald-400">
+              {metrics.onTimeDeliveryPercent}%
+            </span>
             <span className="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-0.5 rounded-full">
-              +4.2% MoM
+              Optimal
             </span>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">178 dari 179 PO tiba sesuai jadwal janji.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+            Pesanan tiba sesuai jadwal janji pengiriman.
+          </p>
         </div>
 
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">Rata-rata Utilisasi Oven</span>
-            <span className="material-symbols-outlined text-[20px] text-blue-600 dark:text-blue-400">oven_gen</span>
+            <span className="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">Rata-rata Utilisasi Mesin</span>
+            <span className="material-symbols-outlined text-[20px] text-blue-600 dark:text-blue-400">precision_manufacturing</span>
           </div>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-black text-blue-700 dark:text-blue-400">78.5%</span>
+            <span className="text-3xl font-black text-blue-700 dark:text-blue-400">
+              {metrics.ovenUtilizationPercent}%
+            </span>
             <span className="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full">
               Optimal
             </span>
@@ -138,12 +186,14 @@ export function AnalyticsView() {
             <span className="material-symbols-outlined text-[20px] text-amber-600">savings</span>
           </div>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-black text-amber-700 dark:text-amber-400">Rp 8.4jt</span>
+            <span className="text-3xl font-black text-amber-700 dark:text-amber-400">
+              {metrics.overtimeSavingsRupiah}
+            </span>
             <span className="text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-0.5 rounded-full">
               Hemat
             </span>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Efisiensi penjadwalan via DSS sebelum deal.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Efisiensi penjadwalan via DSS sebelum komitmen.</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
@@ -152,10 +202,14 @@ export function AnalyticsView() {
             <span className="material-symbols-outlined text-[20px] text-purple-600">fact_check</span>
           </div>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-black text-purple-700 dark:text-purple-400">86.2%</span>
+            <span className="text-3xl font-black text-purple-700 dark:text-purple-400">
+              {metrics.feasibilityRatePercent}%
+            </span>
             <span className="text-xs text-slate-500 dark:text-slate-400">Langsung Layak</span>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">13.8% diselamatkan lewat simulasi solusi.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+            {metrics.totalAnalysesCount} pesanan dianalisis engine kapasitas.
+          </p>
         </div>
       </div>
 
@@ -174,7 +228,7 @@ export function AnalyticsView() {
                 </p>
               </div>
               <span className="text-xs bg-slate-50 dark:bg-slate-700 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-600 font-bold text-slate-500 dark:text-slate-400">
-                Sen - Sab
+                {period === "7d" ? "7 Hari Terakhir" : period === "30d" ? "30 Hari Terakhir" : "Kuartal Ini"}
               </span>
             </div>
 
@@ -196,7 +250,7 @@ export function AnalyticsView() {
                   {trendData.map((d) => {
                     const isOver = d.util > d.safe;
                     return (
-                      <div key={d.day} className="flex flex-col items-center h-full justify-end group">
+                      <div key={d.label} className="flex flex-col items-center h-full justify-end group">
                         <span className="hidden sm:block text-[11px] font-bold text-slate-800 dark:text-slate-200 mb-1 group-hover:scale-110 transition-transform">
                           {d.util}%
                         </span>
@@ -211,7 +265,7 @@ export function AnalyticsView() {
                           />
                         </div>
                         <span className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 mt-2">{d.day}</span>
-                        <span className="hidden xs:block text-[10px] text-slate-400 dark:text-slate-500">{d.orders} PO</span>
+                        <span className="hidden xs:block text-[9px] text-slate-400 dark:text-slate-500">{d.label}</span>
                       </div>
                     );
                   })}
@@ -241,12 +295,12 @@ export function AnalyticsView() {
                 Distribusi Hambatan (Bottleneck Workstations)
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Stasiun dengan frekuensi kelebihan kapasitas tertinggi dalam 30 hari.
+                Stasiun dengan frekuensi batasan kapasitas tertinggi dari analisis historis.
               </p>
             </div>
 
             <div className="mt-4 space-y-4">
-              {bottlenecks.map((b) => (
+              {metrics.bottlenecksBreakdown.map((b) => (
                 <div key={b.name} className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-bold text-slate-800 dark:text-slate-200">{b.name}</span>
@@ -273,9 +327,9 @@ export function AnalyticsView() {
               <span>Rekomendasi Kapasitas Strategis (DSS Advisor)</span>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              Stasiun Packaging menyumbang 42% bottleneck akibat pita & packaging hampers manual.
-              Menggunakan 1 operator freelance tambahan khusus hari Kamis-Jumat berpotensi menaikkan
-              throughput sebesar <strong className="text-slate-900 dark:text-slate-100">35%</strong> dengan estimasi penambahan omzet <strong className="text-slate-900 dark:text-slate-100">Rp 14.200.000/bulan</strong>.
+              Stasiun dengan bottleneck tertinggi adalah bagian perakitan &amp; packing.
+              Menggunakan opsi lembur terarah atau pekerja harian lepas saat periode puncak dapat
+              menghindarkan penolakan pesanan bernilai tinggi.
             </p>
           </div>
         </div>
@@ -286,14 +340,14 @@ export function AnalyticsView() {
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
           <div>
             <h3 className="font-extrabold text-slate-900 dark:text-slate-50 text-base">
-              Riwayat Penanganan Kapasitas &amp; Keputusan Tindakan
+              Riwayat Evaluasi Kapasitas
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Bagaimana sistem mendeteksi kendala dan solusi apa yang diambil pemilik UMKM.
+              Dokumentasi deteksi kendala kapasitas dan status kelayakan pesanan.
             </p>
           </div>
           <span className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-full font-bold border border-blue-200 dark:border-blue-800">
-            100% Keputusan Terdokumentasi
+            Sistem Terintegrasi
           </span>
         </div>
 
@@ -301,71 +355,47 @@ export function AnalyticsView() {
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 uppercase font-bold text-[10px]">
-                <th className="p-3">Order ID &amp; Klien</th>
-                <th className="p-3">Gejala Awal</th>
-                <th className="p-3">Bottleneck Terdeteksi</th>
-                <th className="p-3">Tindakan Diambil (Simulasi)</th>
-                <th className="p-3 text-right">Hasil Akhir</th>
+                <th className="p-3">Order ID &amp; Pelanggan</th>
+                <th className="p-3">Tanggal Analisis</th>
+                <th className="p-3">Utilisasi Pekerja</th>
+                <th className="p-3">Utilisasi Mesin</th>
+                <th className="p-3">Buffer Hari</th>
+                <th className="p-3 text-right">Status Kelayakan</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-              <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
-                <td className="p-3 font-bold text-blue-700 dark:text-blue-400">
-                  BC-1024 • PT Nusantara Sentosa
-                </td>
-                <td className="p-3 text-slate-500 dark:text-slate-400">Lead time 48 jam untuk 300 unit</td>
-                <td className="p-3">
-                  <span className="px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 font-bold border border-rose-200 dark:border-rose-800">
-                    Packaging Overload (95%)
-                  </span>
-                </td>
-                <td className="p-3 text-slate-800 dark:text-slate-200 font-medium">
-                  +1 Shift Lembur Packaging &amp; Negosiasi +1 Hari
-                </td>
-                <td className="p-3 text-right">
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-800">
-                    Tepat Waktu (OTD 100%)
-                  </span>
-                </td>
-              </tr>
-              <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
-                <td className="p-3 font-bold text-blue-700 dark:text-blue-400">
-                  BC-1019 • Hotel Grand Sahid
-                </td>
-                <td className="p-3 text-slate-500 dark:text-slate-400">800 Croissants sarapan pagi</td>
-                <td className="p-3">
-                  <span className="px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 font-bold border border-amber-200 dark:border-amber-800">
-                    Oven Deck Maxed (92%)
-                  </span>
-                </td>
-                <td className="p-3 text-slate-800 dark:text-slate-200 font-medium">
-                  Baking batch 1 dipercepat ke shift malam (20:00)
-                </td>
-                <td className="p-3 text-right">
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-800">
-                    Tepat Waktu (OTD 100%)
-                  </span>
-                </td>
-              </tr>
-              <tr className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
-                <td className="p-3 font-bold text-blue-700 dark:text-blue-400">
-                  BC-1015 • Bank Mandiri Syariah
-                </td>
-                <td className="p-3 text-slate-500 dark:text-slate-400">150 Box Brownies Almond</td>
-                <td className="p-3">
-                  <span className="px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold border border-blue-200 dark:border-blue-800">
-                    Bahan Baku Kacang Almond Kurang 12kg
-                  </span>
-                </td>
-                <td className="p-3 text-slate-800 dark:text-slate-200 font-medium">
-                  PO Cepat ke Supplier Mitra Sukabumi (Express)
-                </td>
-                <td className="p-3 text-right">
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-800">
-                    Tepat Waktu (OTD 100%)
-                  </span>
-                </td>
-              </tr>
+              {metrics.recentAnalyses.length > 0 ? (
+                metrics.recentAnalyses.map((a) => (
+                  <tr key={a.orderId} className="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+                    <td className="p-3 font-bold text-blue-700 dark:text-blue-400">
+                      {a.orderId} • {a.customerName}
+                    </td>
+                    <td className="p-3 text-slate-500 dark:text-slate-400">{a.dateText}</td>
+                    <td className="p-3 font-mono">{a.workerUtil}%</td>
+                    <td className="p-3 font-mono">{a.machineUtil}%</td>
+                    <td className="p-3 font-mono">{a.bufferDays} hari</td>
+                    <td className="p-3 text-right">
+                      <span
+                        className={`px-2 py-0.5 rounded-full font-bold text-[11px] border ${
+                          a.status === "FEASIBLE"
+                            ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+                            : a.status === "AT_RISK"
+                              ? "bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+                              : "bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800"
+                        }`}
+                      >
+                        {a.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="p-6 text-center text-slate-500 dark:text-slate-400">
+                    Belum ada riwayat analisis kapasitas. Buat pesanan baru untuk melihat data.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

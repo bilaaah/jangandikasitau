@@ -330,15 +330,16 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-[#64748B]">
                   Jumlah Pesanan (Unit / Box) *
                 </label>
-                <span className="text-xs text-[#64748B]">Angka bulat</span>
+                <span className="text-xs text-[#64748B]">Maks. 50.000 unit</span>
               </div>
               <input
                 type="number"
                 min={1}
+                max={50000}
                 required
                 value={quantity}
                 onChange={(e) => {
-                  setQuantity(Math.max(1, parseInt(e.target.value) || 1));
+                  setQuantity(Math.min(50000, Math.max(1, parseInt(e.target.value) || 1)));
                   setPreviewResult(null);
                   setShowFeasibilityWarning(false);
                 }}

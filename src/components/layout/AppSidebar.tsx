@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useSession } from "next-auth/react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { logout } from "@/actions/auth.actions";
 import { ThemeToggle } from "./ThemeToggle";
@@ -57,77 +58,88 @@ export function AppSidebar({ activeCount = 18, isOpen, onClose, onOpenHelp }: Ap
     };
   }, []);
 
-  const navGroups: NavGroup[] = [
-    {
-      title: "RINGKASAN",
-      items: [
-        {
-          name: "Beranda",
-          hint: "Status usaha hari ini",
-          href: "/dashboard",
-          icon: "home",
-        },
-        {
-          name: "Pesanan",
-          hint: "Daftar pesanan masuk",
-          href: "/orders",
-          icon: "receipt_long",
-          badge: `${activeCount}`,
-        },
-      ],
-    },
-    {
-      title: "DATA USAHA",
-      items: [
-        {
-          name: "Daftar Produk",
-          hint: "Produk yang kamu jual",
-          href: "/products",
-          icon: "inventory_2",
-        },
-        {
-          name: "Staf, Mesin & Bahan",
-          hint: "Kapasitas produksimu",
-          href: "/resources",
-          icon: "precision_manufacturing",
-        },
-        {
-          name: "Jadwal Produksi",
-          hint: "Rencana kerja mingguan",
-          href: "/production-planning",
-          icon: "calendar_month",
-        },
-      ],
-    },
-    {
-      title: "BANTU PUTUSKAN",
-      items: [
-        {
-          name: "Simulasi Pesanan",
-          hint: "Tes dulu sebelum terima order",
-          href: "/simulations",
-          icon: "calculate",
-        },
-        {
-          name: "Laporan & Grafik",
-          hint: "Performa usaha bulan ini",
-          href: "/analytics",
-          icon: "bar_chart",
-        },
-      ],
-    },
-    {
-      title: "LAINNYA",
-      items: [
-        {
-          name: "Pengaturan",
-          hint: "Profil & preferensi",
-          href: "/settings",
-          icon: "settings",
-        },
-      ],
-    },
-  ];
+  const { data: session } = useSession();
+  const isOwner = session?.user?.role !== "MEMBER"; // Owner atau default dev
+
+  const navGroups: NavGroup[] = useMemo(() => {
+    const groups: NavGroup[] = [
+      {
+        title: "RINGKASAN",
+        items: [
+          {
+            name: "Beranda",
+            hint: "Status usaha hari ini",
+            href: "/dashboard",
+            icon: "home",
+          },
+          {
+            name: "Pesanan",
+            hint: "Daftar pesanan masuk",
+            href: "/orders",
+            icon: "receipt_long",
+            badge: `${activeCount}`,
+          },
+        ],
+      },
+      {
+        title: "DATA USAHA",
+        items: [
+          {
+            name: "Daftar Produk",
+            hint: "Produk yang kamu jual",
+            href: "/products",
+            icon: "inventory_2",
+          },
+          {
+            name: "Staf, Mesin & Bahan",
+            hint: "Kapasitas produksimu",
+            href: "/resources",
+            icon: "precision_manufacturing",
+          },
+          {
+            name: "Jadwal Produksi",
+            hint: "Rencana kerja mingguan",
+            href: "/production-planning",
+            icon: "calendar_month",
+          },
+        ],
+      },
+      {
+        title: "BANTU PUTUSKAN",
+        items: [
+          {
+            name: "Simulasi Pesanan",
+            hint: "Tes dulu sebelum terima order",
+            href: "/simulations",
+            icon: "calculate",
+          },
+          {
+            name: "Laporan & Grafik",
+            hint: "Performa usaha bulan ini",
+            href: "/analytics",
+            icon: "bar_chart",
+          },
+        ],
+      },
+    ];
+
+    // Menu Pengaturan hanya tersedia untuk Owner usaha
+    if (isOwner) {
+      groups.push({
+        title: "LAINNYA",
+        items: [
+          {
+            name: "Pengaturan",
+            hint: "Profil & preferensi biaya",
+            href: "/settings",
+            icon: "settings",
+          },
+        ],
+      });
+    }
+
+    return groups;
+  }, [activeCount, isOwner]);
 
   const isActive = (href: string) =>
     href === "/orders"

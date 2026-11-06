@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition } from "react";
+import { useSession } from "next-auth/react";
 import {
   deactivateResourceAction,
   saveMachineAction,
@@ -55,6 +56,9 @@ export function ResourceManagementView({
   const [restockQuantity, setRestockQuantity] = useState("0");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const { data: session } = useSession();
+  const isOwner = session?.user?.role !== "MEMBER";
 
   function openForm(item?: EditableResource) {
     setEditing(item ?? null);
@@ -145,11 +149,20 @@ export function ResourceManagementView({
             Kelola kapasitas pekerja dan mesin serta snapshot stok bahan baku usaha.
           </p>
         </div>
-        <button type="button" onClick={() => openForm()} className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 dark:bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 dark:hover:bg-blue-700">
-          <span className="material-symbols-outlined text-lg">add_circle</span>
-          Tambah {activeTab === "workers" ? "Pekerja" : activeTab === "machines" ? "Mesin" : "Bahan Baku"}
-        </button>
+        {(isOwner || activeTab === "materials") && (
+          <button type="button" onClick={() => openForm()} className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 dark:bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 dark:hover:bg-blue-700">
+            <span className="material-symbols-outlined text-lg">add_circle</span>
+            Tambah {activeTab === "workers" ? "Pekerja" : activeTab === "machines" ? "Mesin" : "Bahan Baku"}
+          </button>
+        )}
       </header>
+
+      {!isOwner && (
+        <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/70 dark:bg-blue-950/30 p-3 text-xs text-blue-800 dark:text-blue-300 flex items-center gap-2">
+          <span className="material-symbols-outlined text-[18px]">badge</span>
+          <span>Akses Staf: Anda dapat mencatat dan memperbarui stok bahan baku fisik. Data mesin & pekerja dikelola oleh Owner.</span>
+        </div>
+      )}
 
       {error && <p role="alert" className="rounded-xl bg-rose-50 dark:bg-rose-900/30 p-3 text-sm text-rose-700 dark:text-rose-400">{error}</p>}
 
@@ -168,6 +181,7 @@ export function ResourceManagementView({
           onEdit={openForm}
           onDeactivate={handleDeactivate}
           isPending={isPending}
+          isOwner={isOwner}
           renderDetails={(item) => <p className="text-sm text-slate-600">Kapasitas: <strong>{item.dailyAvailableHours} jam/hari</strong></p>}
         />
       )}
@@ -178,6 +192,7 @@ export function ResourceManagementView({
           onEdit={openForm}
           onDeactivate={handleDeactivate}
           isPending={isPending}
+          isOwner={isOwner}
           renderDetails={(item) => <p className="text-sm text-slate-600">Kapasitas: <strong>{item.dailyAvailableHours} jam/hari</strong></p>}
         />
       )}
@@ -204,8 +219,12 @@ export function ResourceManagementView({
                   </div>
                   <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-3">
                     <button type="button" onClick={() => { setRestockMaterial(item); setRestockMode("add"); setRestockQuantity("0"); setError(null); }} className="rounded-lg px-3 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30">Perbarui stok</button>
-                    <button type="button" onClick={() => openForm(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30">Ubah</button>
-                    <button type="button" disabled={isPending} onClick={() => handleDeactivate(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 disabled:opacity-50">Nonaktifkan</button>
+                    {isOwner && (
+                      <>
+                        <button type="button" onClick={() => openForm(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30">Ubah</button>
+                        <button type="button" disabled={isPending} onClick={() => handleDeactivate(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 disabled:opacity-50">Nonaktifkan</button>
+                      </>
+                    )}
                   </div>
                 </article>
               );
@@ -297,6 +316,7 @@ function ResourceList<T extends Worker | Machine>({
   onEdit,
   onDeactivate,
   isPending,
+  isOwner = true,
   renderDetails,
 }: {
   items: T[];
@@ -304,6 +324,7 @@ function ResourceList<T extends Worker | Machine>({
   onEdit: (item: T) => void;
   onDeactivate: (item: T) => void;
   isPending: boolean;
+  isOwner?: boolean;
   renderDetails: (item: T) => React.ReactNode;
 }) {
   if (items.length === 0) return <EmptyState text={emptyText} />;
@@ -316,8 +337,14 @@ function ResourceList<T extends Worker | Machine>({
             {renderDetails(item)}
           </div>
           <div className="flex justify-end gap-2 border-t border-slate-100 pt-3">
-            <button type="button" onClick={() => onEdit(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30">Ubah</button>
-            <button type="button" disabled={isPending} onClick={() => onDeactivate(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 disabled:opacity-50">Nonaktifkan</button>
+            {isOwner ? (
+              <>
+                <button type="button" onClick={() => onEdit(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30">Ubah</button>
+                <button type="button" disabled={isPending} onClick={() => onDeactivate(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 disabled:opacity-50">Nonaktifkan</button>
+              </>
+            ) : (
+              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 py-1">Kapasitas Aktif • Dikelola Owner</span>
+            )}
           </div>
         </article>
       ))}

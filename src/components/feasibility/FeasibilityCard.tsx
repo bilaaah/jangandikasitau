@@ -268,7 +268,7 @@ export function FeasibilityCard({
                     ? "bg-amber-500"
                     : "bg-emerald-500",
                 )}
-                style={{ width: `${Math.min(workerAnalysis.utilizationPercent, 100)}%` }}
+                style={{ width: `${Math.min(100, Math.max(0, workerAnalysis.utilizationPercent))}%` }}
               />
             </div>
             <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground pt-1 border-t border-border/30">
@@ -321,7 +321,7 @@ export function FeasibilityCard({
                     ? "bg-amber-500"
                     : "bg-emerald-500",
                 )}
-                style={{ width: `${Math.min(machineAnalysis.utilizationPercent, 100)}%` }}
+                style={{ width: `${Math.min(100, Math.max(0, machineAnalysis.utilizationPercent))}%` }}
               />
             </div>
             <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground pt-1 border-t border-border/30">

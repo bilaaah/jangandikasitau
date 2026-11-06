@@ -115,6 +115,27 @@ export function SimulationsView({
     initialSolution === "split" ? 3 : 0,
   );
   const [orderValue, setOrderValue] = useState(0);
+  const [overtimeRate, setOvertimeRate] = useState(OVERTIME_COST_PER_HOUR);
+  const [freelanceRate, setFreelanceRate] = useState(WORKER_DAILY_RATE);
+
+  useEffect(() => {
+    try {
+      const storedOt = localStorage.getItem("biz_overtime_rate");
+      const storedFree = localStorage.getItem("biz_freelance_rate");
+      if (storedOt && Number(storedOt) > 0) setOvertimeRate(Number(storedOt));
+      if (storedFree && Number(storedFree) > 0) setFreelanceRate(Number(storedFree));
+    } catch {
+      // SSR guard
+    }
+  }, []);
+
+  const selected = orders.find((o) => o.id === selectedOrderId) ?? null;
+
+  useEffect(() => {
+    if (selected && orderValue === 0) {
+      setOrderValue(selected.quantity * 60_000);
+    }
+  }, [selected, orderValue]);
 
   // ── UI state ─────────────────────────────────────────────────────
   const [isApplying, setIsApplying] = useState(false);
@@ -124,7 +145,6 @@ export function SimulationsView({
   const [sim, setSim] = useState<WhatIfSimulationResult | null>(null);
   const [simError, setSimError] = useState<string | null>(null);
 
-  const selected = orders.find((o) => o.id === selectedOrderId) ?? null;
   const selProductId = selected?.productId;
   const selQuantity = selected?.quantity;
   const selDelivery = selected?.deliveryDateStr;
@@ -249,10 +269,10 @@ export function SimulationsView({
     orderValue,
   };
 
-  // ── Biaya (tarif contoh) ─────────────────────────────────────────
+  // ── Biaya (tarif dari Pengaturan / Default) ──────────────────────
   const overtimeCost =
-    overtimeHours * workerCount * workDays * OVERTIME_COST_PER_HOUR;
-  const workerCost = extraWorkers * workDays * WORKER_DAILY_RATE;
+    overtimeHours * workerCount * workDays * overtimeRate;
+  const workerCost = extraWorkers * workDays * freelanceRate;
   const totalCost = overtimeCost + workerCost;
   const netProtectedRevenue = orderValue - totalCost;
   const costRatio =
@@ -430,6 +450,7 @@ export function SimulationsView({
               cost="belum tersedia"
               checked={false}
               onChange={() => {}}
+              badgeLabel="Segera hadir"
             />
 
             {/* ── Toggle: Split Delivery ────────────────────────── */}

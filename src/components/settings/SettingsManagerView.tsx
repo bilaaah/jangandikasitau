@@ -1,15 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { updateBusinessSettingsAction } from "@/actions/settings.actions";
 
-export function SettingsManagerView() {
+interface SettingsManagerViewProps {
+  initialBusinessName?: string;
+  initialLocation?: string;
+}
+
+export function SettingsManagerView({
+  initialBusinessName = "SweetCrumbs Artisan Bakery & Hampers",
+  initialLocation = "Kebayoran Baru, Jakarta Selatan",
+}: SettingsManagerViewProps) {
   const [activeTab, setActiveTab] = useState<"profil" | "capacity" | "notifications" | "costs" | "billing">("capacity");
   const [isSaving, setIsSaving] = useState(false);
   const [saveToast, setSaveToast] = useState<string | null>(null);
 
   // Form states
-  const [shopName, setShopName] = useState("SweetCrumbs Artisan Bakery & Hampers");
-  const [location, setLocation] = useState("Kebayoran Baru, Jakarta Selatan");
+  const [shopName, setShopName] = useState(initialBusinessName);
+  const [location, setLocation] = useState(initialLocation);
   const [contactPhone, setContactPhone] = useState("+62 812-3456-7890");
 
   const [shiftHours, setShiftHours] = useState("8");
@@ -28,38 +37,66 @@ export function SettingsManagerView() {
       const storedName = localStorage.getItem("biz_name");
       const storedPhone = localStorage.getItem("biz_phone");
       const storedLoc = localStorage.getItem("biz_location");
+      const storedShift = localStorage.getItem("biz_shift_hours");
+      const storedUtil = localStorage.getItem("biz_util_threshold");
+      const storedBuffer = localStorage.getItem("biz_buffer_days");
+      const storedOt = localStorage.getItem("biz_overtime_rate");
+      const storedFree = localStorage.getItem("biz_freelance_rate");
+
       if (storedName) setShopName(storedName);
       if (storedPhone) setContactPhone(storedPhone);
       if (storedLoc) setLocation(storedLoc);
+      if (storedShift) setShiftHours(storedShift);
+      if (storedUtil) setUtilThreshold(storedUtil);
+      if (storedBuffer) setDeliveryBufferDays(storedBuffer);
+      if (storedOt) setOvertimeHourlyRate(storedOt);
+      if (storedFree) setFreelanceDayRate(storedFree);
     } catch {
       // SSR guard
     }
   }, []);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
 
     try {
-      if (shopName.trim()) {
-        localStorage.setItem("biz_name", shopName.trim());
-      }
-      if (contactPhone.trim()) {
-        localStorage.setItem("biz_phone", contactPhone.trim());
-      }
-      if (location.trim()) {
-        localStorage.setItem("biz_location", location.trim());
-      }
-      window.dispatchEvent(new Event("biz_profile_updated"));
-    } catch {
-      // SSR guard
-    }
+      // Persist to localStorage for client-side instant access
+      localStorage.setItem("biz_name", shopName.trim());
+      localStorage.setItem("biz_phone", contactPhone.trim());
+      localStorage.setItem("biz_location", location.trim());
+      localStorage.setItem("biz_shift_hours", shiftHours);
+      localStorage.setItem("biz_util_threshold", utilThreshold);
+      localStorage.setItem("biz_buffer_days", deliveryBufferDays);
+      localStorage.setItem("biz_overtime_rate", overtimeHourlyRate);
+      localStorage.setItem("biz_freelance_rate", freelanceDayRate);
 
-    setTimeout(() => {
+      window.dispatchEvent(new Event("biz_profile_updated"));
+
+      // Persist to PostgreSQL database via Server Action
+      const res = await updateBusinessSettingsAction({
+        shopName,
+        location,
+        contactPhone,
+        shiftHours: Number(shiftHours),
+        utilThreshold: Number(utilThreshold),
+        deliveryBufferDays: Number(deliveryBufferDays),
+        overtimeHourlyRate: Number(overtimeHourlyRate),
+        freelanceDayRate: Number(freelanceDayRate),
+      });
+
       setIsSaving(false);
-      setSaveToast("Pengaturan profil & parameter kapasitas berhasil disimpan!");
+      if (res.success) {
+        setSaveToast("Pengaturan profil & parameter kapasitas berhasil disimpan ke database!");
+      } else {
+        setSaveToast(res.error || "Gagal menyimpan ke database.");
+      }
       setTimeout(() => setSaveToast(null), 4000);
-    }, 500);
+    } catch (err: unknown) {
+      setIsSaving(false);
+      setSaveToast("Pengaturan berhasil disimpan di perangkat lokal.");
+      setTimeout(() => setSaveToast(null), 4000);
+    }
   };
 
   const tabs = [

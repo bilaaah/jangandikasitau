@@ -157,10 +157,31 @@ interface OrdersDashboardViewProps {
   initialDbOrders?: any[];
 }
 
+/** Hitung sisa hari dari sekarang ke deadline */
+function getRemainingText(deadline: string | Date): string {
+  const now = new Date();
+  const dl = new Date(deadline);
+  const diffMs = dl.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays < 0) return `Terlambat ${Math.abs(diffDays)} hari`;
+  if (diffDays === 0) return "Deadline hari ini!";
+  if (diffDays === 1) return "Besok — KRITIS";
+  if (diffDays <= 3) return `Sisa ${diffDays} hari (Kritis)`;
+  return `Sisa ${diffDays} hari`;
+}
+
+function getUrgencyLevel(deadline: string | Date, capStatus: string, orderStatus: string): "critical" | "warning" | "normal" | "completed" {
+  if (orderStatus === "COMPLETED") return "completed";
+  const diffDays = Math.ceil((new Date(deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  if (diffDays < 0 || capStatus === "NOT_FEASIBLE") return "critical";
+  if (diffDays <= 2 || capStatus === "AT_RISK") return "warning";
+  return "normal";
+}
+
 export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProps) {
   const [orders, setOrders] = useState<OrderItemData[]>(() => {
     if (initialDbOrders && initialDbOrders.length > 0) {
-      // Map DB orders to view items
+      // Map DB orders to view items — HANYA DB data, tidak dicampur sample
       const mappedDb: OrderItemData[] = initialDbOrders.map((o) => {
         const item = o.items?.[0];
         const analysis = o.capacityAnalyses?.[0];
@@ -179,28 +200,31 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
           clientName: o.customerName || "Customer",
           clientType: "Pelanggan Terdaftar",
           productName: item?.product?.name || "Produk Custom",
-          quantityText: `${item?.quantity ?? 1} units`,
-          skuDetails: "SKU Standar",
+          quantityText: `${item?.quantity ?? 1} unit`,
+          skuDetails: item?.product?.description || "SKU Standar",
           deadlineText: new Date(o.requiredDeliveryDate).toLocaleDateString("id-ID", {
             day: "numeric",
             month: "short",
             year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
           }),
-          remainingText: "Dalam Jadwal",
-          urgencyLevel: capStatus === "NOT_FEASIBLE" ? "critical" : "normal",
+          remainingText: getRemainingText(o.requiredDeliveryDate),
+          urgencyLevel: getUrgencyLevel(o.requiredDeliveryDate, capStatus, o.status),
           capacityStatus: capStatus,
           capacityDetail:
             analysis?.reasoning?.[0] || "Kalkulasi kapasitas terverifikasi engine.",
-          productionStatus: (o.status?.toLowerCase() as any) || "planned",
-          productionStatusLabel: o.status || "Planned",
-          progressPercent: o.status === "COMPLETED" ? 100 : 30,
-          productionNote: "Analisis DSS BizCapacity",
-          hasBottleneck: capStatus !== "FEASIBLE",
-          bottleneckStation: "Lini Produksi Utama",
-          bottleneckDeficit: "Kapasitas terbatas",
+          productionStatus: (o.status?.toLowerCase() as any) || "draft",
+          productionStatusLabel: o.status || "DRAFT",
+          progressPercent: o.status === "COMPLETED" ? 100 : o.status === "IN_PROGRESS" ? 50 : o.status === "CONFIRMED" ? 20 : 0,
+          productionNote: analysis ? `Analisis DSS — ${analysis.status}` : "Belum dianalisis",
+          hasBottleneck: (analysis?.bottlenecks?.length ?? 0) > 0,
+          bottleneckStation: analysis?.bottlenecks?.[0]?.resourceType || undefined,
+          bottleneckDeficit: analysis?.bottlenecks?.[0]?.description || undefined,
         };
       });
-      return [...mappedDb, ...DEFAULT_SAMPLE_ORDERS];
+      // FIX FE-2: hanya tampilkan DB data, bukan campuran dengan sample
+      return mappedDb;
     }
     return DEFAULT_SAMPLE_ORDERS;
   });

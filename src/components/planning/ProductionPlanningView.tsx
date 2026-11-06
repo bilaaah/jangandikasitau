@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 
 interface ScheduleItem {
@@ -18,6 +18,31 @@ interface ScheduleItem {
   isCapacityLocked: boolean; // Sesuai aturan: hanya pesanan CONFIRMED & IN_PROGRESS yang mengunci kapasitas
 }
 
+interface ProductionPlanningViewProps {
+  initialDbOrders?: any[];
+}
+
+function getDynamicDays() {
+  const now = new Date();
+  const currentDay = now.getDay(); // 0=Sun, 1=Mon...
+  const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + distanceToMonday);
+
+  const dayNames = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+  return dayNames.map((name, index) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + index);
+    return {
+      index,
+      name,
+      date: `${d.getDate()} ${monthNames[d.getMonth()]}`,
+    };
+  });
+}
+
 const STATIONS = [
   { id: "mixing", name: "1. Mixing & Dough Prep", totalHours: 40, usedHours: 26, color: "bg-blue-500", lightColor: "bg-blue-50 border-blue-200 text-blue-700" },
   { id: "baking", name: "2. Oven Baking & Proofing", totalHours: 48, usedHours: 42, color: "bg-amber-500", lightColor: "bg-amber-50 border-amber-200 text-amber-700" },
@@ -25,16 +50,7 @@ const STATIONS = [
   { id: "packaging", name: "4. Packaging & Box Wrapping", totalHours: 36, usedHours: 34.5, color: "bg-rose-500", lightColor: "bg-rose-50 border-rose-200 text-rose-700" },
 ];
 
-const DAYS = [
-  { index: 0, name: "Senin", date: "22 Okt" },
-  { index: 1, name: "Selasa", date: "23 Okt" },
-  { index: 2, name: "Rabu", date: "24 Okt" },
-  { index: 3, name: "Kamis", date: "25 Okt" },
-  { index: 4, name: "Jumat", date: "26 Okt" },
-  { index: 5, name: "Sabtu", date: "27 Okt" },
-];
-
-const INITIAL_SCHEDULE: ScheduleItem[] = [
+const DEFAULT_SCHEDULE: ScheduleItem[] = [
   {
     id: "SCH-01",
     orderId: "BC-1024",
@@ -47,24 +63,10 @@ const INITIAL_SCHEDULE: ScheduleItem[] = [
     status: "at_risk",
     progress: 40,
     operator: "Budi & Tim Packing (3 Org)",
-    isCapacityLocked: true, // PO Terkonfirmasi mengunci kapasitas
-  },
-  {
-    id: "SCH-02",
-    orderId: "BC-1024",
-    customer: "PT Nusantara Sentosa",
-    product: "Kue Kering Butter Wijsman",
-    qty: 300,
-    station: "baking",
-    startDay: 1,
-    spanDays: 2,
-    status: "in_progress",
-    progress: 75,
-    operator: "Chef Aris (Oven Deck A)",
     isCapacityLocked: true,
   },
   {
-    id: "SCH-03",
+    id: "SCH-02",
     orderId: "BC-1023",
     customer: "Ibu Ratna Catering",
     product: "Signature Brownies Panggang",
@@ -72,27 +74,13 @@ const INITIAL_SCHEDULE: ScheduleItem[] = [
     station: "baking",
     startDay: 0,
     spanDays: 2,
-    status: "completed",
-    progress: 100,
-    operator: "Chef Dita (Oven Konveksi B)",
+    status: "in_progress",
+    progress: 75,
+    operator: "Chef Aris (Oven Utama)",
     isCapacityLocked: true,
   },
   {
-    id: "SCH-04",
-    orderId: "BC-1023",
-    customer: "Ibu Ratna Catering",
-    product: "Packaging Box Brownies",
-    qty: 120,
-    station: "packaging",
-    startDay: 1,
-    spanDays: 1,
-    status: "completed",
-    progress: 100,
-    operator: "Siti Rahma",
-    isCapacityLocked: true,
-  },
-  {
-    id: "SCH-05",
+    id: "SCH-03",
     orderId: "BC-1022",
     customer: "Kopi Selaras Cafe",
     product: "Artisan Croissants (Laminasi)",
@@ -100,43 +88,73 @@ const INITIAL_SCHEDULE: ScheduleItem[] = [
     station: "mixing",
     startDay: 1,
     spanDays: 2,
-    status: "in_progress",
-    progress: 60,
-    operator: "Ahmad Fauzi (Sheeter Machine)",
-    isCapacityLocked: true,
-  },
-  {
-    id: "SCH-06",
-    orderId: "BC-1022",
-    customer: "Kopi Selaras Cafe",
-    product: "Croissant Proof & Bake",
-    qty: 500,
-    station: "baking",
-    startDay: 3,
-    spanDays: 2,
-    status: "scheduled",
-    progress: 0,
-    operator: "Chef Aris (Oven Rotary)",
-    isCapacityLocked: false, // Draft proposal - belum mengunci kapasitas
-  },
-  {
-    id: "SCH-07",
-    orderId: "BC-1020",
-    customer: "Wedding Organizer Harmoni",
-    product: "Royal Tier Fondant Decoration",
-    qty: 1,
-    station: "assembly",
-    startDay: 2,
-    spanDays: 3,
-    status: "in_progress",
-    progress: 50,
-    operator: "Chef Maya (Master Decorator)",
+    status: "completed",
+    progress: 100,
+    operator: "Ahmad Fauzi (Sheeter)",
     isCapacityLocked: true,
   },
 ];
 
-export function ProductionPlanningView() {
-  const [schedule, setSchedule] = useState<ScheduleItem[]>(INITIAL_SCHEDULE);
+export function ProductionPlanningView({ initialDbOrders }: ProductionPlanningViewProps) {
+  const DAYS = useMemo(() => getDynamicDays(), []);
+
+  const initialSchedule = useMemo<ScheduleItem[]>(() => {
+    if (initialDbOrders && initialDbOrders.length > 0) {
+      return initialDbOrders.map((o, idx) => {
+        const item = o.items?.[0];
+        const analysis = o.capacityAnalyses?.[0];
+        const prodName = item?.product?.name?.toLowerCase() || "";
+
+        let station: "mixing" | "baking" | "assembly" | "packaging" = "baking";
+        if (prodName.includes("box") || prodName.includes("hampers") || prodName.includes("packaging")) {
+          station = "packaging";
+        } else if (prodName.includes("croissant") || prodName.includes("dough") || prodName.includes("adonan")) {
+          station = "mixing";
+        } else if (prodName.includes("cake") || prodName.includes("tart") || prodName.includes("hias")) {
+          station = "assembly";
+        } else {
+          station = (["packaging", "baking", "assembly", "mixing"] as const)[idx % 4];
+        }
+
+        const isLocked = o.status === "CONFIRMED" || o.status === "IN_PROGRESS";
+        const isAtRisk = analysis?.status === "AT_RISK" || analysis?.status === "NOT_FEASIBLE";
+        const status: "completed" | "in_progress" | "at_risk" | "scheduled" =
+          o.status === "COMPLETED"
+            ? "completed"
+            : isAtRisk
+              ? "at_risk"
+              : o.status === "IN_PROGRESS"
+                ? "in_progress"
+                : "scheduled";
+
+        const progress = o.status === "COMPLETED" ? 100 : o.status === "IN_PROGRESS" ? 65 : o.status === "CONFIRMED" ? 30 : 0;
+        const operatorNames = [
+          "Budi & Tim Packing",
+          "Chef Aris (Oven Utama)",
+          "Chef Maya (Dekorator)",
+          "Ahmad Fauzi (Sheeter)",
+        ];
+
+        return {
+          id: `SCH-${String(idx + 1).padStart(2, "0")}`,
+          orderId: o.id,
+          customer: o.customerName || "Pelanggan",
+          product: item?.product?.name || "Produk Custom",
+          qty: item?.quantity ?? 1,
+          station,
+          startDay: idx % 5,
+          spanDays: Math.min(3, Math.max(1, analysis?.estimatedProductionDays ?? 2)),
+          status,
+          progress,
+          operator: operatorNames[idx % operatorNames.length],
+          isCapacityLocked: isLocked,
+        };
+      });
+    }
+    return DEFAULT_SCHEDULE;
+  }, [initialDbOrders]);
+
+  const [schedule, setSchedule] = useState<ScheduleItem[]>(initialSchedule);
   const [selectedStation, setSelectedStation] = useState<string>("all");
   const [selectedItem, setSelectedItem] = useState<ScheduleItem | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -190,38 +208,63 @@ export function ProductionPlanningView() {
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
           <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase">Kapasitas Terpakai</span>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-2xl font-black text-slate-900 dark:text-slate-50">82.4%</span>
-            <span className="text-xs text-amber-600 dark:text-amber-400 font-bold">Mendekati Limit</span>
+            <span className="text-2xl font-black text-slate-900 dark:text-slate-50">
+              {schedule.length > 0 ? Math.min(100, Math.round((schedule.filter(s => s.isCapacityLocked).length / Math.max(1, schedule.length)) * 85)) : 0}%
+            </span>
+            <span className={`text-xs font-bold ${
+              schedule.some(s => s.status === "at_risk")
+                ? "text-amber-600 dark:text-amber-400"
+                : "text-emerald-600 dark:text-emerald-400"
+            }`}>
+              {schedule.some(s => s.status === "at_risk") ? "Perlu Review" : "Optimal"}
+            </span>
           </div>
           <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full mt-2 overflow-hidden">
-            <div className="bg-amber-500 h-full rounded-full" style={{ width: "82.4%" }} />
+            <div
+              className={`h-full rounded-full ${
+                schedule.some(s => s.status === "at_risk") ? "bg-amber-500" : "bg-emerald-500"
+              }`}
+              style={{
+                width: `${schedule.length > 0 ? Math.min(100, Math.round((schedule.filter(s => s.isCapacityLocked).length / Math.max(1, schedule.length)) * 85)) : 0}%`,
+              }}
+            />
           </div>
         </div>
 
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
           <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase">Titik Macet Aktif</span>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-2xl font-black text-rose-600 dark:text-rose-400">Stasiun 4</span>
+            <span className="text-2xl font-black text-rose-600 dark:text-rose-400">
+              {schedule.filter(s => s.status === "at_risk").length} Batch
+            </span>
             <span className="text-xs bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 px-2 py-0.5 rounded-full font-bold border border-rose-200 dark:border-rose-800">
-              Packaging (95.8%)
+              {schedule.some(s => s.status === "at_risk") ? "At-Risk" : "Nihil"}
             </span>
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2">Dampak: Potensi telat PO BC-1024</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2">
+            {schedule.some(s => s.status === "at_risk")
+              ? "Perlu solusi lembur atau freelance"
+              : "Semua batch dalam buffer aman"}
+          </p>
         </div>
 
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
           <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase">Pesanan Berjalan</span>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-2xl font-black text-blue-700 dark:text-blue-400">18 PO</span>
+            <span className="text-2xl font-black text-blue-700 dark:text-blue-400">
+              {schedule.length} PO
+            </span>
             <span className="text-xs text-slate-500 dark:text-slate-400">Pekan Ini</span>
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2">12 On-Track • 4 Terjadwal • 2 At-Risk</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2">
+            {schedule.filter(s => s.isCapacityLocked).length} Terkunci • {schedule.filter(s => !s.isCapacityLocked).length} Rencana
+          </p>
         </div>
 
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
           <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase">Rasio Tepat Waktu (OTD)</span>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">98.2%</span>
+            <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">98.5%</span>
             <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">Target &gt;95%</span>
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2">Akurasi janji kapasitas terjaga</p>

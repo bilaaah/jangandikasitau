@@ -415,19 +415,23 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
               <div className="absolute right-0 top-11 w-64 bg-white/95 dark:bg-[#0F172A]/90 backdrop-blur-2xl rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-black/30 border border-slate-200 dark:border-white/[0.08] p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
                 {/* Business identity */}
                 <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/60 dark:border-white/[0.06] mb-1">
-                  <p className="text-xs font-bold text-slate-900 dark:text-[#F1F5F9]">SweetCrumbs Bakery</p>
-                  <p className="text-[11px] text-slate-500 dark:text-[#94A3B8]">Semarang • Operasional Aktif</p>
+                  <p className="text-xs font-bold text-slate-900 dark:text-[#F1F5F9]">{bizName}</p>
+                  <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] truncate">
+                    {session?.user?.email ?? "Operasional Aktif"}
+                  </p>
                 </div>
 
                 <div className="space-y-0.5">
-                  <Link
-                    href="/settings"
-                    onClick={() => setShowProfile(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-[#F1F5F9] hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-[18px] text-slate-500 dark:text-[#94A3B8]">settings</span>
-                    <span>Pengaturan Usaha</span>
-                  </Link>
+                  {session?.user?.role !== "MEMBER" && (
+                    <Link
+                      href="/settings"
+                      onClick={() => setShowProfile(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-[#F1F5F9] hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[18px] text-slate-500 dark:text-[#94A3B8]">settings</span>
+                      <span>Pengaturan Usaha</span>
+                    </Link>
+                  )}
                   <Link
                     href="/resources"
                     onClick={() => setShowProfile(false)}

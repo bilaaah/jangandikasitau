@@ -129,32 +129,35 @@ export function SimulationsView({
   const [extendedDays, setExtendedDays] = useState(0);
   const [outsourcePercent, setOutsourcePercent] = useState(0);
   const [splitEnabled, setSplitEnabled] = useState(initialSolution === "split");
-  const [orderValue, setOrderValue] = useState(0);
-  const [overtimeRate, setOvertimeRate] = useState(OVERTIME_COST_PER_HOUR);
-  const [freelanceRate, setFreelanceRate] = useState(WORKER_DAILY_RATE);
-
-  useEffect(() => {
+  
+  const initialSelected = orders.find((o) => o.id === selectedOrderId) ?? orders[0] ?? null;
+  const [orderValue, setOrderValue] = useState<number>(() =>
+    initialSelected ? initialSelected.quantity * 60_000 : 0,
+  );
+  const [overtimeRate] = useState<number>(() => {
+    if (typeof window === "undefined") return OVERTIME_COST_PER_HOUR;
     try {
-      const storedOt = localStorage.getItem("biz_overtime_rate");
-      const storedFree = localStorage.getItem("biz_freelance_rate");
-      if (storedOt && Number(storedOt) > 0) setOvertimeRate(Number(storedOt));
-      if (storedFree && Number(storedFree) > 0) setFreelanceRate(Number(storedFree));
+      const stored = localStorage.getItem("biz_overtime_rate");
+      return stored && Number(stored) > 0 ? Number(stored) : OVERTIME_COST_PER_HOUR;
     } catch {
-      // SSR guard
+      return OVERTIME_COST_PER_HOUR;
     }
-  }, []);
+  });
+  const [freelanceRate] = useState<number>(() => {
+    if (typeof window === "undefined") return WORKER_DAILY_RATE;
+    try {
+      const stored = localStorage.getItem("biz_freelance_rate");
+      return stored && Number(stored) > 0 ? Number(stored) : WORKER_DAILY_RATE;
+    } catch {
+      return WORKER_DAILY_RATE;
+    }
+  });
 
   const selected = orders.find((o) => o.id === selectedOrderId) ?? null;
 
-  useEffect(() => {
-    if (selected && orderValue === 0) {
-      setOrderValue(selected.quantity * 60_000);
-    }
-  }, [selected, orderValue]);
-
   // ── UI state ─────────────────────────────────────────────────────
-  const [isApplying, setIsApplying] = useState(false);
-  const [appliedSuccess, setAppliedSuccess] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   // ── Hasil engine ─────────────────────────────────────────────────
   const [sim, setSim] = useState<WhatIfSimulationResult | null>(null);
@@ -221,7 +224,7 @@ export function SimulationsView({
     setExtendedDays(0);
     setOutsourcePercent(0);
     setSplitEnabled(false);
-    setAppliedSuccess(false);
+    setCopySuccess(false);
   }
 
   const enableOutsource = outsourcePercent > 0;
@@ -392,7 +395,12 @@ export function SimulationsView({
               <select
                 value={selectedOrderId}
                 onChange={(e) => {
-                  setSelectedOrderId(e.target.value);
+                  const newId = e.target.value;
+                  setSelectedOrderId(newId);
+                  const newSel = orders.find((o) => o.id === newId);
+                  if (newSel) {
+                    setOrderValue(newSel.quantity * 60_000);
+                  }
                   setSim(null);
                   resetAll();
                 }}
@@ -830,56 +838,77 @@ export function SimulationsView({
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsApplying(true);
-                    setTimeout(() => {
-                      setIsApplying(false);
-                      setAppliedSuccess(true);
-                    }, 700);
+                  onClick={async () => {
+                    if (!selected || !sim) return;
+                    setIsCopying(true);
+
+                    const activeSolutionsList = [
+                      overtimeHours > 0 && `• Tambah lembur: +${overtimeHours} jam/hari/pekerja`,
+                      extraWorkers > 0 && `• Tambah pekerja harian: +${extraWorkers} orang`,
+                      extendedDays > 0 && `• Geser tenggat deadline: +${extendedDays} hari kerja`,
+                      outsourcePercent > 0 && `• Alihkan ke mitra maklon: ${outsourcePercent}% (${sim.outsourcedUnits} unit)`,
+                      splitEnabled && `• Pengiriman bertahap (2 termin): ${SPLIT_FIRST_WAVE_PERCENT}% di tenggat, ${100 - SPLIT_FIRST_WAVE_PERCENT}% +${SPLIT_DELAY_WORKING_DAYS} hari kerja`,
+                    ].filter(Boolean);
+
+                    const summaryText = `[RINGKASAN SKENARIO PRODUKSI BIZCAPACITY]
+Pesanan: ${selected.customerName} (${selected.quantity} unit × ${selected.productName})
+Tenggat: ${new Date(selected.deliveryDateStr).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+Status Awal: ${order.statusLabel} (${order.baseUtilization}% beban kapasitas)
+Status Hasil Skenario: ${statusLabel[newStatus]} (${newUtilization}% beban kapasitas)
+
+Intervensi Solusi yang Dipilih:
+${activeSolutionsList.length > 0 ? activeSolutionsList.join("\n") : "• Tidak ada intervensi tambahan"}
+
+Dampak Finansial:
+• Nilai Pesanan: Rp ${orderValue.toLocaleString("id-ID")}
+• Tambahan Biaya Solusi: Rp ${totalCost.toLocaleString("id-ID")}
+• Estimasi Pendapatan Bersih: Rp ${netProtectedRevenue.toLocaleString("id-ID")}
+${sim.splitDelivery ? `\nStatus Pembagian Termin:\n• Termin 1 (${sim.splitDelivery.wave1Units} unit): ${STATUS_LABEL[sim.splitDelivery.wave1Result.status]}\n• Termin 2 (${sim.splitDelivery.wave2Units} unit): ${STATUS_LABEL[sim.splitDelivery.wave2Result.status]}` : ""}
+
+Dihasilkan otomatis oleh BizCapacity Decision Support System.`;
+
+                    try {
+                      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+                        await navigator.clipboard.writeText(summaryText);
+                      }
+                      setCopySuccess(true);
+                      setTimeout(() => setCopySuccess(false), 5000);
+                    } catch {
+                      setCopySuccess(true);
+                      setTimeout(() => setCopySuccess(false), 5000);
+                    } finally {
+                      setIsCopying(false);
+                    }
                   }}
-                  disabled={isApplying}
+                  disabled={isCopying || !sim}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-bold transition-all shadow-sm shadow-blue-500/20 disabled:opacity-70 cursor-pointer"
                 >
-                  {isApplying ? (
-                    <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
-                  ) : (
-                    <span className="material-symbols-outlined text-[18px]">
-                      bookmark_added
-                    </span>
-                  )}
-                  <span>Simpan Catatan Skenario</span>
+                  <span className="material-symbols-outlined text-[18px]">
+                    {copySuccess ? "done_all" : "content_copy"}
+                  </span>
+                  <span>{copySuccess ? "Tersalin ke Clipboard!" : "Salin Ringkasan Skenario"}</span>
                 </button>
               </div>
 
               {/* Success feedback banner */}
-              {appliedSuccess && (
-                <div className="p-4 rounded-xl border border-blue-200 dark:border-blue-500/30 bg-blue-50/90 dark:bg-blue-500/[0.12] text-blue-950 dark:text-blue-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              {copySuccess && (
+                <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/90 dark:bg-emerald-500/[0.12] text-emerald-950 dark:text-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
                   <div className="flex items-start gap-2.5">
-                    <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[22px] shrink-0">
-                      info
+                    <span className="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-[22px] shrink-0">
+                      check_circle
                     </span>
                     <div>
-                      <h5 className="font-bold text-xs text-blue-900 dark:text-blue-200">
-                        Catatan Skenario Disimpan — Pesanan{" "}
-                        {selectedOrderId.toUpperCase()}
+                      <h5 className="font-bold text-xs text-emerald-900 dark:text-emerald-200">
+                        Ringkasan Skenario Berhasil Disalin ke Clipboard!
                       </h5>
-                      <p className="text-[11px] text-blue-800 dark:text-blue-300 mt-0.5">
-                        Skenario:{" "}
-                        {[
-                          overtimeHours > 0 && `+${overtimeHours}j lembur`,
-                          extraWorkers > 0 && `+${extraWorkers} pekerja`,
-                          extendedDays > 0 && `+${extendedDays} hari deadline`,
-                          enableOutsource && "outsource",
-                          enableSplitDelivery && "split delivery",
-                        ]
-                          .filter(Boolean)
-                          .join(", ") || "Tidak ada perubahan"}
+                      <p className="text-[11px] text-emerald-800 dark:text-emerald-300 mt-0.5">
+                        Teks ringkasan skenario pesanan <strong>{selected.customerName}</strong> siap dibagikan ke WhatsApp tim produksi, mitra maklon, atau catatan manajemen.
                       </p>
                     </div>
                   </div>
                   <Link
                     href={`/orders/${selectedOrderId}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold shrink-0 self-start sm:self-auto shadow-xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shrink-0 self-start sm:self-auto shadow-xs"
                   >
                     <span>Lihat Detail PO</span>
                     <span className="material-symbols-outlined text-[14px]">

@@ -17,6 +17,8 @@ export interface GenerateAdviceInput {
   analysis: CapacityEngineResult;
   /** id pertanyaan cepat dari UI: general | why_risk | bottleneck | how_fix | add_worker | priority */
   question?: string;
+  /** Peringatan lead time supplier hasil findLeadTimeConflicts (opsional). */
+  leadTimeWarnings?: string[];
 }
 
 /**
@@ -24,5 +26,5 @@ export interface GenerateAdviceInput {
  */
 export async function generateOrderFeasibilityAdvice(input: GenerateAdviceInput): Promise<AiOrderAdvice> {
   const prompt = buildAdvisoryPrompt(input);
-  return callGeminiAdvisory(prompt, input.analysis);
+  return callGeminiAdvisory(prompt, input.analysis, input.leadTimeWarnings ?? []);
 }

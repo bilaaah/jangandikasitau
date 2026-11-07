@@ -20,8 +20,15 @@ export function buildAdvisoryPrompt(params: {
   deliveryDateStr: string;
   analysis: CapacityEngineResult;
   question?: string;
+  leadTimeWarnings?: string[];
 }): string {
-  const { productName, quantity, customerName, deliveryDateStr, analysis, question } = params;
+  const { productName, quantity, customerName, deliveryDateStr, analysis, question, leadTimeWarnings } = params;
+  const leadTimeBlock =
+    leadTimeWarnings && leadTimeWarnings.length > 0
+      ? `\nKENDALA LEAD TIME SUPPLIER (FAKTA, JANGAN DIBANTAH):\n${leadTimeWarnings
+          .map((w, i) => `${i + 1}. ${w}`)
+          .join("\n")}\nJika kendala ini ada, JANGAN menjadikan "beli bahan tambahan ke supplier" sebagai solusi utama; sarankan bahan substitusi, penjadwalan ulang, atau pengiriman bertahap.\n`
+      : "";
   const focus =
   question && Object.prototype.hasOwnProperty.call(QUESTION_FOCUS, question)
     ? QUESTION_FOCUS[question]
@@ -49,7 +56,7 @@ ${analysis.bottlenecks.map((b, i) => `${i + 1}. [${b.severity}] ${b.resourceType
 
 LANGKAH PENALARAN ENGINE:
 ${analysis.reasoning.map((r, i) => `${i + 1}. ${r}`).join("\n")}
-
+${leadTimeBlock}
 FOKUS PERTANYAAN PEMILIK USAHA:
 ${focus}
 

@@ -25,6 +25,10 @@ export interface SimOrder {
   quantity: number;
   /** Tenggat pesanan dalam format ISO */
   deliveryDateStr: string;
+  /** Status pesanan saat ini */
+  status: "DRAFT" | "CONFIRMED" | "IN_PROGRESS";
+  /** Analisis tersimpan terakhir berstatus AT_RISK / NOT_FEASIBLE */
+  lastKnownRisk: boolean;
 }
 
 interface SimulationsViewProps {
@@ -39,12 +43,23 @@ interface SimulationsViewProps {
 const OVERTIME_MAX = 4; // jam/hari per pekerja
 const WORKERS_MAX = 3; // orang
 const DEADLINE_MAX = 7; // hari kerja
-const SPLIT_TERMIN = 2;
+const OUTSOURCE_MAX_PERCENT = 80; // % unit yang boleh dialihkan ke mitra
+const OUTSOURCE_STEP = 10;
+const SPLIT_FIRST_WAVE_PERCENT = 50; // % unit di termin 1
+const SPLIT_DELAY_WORKING_DAYS = 3; // termin 2 menyusul N hari kerja setelah tenggat
 const FREELANCER_DAILY_HOURS = 8;
 
 // ── Tarif contoh (belum ada di database) ──────────────────────────
 const OVERTIME_COST_PER_HOUR = 30_000;
 const WORKER_DAILY_RATE = 140_000;
+const OUTSOURCE_COST_PER_UNIT = 35_000; // biaya maklon per unit (contoh)
+const SPLIT_EXTRA_SHIPPING_COST = 150_000; // ongkir tambahan untuk termin ke-2 (contoh)
+
+const ORDER_STATUS_TAG = {
+  DRAFT: "Draf",
+  CONFIRMED: "Terkonfirmasi",
+  IN_PROGRESS: "Diproduksi",
+} as const;
 
 const STATUS_COLOR = {
   FEASIBLE: {
@@ -111,9 +126,9 @@ export function SimulationsView({
   const [extraWorkers, setExtraWorkers] = useState(() =>
     initialSolution === "workers" ? 1 : 0,
   );
-  const [extendedDays, setExtendedDays] = useState(() =>
-    initialSolution === "split" ? 3 : 0,
-  );
+  const [extendedDays, setExtendedDays] = useState(0);
+  const [outsourcePercent, setOutsourcePercent] = useState(0);
+  const [splitEnabled, setSplitEnabled] = useState(initialSolution === "split");
   const [orderValue, setOrderValue] = useState(0);
   const [overtimeRate, setOvertimeRate] = useState(OVERTIME_COST_PER_HOUR);
   const [freelanceRate, setFreelanceRate] = useState(WORKER_DAILY_RATE);
@@ -160,11 +175,22 @@ export function SimulationsView({
     const timer = setTimeout(async () => {
       const res = await runWhatIfForOrderAction(
         {
+          orderId: selectedOrderId,
           productId: selProductId,
           quantity: selQuantity,
           deliveryDateStr: selDelivery,
         },
-        { additionalWorkerDailyHours, deadlineShiftDays: extendedDays },
+        {
+          additionalWorkerDailyHours,
+          deadlineShiftDays: extendedDays,
+          outsourcePercent,
+          splitDelivery: splitEnabled
+            ? {
+                firstWavePercent: SPLIT_FIRST_WAVE_PERCENT,
+                secondWaveDelayWorkingDays: SPLIT_DELAY_WORKING_DAYS,
+              }
+            : undefined,
+        },
       );
       if (cancelled) return;
       if (res.success && res.data) {
@@ -179,23 +205,27 @@ export function SimulationsView({
       clearTimeout(timer);
     };
   }, [
+    selectedOrderId,
     selProductId,
     selQuantity,
     selDelivery,
     additionalWorkerDailyHours,
     extendedDays,
+    outsourcePercent,
+    splitEnabled,
   ]);
 
   function resetAll() {
     setOvertimeHours(0);
     setExtraWorkers(0);
     setExtendedDays(0);
+    setOutsourcePercent(0);
+    setSplitEnabled(false);
     setAppliedSuccess(false);
   }
 
-  // Tuas yang belum didukung engine (kartunya ditandai "Segera hadir")
-  const enableOutsource = false;
-  const enableSplitDelivery = false;
+  const enableOutsource = outsourcePercent > 0;
+  const enableSplitDelivery = splitEnabled;
 
   // ── Keadaan khusus (semua hook sudah dipanggil di atas) ──────────
   if (!selected) {
@@ -206,8 +236,8 @@ export function SimulationsView({
             Belum ada pesanan untuk disimulasikan
           </h2>
           <p className="text-sm text-slate-600 dark:text-[#94A3B8]">
-            Simulasi dipakai sebelum pesanan diterima, jadi hanya pesanan
-            berstatus DRAFT yang muncul di sini.
+            Simulasi tersedia untuk pesanan berstatus DRAFT, terkonfirmasi,
+            atau sedang diproduksi.
           </p>
           <Link
             href="/orders/new"
@@ -273,7 +303,9 @@ export function SimulationsView({
   const overtimeCost =
     overtimeHours * workerCount * workDays * overtimeRate;
   const workerCost = extraWorkers * workDays * freelanceRate;
-  const totalCost = overtimeCost + workerCost;
+  const outsourceCost = sim.outsourcedUnits * OUTSOURCE_COST_PER_UNIT;
+  const splitCost = enableSplitDelivery ? SPLIT_EXTRA_SHIPPING_COST : 0;
+  const totalCost = overtimeCost + workerCost + outsourceCost + splitCost;
   const netProtectedRevenue = orderValue - totalCost;
   const costRatio =
     orderValue > 0 ? ((totalCost / orderValue) * 100).toFixed(1) : "0.0";
@@ -368,7 +400,9 @@ export function SimulationsView({
               >
                 {orders.map((o) => (
                   <option key={o.id} value={o.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
-                    {o.customerName} ({o.quantity} × {o.productName})
+                    {o.customerName} ({o.quantity} × {o.productName}) ·{" "}
+                    {ORDER_STATUS_TAG[o.status]}
+                    {o.lastKnownRisk ? " ⚠️" : ""}
                   </option>
                 ))}
               </select>
@@ -442,27 +476,49 @@ export function SimulationsView({
               costNoteColor="text-emerald-600 dark:text-emerald-400"
             />
 
-            {/* ── Toggle: Outsource ─────────────────────────────── */}
-            <ToggleControl
+            {/* ── Slider: Outsource ─────────────────────────────── */}
+            <SliderControl
               icon="handshake"
-              label="Outsource ke Mitra Produksi"
-              sublabel="Kirim pola/komponen ke workshop rekanan"
-              cost="belum tersedia"
-              checked={false}
-              onChange={() => {}}
-              badgeLabel="Segera hadir"
+              label="Outsource ke Mitra Maklon"
+              sublabel="alihkan sebagian unit ke workshop rekanan"
+              value={outsourcePercent}
+              min={0}
+              max={OUTSOURCE_MAX_PERCENT}
+              step={OUTSOURCE_STEP}
+              unit="% unit"
+              ticks={["0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80% (maks)"]}
+              onChange={setOutsourcePercent}
+              costNote={
+                outsourcePercent > 0
+                  ? `${sim.outsourcedUnits} unit ke mitra · +Rp ${outsourceCost.toLocaleString("id-ID")} biaya maklon`
+                  : undefined
+              }
             />
 
             {/* ── Toggle: Split Delivery ────────────────────────── */}
             <ToggleControl
               icon="local_shipping"
               label="Pengiriman Bertahap (2 Termin)"
-              sublabel={`Kirim 50% lebih awal, sisa ${SPLIT_TERMIN === 2 ? "50%" : ""} menyusul — meringankan beban produksi satu periode`}
-              cost="belum tersedia"
-              checked={false}
-              onChange={() => {}}
-              badgeLabel="Segera hadir"
+              sublabel={`Kirim ${SPLIT_FIRST_WAVE_PERCENT}% di tenggat, sisanya menyusul +${SPLIT_DELAY_WORKING_DAYS} hari kerja`}
+              cost={`Rp ${SPLIT_EXTRA_SHIPPING_COST.toLocaleString("id-ID")} (ongkir termin 2)`}
+              checked={splitEnabled}
+              onChange={setSplitEnabled}
             />
+            {sim.splitDelivery && (
+              <div className="p-3 rounded-lg bg-orange-50 dark:bg-orange-500/[0.10] border border-orange-200 dark:border-orange-500/20 text-[11px] text-orange-900 dark:text-orange-200 space-y-1">
+                <p>
+                  <strong>Termin 1</strong> ({sim.splitDelivery.wave1Units} unit, tepat tenggat):{" "}
+                  {STATUS_LABEL[sim.splitDelivery.wave1Result.status]}
+                </p>
+                <p>
+                  <strong>Termin 2</strong> ({sim.splitDelivery.wave2Units} unit, +{SPLIT_DELAY_WORKING_DAYS} hari kerja):{" "}
+                  {STATUS_LABEL[sim.splitDelivery.wave2Result.status]}
+                </p>
+                <p className="opacity-80">
+                  Hasil perbandingan di kanan memakai termin yang paling ketat.
+                </p>
+              </div>
+            )}
 
             {/* Reset button */}
             <button

@@ -5,15 +5,23 @@
 // What-if dari data usaha yang sedang login. Tidak menulis apa pun ke database.
 
 import { z } from "zod";
+import { OrderStatus } from "@prisma/client";
+import { db } from "@/lib/db";
 import { getBusinessId } from "@/lib/context";
-import { simulateScenario } from "@/engine/simulation/scenario";
-import type { WhatIfSimulationResult } from "@/engine/simulation/types";
+import {
+  simulateScenario,
+  subtractOwnCommitment,
+  workingDaysToCalendarDays,
+} from "@/engine/simulation/scenario";
+import type { WhatIfAdjustments, WhatIfSimulationResult } from "@/engine/simulation/types";
 import type { CapacityEngineInput } from "@/engine/types";
 import { getBusinessResources, getProductById } from "@/queries/resources.queries";
 import { getActiveCommitments } from "@/queries/orders.queries";
 import type { ActionResult } from "./feasibility.actions";
 
 const OrderRefSchema = z.object({
+  /** Jika diisi, produk/jumlah/tenggat dibaca dari database (bukan dari klien). */
+  orderId: z.string().min(1).max(100).optional(),
   productId: z.string().min(1),
   quantity: z.number().int().positive().max(1_000_000),
   deliveryDateStr: z.string().min(1).max(40),
@@ -24,21 +32,21 @@ const AdjustmentsSchema = z.object({
   additionalMachineDailyHours: z.number().min(0).max(24).optional(),
   deadlineShiftDays: z.number().int().min(0).max(30).optional(),
   additionalMaterialStock: z.record(z.string(), z.number().min(0).max(1_000_000)).optional(),
+  outsourcePercent: z.number().int().min(0).max(100).optional(),
+  splitDelivery: z
+    .object({
+      firstWavePercent: z.number().int().min(10).max(90),
+      /** Jeda termin 2 dalam HARI KERJA (dikonversi ke hari kalender di server). */
+      secondWaveDelayWorkingDays: z.number().int().min(1).max(14),
+    })
+    .optional(),
 });
 
-/** Menghitung berapa hari kalender yang setara dengan N hari kerja (Senin–Jumat). */
-function workingDaysToCalendarDays(from: Date, workingDays: number): number {
-  let added = 0;
-  let calendar = 0;
-  const cursor = new Date(from);
-  while (added < workingDays) {
-    cursor.setDate(cursor.getDate() + 1);
-    calendar += 1;
-    const day = cursor.getDay();
-    if (day !== 0 && day !== 6) added += 1;
-  }
-  return calendar;
-}
+const SIMULATABLE_STATUSES: OrderStatus[] = [
+  OrderStatus.DRAFT,
+  OrderStatus.CONFIRMED,
+  OrderStatus.IN_PROGRESS,
+];
 
 export async function runWhatIfForOrderAction(
   orderRef: unknown,
@@ -52,36 +60,60 @@ export async function runWhatIfForOrderAction(
     return { success: false, error: "Parameter simulasi tidak valid." };
   }
 
-  const deliveryDate = new Date(ref.data.deliveryDateStr);
-  if (Number.isNaN(deliveryDate.getTime())) {
-    return { success: false, error: "Tanggal pengiriman tidak valid." };
-  }
-
   try {
+    let productId = ref.data.productId;
+    let quantity = ref.data.quantity;
+    let deliveryDate = new Date(ref.data.deliveryDateStr);
+    let isActiveOrder = false;
+
+    // Pesanan nyata: ambil dari database agar konsisten dan tidak bisa dipalsukan klien.
+    if (ref.data.orderId) {
+      const order = await db.order.findFirst({
+        where: { id: ref.data.orderId, businessId },
+        include: { items: true },
+      });
+      if (!order || order.items.length === 0) {
+        return { success: false, error: "Pesanan tidak ditemukan pada usaha ini." };
+      }
+      if (!SIMULATABLE_STATUSES.includes(order.status)) {
+        return { success: false, error: "Pesanan ini sudah selesai atau dibatalkan." };
+      }
+      productId = order.items[0].productId;
+      quantity = order.items[0].quantity;
+      deliveryDate = order.requiredDeliveryDate;
+      isActiveOrder = order.status !== OrderStatus.DRAFT;
+    }
+
+    if (Number.isNaN(deliveryDate.getTime())) {
+      return { success: false, error: "Tanggal pengiriman tidak valid." };
+    }
+
     const [resources, product, commitments] = await Promise.all([
       getBusinessResources(businessId),
-      getProductById(ref.data.productId, businessId),
+      getProductById(productId, businessId),
       getActiveCommitments(businessId),
     ]);
     if (!product) {
       return { success: false, error: "Produk tidak ditemukan pada usaha ini." };
     }
 
+    const engineProduct: CapacityEngineInput["product"] = {
+      workerHoursPerUnit: product.workerHoursPerUnit,
+      machineHoursPerUnit: product.machineHoursPerUnit,
+      materials: product.materials.map((pm: { materialId: string; quantityPerUnit: number }) => ({
+        materialId: pm.materialId,
+        quantityPerUnit: pm.quantityPerUnit,
+      })),
+    };
+
     const baseInput: CapacityEngineInput = {
       newOrder: {
-        quantity: ref.data.quantity,
-        productId: ref.data.productId,
+        quantity,
+        productId,
         analysisDate: new Date(),
         requiredDeliveryDate: deliveryDate,
       },
-      product: {
-        workerHoursPerUnit: product.workerHoursPerUnit,
-        machineHoursPerUnit: product.machineHoursPerUnit,
-        materials: product.materials.map((pm: { materialId: string; quantityPerUnit: number }) => ({
-          materialId: pm.materialId,
-          quantityPerUnit: pm.quantityPerUnit,
-        })),
-      },
+      product: engineProduct,
       workforce: {
         workers: resources.workers.map((w) => ({ id: w.id, dailyAvailableHours: w.dailyAvailableHours })),
       },
@@ -91,13 +123,26 @@ export async function runWhatIfForOrderAction(
       inventory: {
         materials: resources.materials.map((m) => ({ id: m.id, currentStock: m.currentStock, unit: m.unit })),
       },
-      activeCommitments: commitments,
+      // Pesanan CONFIRMED/IN_PROGRESS sudah ada di komitmen aktif: keluarkan agar tidak terhitung ganda.
+      activeCommitments: isActiveOrder
+        ? subtractOwnCommitment(commitments, { quantity, product: engineProduct })
+        : commitments,
     };
 
-        const adjustmentsForEngine = {
-      ...adj.data,
-      deadlineShiftDays: adj.data.deadlineShiftDays
-        ? workingDaysToCalendarDays(deliveryDate, adj.data.deadlineShiftDays)
+    const { splitDelivery, ...rest } = adj.data;
+    const adjustmentsForEngine: WhatIfAdjustments = {
+      ...rest,
+      deadlineShiftDays: rest.deadlineShiftDays
+        ? workingDaysToCalendarDays(deliveryDate, rest.deadlineShiftDays)
+        : undefined,
+      splitDelivery: splitDelivery
+        ? {
+            firstWavePercent: splitDelivery.firstWavePercent,
+            secondWaveDelayDays: workingDaysToCalendarDays(
+              deliveryDate,
+              splitDelivery.secondWaveDelayWorkingDays,
+            ),
+          }
         : undefined,
     };
 

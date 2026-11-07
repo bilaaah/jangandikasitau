@@ -25,13 +25,16 @@ interface ModelPlan {
   timeoutMs: number;
 }
 
+/** Batas TOTAL menunggu AI (semua model) sebelum jatuh ke fallback lokal. */
+const TOTAL_AI_BUDGET_MS = 15000;
+
 /** Model utama cepat (lite); model cadangan lebih lambat sehingga diberi batas waktu lebih longgar. */
 function getModelChain(): ModelPlan[] {
   const names = [
     process.env.GEMINI_MODEL || "gemini-3.5-flash-lite",
     process.env.GEMINI_FALLBACK_MODEL || "",
   ].filter((name, index, all) => name && all.indexOf(name) === index);
-  return names.map((name, index) => ({ name, timeoutMs: index === 0 ? 10000 : 20000 }));
+  return names.map((name, index) => ({ name, timeoutMs: index === 0 ? 8000 : 12000 }));
 }
 
 async function requestGeminiJson(
@@ -92,16 +95,25 @@ export function hasUnknownPercentages(text: string, analysis: CapacityEngineResu
 export async function callGeminiAdvisory(
   prompt: string,
   analysis: CapacityEngineResult,
+  leadTimeWarnings: string[] = [],
 ): Promise<AiOrderAdvice> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     // Jeda 1.2 detik agar progress step dan animasi loading terbaca dengan mulus di UI
     await new Promise((resolve) => setTimeout(resolve, 1200));
-    return generateLocalFallbackAdvice(analysis);
+    return generateLocalFallbackAdvice(analysis, leadTimeWarnings);
   }
 
+  const startedAt = Date.now();
   for (const plan of getModelChain()) {
-    const rawText = await requestGeminiJson(plan, apiKey, prompt);
+    // Sisa anggaran waktu: total tunggu AI dibatasi agar UI tidak menggantung 30 detik.
+    const remainingMs = TOTAL_AI_BUDGET_MS - (Date.now() - startedAt);
+    if (remainingMs < 1000) break;
+    const rawText = await requestGeminiJson(
+      { ...plan, timeoutMs: Math.min(plan.timeoutMs, remainingMs) },
+      apiKey,
+      prompt,
+    );
     if (!rawText) continue;
 
     try {
@@ -126,14 +138,17 @@ export async function callGeminiAdvisory(
   }
 
   await new Promise((resolve) => setTimeout(resolve, 800));
-  return generateLocalFallbackAdvice(analysis);
+  return generateLocalFallbackAdvice(analysis, leadTimeWarnings);
 }
 
 /**
  * Deterministic local heuristic generator (0ms, 0 external calls, 0 RAM overhead).
  * Used when offline, during testing, or when GEMINI_API_KEY is not yet configured.
  */
-export function generateLocalFallbackAdvice(analysis: CapacityEngineResult): AiOrderAdvice {
+export function generateLocalFallbackAdvice(
+  analysis: CapacityEngineResult,
+  leadTimeWarnings: string[] = [],
+): AiOrderAdvice {
   const criticals = analysis.bottlenecks.filter((b) => b.severity === "CRITICAL");
   const warnings = analysis.bottlenecks.filter((b) => b.severity === "WARNING");
 
@@ -145,12 +160,23 @@ export function generateLocalFallbackAdvice(analysis: CapacityEngineResult): AiO
     const actionItems = [];
 
     if (materialShortage) {
-      actionItems.push({
-        category: "MATERIAL" as const,
-        priority: "HIGH" as const,
-        action: "Lakukan restock bahan baku prioritas atau pesan bahan secara ekspres.",
-        impact: materialShortage.description,
-      });
+      const leadTimeWarning = leadTimeWarnings[0];
+      actionItems.push(
+        leadTimeWarning
+          ? {
+              category: "MATERIAL" as const,
+              priority: "HIGH" as const,
+              action:
+                "Restock tidak akan tiba tepat waktu: cari bahan substitusi lokal, atau negosiasikan jadwal kirim / pengiriman bertahap.",
+              impact: leadTimeWarning,
+            }
+          : {
+              category: "MATERIAL" as const,
+              priority: "HIGH" as const,
+              action: "Lakukan restock bahan baku prioritas atau pesan bahan secara ekspres.",
+              impact: materialShortage.description,
+            },
+      );
     }
 
     if (workerShortage) {

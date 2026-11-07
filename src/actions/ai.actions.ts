@@ -22,7 +22,11 @@ export async function generateAdviceAction(
     typeof input.customerName === "string" && input.customerName.length <= 150 &&
     typeof input.deliveryDateStr === "string" && input.deliveryDateStr.length <= 40 &&
     Number.isFinite(input.quantity) && input.quantity > 0 &&
-    STATUSES.includes(input.analysis?.status);
+    STATUSES.includes(input.analysis?.status) &&
+    (input.leadTimeWarnings === undefined ||
+      (Array.isArray(input.leadTimeWarnings) &&
+        input.leadTimeWarnings.length <= 5 &&
+        input.leadTimeWarnings.every((w) => typeof w === "string" && w.length <= 300)));
   if (!valid) {
     return { success: false, error: "Data analisis tidak valid." };
   }

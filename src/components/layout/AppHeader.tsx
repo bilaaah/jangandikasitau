@@ -397,10 +397,10 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
               {/* Name info */}
               <div className="hidden sm:flex flex-col text-left">
                 <span className="text-[13px] font-semibold text-slate-800 dark:text-[#F1F5F9] leading-tight">
-                  {session?.user?.name ?? "Pengguna BizCapacity"}
+                  {session?.user?.name ?? (session?.user?.role === "MEMBER" || session?.user?.role === "STAFF" ? "Staf Produksi" : "Owner")}
                 </span>
                 <span className="text-[10.5px] text-slate-500 dark:text-[#94A3B8] leading-none">
-                  {session?.user?.role === "OWNER" ? "Owner" : "Staff"}
+                  {session?.user?.role === "MEMBER" || session?.user?.role === "STAFF" ? "Staff" : "Owner"}
                 </span>
               </div>
 
@@ -422,7 +422,7 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
                 </div>
 
                 <div className="space-y-0.5">
-                  {session?.user?.role !== "MEMBER" && (
+                  {session?.user?.role !== "MEMBER" && session?.user?.role !== "STAFF" && (
                     <Link
                       href="/settings"
                       onClick={() => setShowProfile(false)}

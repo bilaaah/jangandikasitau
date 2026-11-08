@@ -13,9 +13,9 @@ const authConfig = {
     async jwt({ token, user }) {
       if (user) {
         const businessId = "businessId" in user ? user.businessId : undefined;
-        const role = "role" in user ? user.role : undefined;
+        const role = "role" in user ? (user as { role?: unknown }).role : undefined;
         if (typeof businessId === "string") token.businessId = businessId;
-        if (role === "OWNER" || role === "MEMBER") token.role = role;
+        if (typeof role === "string") token.role = role as any;
       }
       return token;
     },
@@ -25,7 +25,7 @@ const authConfig = {
         session.user.businessId =
           typeof token.businessId === "string" ? token.businessId : undefined;
         session.user.role =
-          token.role === "OWNER" || token.role === "MEMBER" ? token.role : undefined;
+          typeof token.role === "string" ? (token.role as any) : undefined;
       }
       return session;
     },

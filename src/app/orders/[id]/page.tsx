@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getBusinessId } from "@/lib/context";
-import { getOrderById } from "@/queries/orders.queries";
+import { getOrderById, getActiveOrdersCount } from "@/queries/orders.queries";
 import { OrderStatusSelect } from "./OrderStatusSelect";
 import { formatDate } from "@/lib/utils";
 import { DashboardShell } from "@/components/layout/DashboardShell";
@@ -17,8 +17,12 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
   const businessId = await getBusinessId();
   
   let order = null;
+  let activeCount = 0;
   try {
-    order = await getOrderById(id, businessId);
+    [order, activeCount] = await Promise.all([
+      getOrderById(id, businessId),
+      getActiveOrdersCount(businessId),
+    ]);
   } catch (err) {
     console.warn(`[OrderDetail] DB getOrderById failed for ${id}:`, err);
   }
@@ -35,7 +39,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
   const isFeasible = latestAnalysis?.status === "FEASIBLE";
 
   return (
-    <DashboardShell>
+    <DashboardShell activeCount={activeCount}>
       <div className="container max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">

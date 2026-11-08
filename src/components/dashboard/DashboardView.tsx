@@ -35,7 +35,7 @@ export function DashboardView({ metrics }: DashboardViewProps) {
     setOwnerName(session?.user?.name ?? "");
   }, [session?.user?.name]);
 
-  const isStaff = session?.user?.role === "MEMBER";
+  const isStaff = session?.user?.role === "MEMBER" || session?.user?.role === "STAFF";
 
   const firstAttentionOrder = metrics.activeOrders.find(
     (o) => o.capacityStatus === "AT_RISK" || o.capacityStatus === "NOT_FEASIBLE",

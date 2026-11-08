@@ -9,7 +9,7 @@ interface DashboardShellProps {
   activeCount?: number;
 }
 
-export function DashboardShell({ children, activeCount = 18 }: DashboardShellProps) {
+export function DashboardShell({ children, activeCount = 0 }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
 

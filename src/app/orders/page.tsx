@@ -1,9 +1,5 @@
-// src/app/orders/page.tsx
-//
-// Orders listing page wrapped in BizCapacity Dashboard Operating System Shell.
-
 import { getBusinessId } from "@/lib/context";
-import { getOrders } from "@/queries/orders.queries";
+import { getOrders, getActiveOrdersCount } from "@/queries/orders.queries";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { OrdersDashboardView } from "@/components/orders/OrdersDashboardView";
 
@@ -12,15 +8,20 @@ export const instant = false;
 export default async function OrdersPage() {
   const businessId = await getBusinessId();
   let orders: any[] = [];
+  let activeCount = 0;
   try {
-    orders = await getOrders(businessId);
+    [orders, activeCount] = await Promise.all([
+      getOrders(businessId),
+      getActiveOrdersCount(businessId),
+    ]);
   } catch (err) {
     console.warn("[OrdersPage] DB query fallback:", err);
     orders = [];
+    activeCount = 0;
   }
 
   return (
-    <DashboardShell activeCount={orders.length > 0 ? orders.length : 18}>
+    <DashboardShell activeCount={activeCount}>
       <OrdersDashboardView initialDbOrders={orders} />
     </DashboardShell>
   );

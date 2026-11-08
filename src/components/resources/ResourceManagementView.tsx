@@ -58,7 +58,7 @@ export function ResourceManagementView({
   const [isPending, startTransition] = useTransition();
 
   const { data: session } = useSession();
-  const isOwner = session?.user?.role !== "MEMBER";
+  const isOwner = session?.user?.role !== "MEMBER" && session?.user?.role !== "STAFF";
 
   function openForm(item?: EditableResource) {
     setEditing(item ?? null);

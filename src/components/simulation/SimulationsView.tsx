@@ -37,6 +37,8 @@ interface SimulationsViewProps {
   initialSolution?: string;
   /** Jumlah pekerja aktif, untuk mengubah "lembur N jam per orang" menjadi total jam */
   workerCount: number;
+  /** Jumlah pesanan aktif untuk badge sidebar */
+  activeOrdersCount?: number;
 }
 
 // ── Konfigurasi slider ────────────────────────────────────────────
@@ -113,6 +115,7 @@ export function SimulationsView({
   initialOrderId,
   initialSolution,
   workerCount,
+  activeOrdersCount,
 }: SimulationsViewProps) {
   // ── Scenario state ───────────────────────────────────────────────
   const [selectedOrderId, setSelectedOrderId] = useState(
@@ -129,7 +132,7 @@ export function SimulationsView({
   const [extendedDays, setExtendedDays] = useState(0);
   const [outsourcePercent, setOutsourcePercent] = useState(0);
   const [splitEnabled, setSplitEnabled] = useState(initialSolution === "split");
-  
+
   const initialSelected = orders.find((o) => o.id === selectedOrderId) ?? orders[0] ?? null;
   const [orderValue, setOrderValue] = useState<number>(() =>
     initialSelected ? initialSelected.quantity * 60_000 : 0,
@@ -189,9 +192,9 @@ export function SimulationsView({
           outsourcePercent,
           splitDelivery: splitEnabled
             ? {
-                firstWavePercent: SPLIT_FIRST_WAVE_PERCENT,
-                secondWaveDelayWorkingDays: SPLIT_DELAY_WORKING_DAYS,
-              }
+              firstWavePercent: SPLIT_FIRST_WAVE_PERCENT,
+              secondWaveDelayWorkingDays: SPLIT_DELAY_WORKING_DAYS,
+            }
             : undefined,
         },
       );
@@ -233,7 +236,7 @@ export function SimulationsView({
   // ── Keadaan khusus (semua hook sudah dipanggil di atas) ──────────
   if (!selected) {
     return (
-      <DashboardShell>
+      <DashboardShell activeCount={activeOrdersCount ?? orders.length}>
         <div className="container max-w-3xl mx-auto px-4 py-16 text-center space-y-3">
           <h2 className="text-lg font-bold text-slate-900 dark:text-[#F1F5F9]">
             Belum ada pesanan untuk disimulasikan
@@ -255,7 +258,7 @@ export function SimulationsView({
 
   if (!sim) {
     return (
-      <DashboardShell>
+      <DashboardShell activeCount={activeOrdersCount ?? orders.length}>
         <div className="p-12 text-center">
           {simError ? (
             <p className="text-sm font-medium text-rose-600 dark:text-rose-400">{simError}</p>
@@ -287,7 +290,7 @@ export function SimulationsView({
     0,
     Math.round(
       after.workerAnalysis.totalAvailableHours -
-        base.workerAnalysis.totalAvailableHours,
+      base.workerAnalysis.totalAvailableHours,
     ),
   );
   const workDays = base.availableWorkDays;
@@ -318,7 +321,7 @@ export function SimulationsView({
   const statusLabel = STATUS_LABEL;
 
   return (
-    <DashboardShell>
+    <DashboardShell activeCount={activeOrdersCount ?? orders.length}>
       <div className="container max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8">
         {/* ── Header Bar ────────────────────────────────────────── */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200/80 dark:border-white/[0.08]">
@@ -796,37 +799,37 @@ export function SimulationsView({
                 extendedDays > 0 ||
                 enableOutsource ||
                 enableSplitDelivery) && (
-                <div className="flex flex-wrap gap-2">
-                  <span className="text-[11px] font-bold text-slate-500 dark:text-[#94A3B8] self-center">
-                    Solusi aktif:
-                  </span>
-                  {overtimeHours > 0 && (
-                    <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">
-                      +{overtimeHours}j lembur/hari
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-[11px] font-bold text-slate-500 dark:text-[#94A3B8] self-center">
+                      Solusi aktif:
                     </span>
-                  )}
-                  {extraWorkers > 0 && (
-                    <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-violet-50 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-500/30">
-                      +{extraWorkers} pekerja lepas
-                    </span>
-                  )}
-                  {extendedDays > 0 && (
-                    <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
-                      +{extendedDays} hari deadline
-                    </span>
-                  )}
-                  {enableOutsource && (
-                    <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
-                      Outsource mitra
-                    </span>
-                  )}
-                  {enableSplitDelivery && (
-                    <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-orange-50 dark:bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-500/30">
-                      🚚 Split delivery
-                    </span>
-                  )}
-                </div>
-              )}
+                    {overtimeHours > 0 && (
+                      <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">
+                        +{overtimeHours}j lembur/hari
+                      </span>
+                    )}
+                    {extraWorkers > 0 && (
+                      <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-violet-50 dark:bg-violet-500/15 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-500/30">
+                        +{extraWorkers} pekerja lepas
+                      </span>
+                    )}
+                    {extendedDays > 0 && (
+                      <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
+                        +{extendedDays} hari deadline
+                      </span>
+                    )}
+                    {enableOutsource && (
+                      <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
+                        Outsource mitra
+                      </span>
+                    )}
+                    {enableSplitDelivery && (
+                      <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-orange-50 dark:bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-500/30">
+                        🚚 Split delivery
+                      </span>
+                    )}
+                  </div>
+                )}
 
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <span className="text-xs text-slate-500 dark:text-[#94A3B8]">
@@ -1021,19 +1024,17 @@ function ToggleControl({
 }: ToggleControlProps) {
   return (
     <div
-      className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer hover-lift-sm ${
-        checked
+      className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer hover-lift-sm ${checked
           ? "bg-blue-50 dark:bg-blue-500/15 border-blue-300 dark:border-blue-500/40 shadow-xs"
           : "bg-slate-50/80 dark:bg-white/[0.03] border-slate-200/80 dark:border-white/[0.06]"
-      }`}
+        }`}
       onClick={() => onChange(!checked)}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2.5 flex-1 min-w-0">
           <span
-            className={`material-symbols-outlined text-[20px] flex-shrink-0 mt-0.5 ${
-              checked ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-[#64748B]"
-            }`}
+            className={`material-symbols-outlined text-[20px] flex-shrink-0 mt-0.5 ${checked ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-[#64748B]"
+              }`}
           >
             {icon}
           </span>
@@ -1062,14 +1063,12 @@ function ToggleControl({
         </div>
         {/* Toggle switch visual */}
         <div
-          className={`w-11 h-6 rounded-full flex items-center transition-colors duration-200 flex-shrink-0 mt-0.5 ${
-            checked ? "bg-blue-600" : "bg-slate-200 dark:bg-white/[0.12]"
-          }`}
+          className={`w-11 h-6 rounded-full flex items-center transition-colors duration-200 flex-shrink-0 mt-0.5 ${checked ? "bg-blue-600" : "bg-slate-200 dark:bg-white/[0.12]"
+            }`}
         >
           <div
-            className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-              checked ? "translate-x-5" : "translate-x-0.5"
-            }`}
+            className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${checked ? "translate-x-5" : "translate-x-0.5"
+              }`}
           />
         </div>
       </div>

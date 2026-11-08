@@ -28,7 +28,7 @@ interface NavGroup {
   items: NavItem[];
 }
 
-export function AppSidebar({ activeCount = 18, isOpen, onClose, onOpenHelp }: AppSidebarProps) {
+export function AppSidebar({ activeCount = 0, isOpen, onClose, onOpenHelp }: AppSidebarProps) {
   const pathname = usePathname();
 
   // Read business identity from localStorage (written by Settings page)
@@ -59,7 +59,7 @@ export function AppSidebar({ activeCount = 18, isOpen, onClose, onOpenHelp }: Ap
   }, []);
 
   const { data: session } = useSession();
-  const isOwner = session?.user?.role !== "MEMBER"; // Owner atau default dev
+  const isOwner = session?.user?.role !== "MEMBER" && session?.user?.role !== "STAFF"; // Owner atau default dev
 
   const navGroups: NavGroup[] = useMemo(() => {
     const groups: NavGroup[] = [
@@ -77,7 +77,7 @@ export function AppSidebar({ activeCount = 18, isOpen, onClose, onOpenHelp }: Ap
             hint: "Daftar pesanan masuk",
             href: "/orders",
             icon: "receipt_long",
-            badge: `${activeCount}`,
+            badge: activeCount > 0 ? `${activeCount}` : undefined,
           },
         ],
       },

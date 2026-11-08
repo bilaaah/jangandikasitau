@@ -4,7 +4,7 @@
 // Supplies real orders from the database to visual Gantt scheduling.
 
 import { getBusinessId } from "@/lib/context";
-import { getOrders } from "@/queries/orders.queries";
+import { getOrders, getActiveOrdersCount } from "@/queries/orders.queries";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ProductionPlanningView } from "@/components/planning/ProductionPlanningView";
 
@@ -13,15 +13,20 @@ export const instant = false;
 export default async function ProductionPlanningPage() {
   const businessId = await getBusinessId();
   let orders: any[] = [];
+  let activeCount = 0;
   try {
-    orders = await getOrders(businessId);
+    [orders, activeCount] = await Promise.all([
+      getOrders(businessId),
+      getActiveOrdersCount(businessId),
+    ]);
   } catch (err) {
     console.warn("[ProductionPlanningPage] DB query fallback:", err);
     orders = [];
+    activeCount = 0;
   }
 
   return (
-    <DashboardShell activeCount={orders.length}>
+    <DashboardShell activeCount={activeCount}>
       <ProductionPlanningView initialDbOrders={orders} />
     </DashboardShell>
   );

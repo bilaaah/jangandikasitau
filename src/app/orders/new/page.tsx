@@ -5,6 +5,7 @@
 import Link from "next/link";
 import { getBusinessId } from "@/lib/context";
 import { getProducts } from "@/queries/resources.queries";
+import { getActiveOrdersCount } from "@/queries/orders.queries";
 import { NewOrderForm } from "./NewOrderForm";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 
@@ -12,10 +13,13 @@ export const instant = false;
 
 export default async function NewOrderPage() {
   const businessId = await getBusinessId();
-  const products = await getProducts(businessId);
+  const [products, activeCount] = await Promise.all([
+    getProducts(businessId),
+    getActiveOrdersCount(businessId).catch(() => 0),
+  ]);
 
   return (
-    <DashboardShell>
+    <DashboardShell activeCount={activeCount}>
       <div className="container max-w-6xl mx-auto px-4 sm:px-8 py-8 space-y-8">
         {/* Breadcrumb / Top Bar */}
         <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-[#94A3B8]">

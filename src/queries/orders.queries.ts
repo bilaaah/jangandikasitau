@@ -8,6 +8,19 @@ import { db } from "@/lib/db";
 import { OrderStatus, type PrismaClient } from "@prisma/client";
 
 /**
+ * Returns the count of active orders (DRAFT, CONFIRMED, IN_PROGRESS) for the sidebar badge.
+ * Lightweight — only counts rows, no joins.
+ */
+export async function getActiveOrdersCount(businessId: string): Promise<number> {
+  return db.order.count({
+    where: {
+      businessId,
+      status: { in: ["DRAFT", "CONFIRMED", "IN_PROGRESS"] },
+    },
+  });
+}
+
+/**
  * Retrieves all orders for a business with their latest capacity analysis and line items.
  */
 export async function getOrders(businessId: string) {

@@ -5,7 +5,7 @@
 // lalu menyerahkannya ke SimulationsView (client).
 
 import { getBusinessId } from "@/lib/context";
-import { getOrders } from "@/queries/orders.queries";
+import { getOrders, getActiveOrdersCount } from "@/queries/orders.queries";
 import { getBusinessResources } from "@/queries/resources.queries";
 import { SimulationsView, type SimOrder } from "@/components/simulation/SimulationsView";
 
@@ -18,10 +18,11 @@ export default async function SimulationsPage({
   searchParams: Promise<{ order?: string; solution?: string }>;
 }) {
   const businessId = await getBusinessId();
-  const [orders, resources, params] = await Promise.all([
+  const [orders, resources, params, activeCount] = await Promise.all([
     getOrders(businessId),
     getBusinessResources(businessId),
     searchParams,
+    getActiveOrdersCount(businessId).catch(() => 0),
   ]);
 
   const simOrders: SimOrder[] = orders
@@ -45,6 +46,7 @@ export default async function SimulationsPage({
       initialOrderId={params.order}
       initialSolution={params.solution}
       workerCount={resources.workers.length}
+      activeOrdersCount={activeCount}
     />
   );
 }

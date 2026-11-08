@@ -4,10 +4,16 @@
 // IN_PROGRESS (pesanan berjalan bisa tiba-tiba berisiko: pekerja sakit, mesin rusak),
 // lalu menyerahkannya ke SimulationsView (client).
 
+import type { Metadata } from "next";
 import { getBusinessId } from "@/lib/context";
 import { getOrders, getActiveOrdersCount } from "@/queries/orders.queries";
 import { getBusinessResources } from "@/queries/resources.queries";
 import { SimulationsView, type SimOrder } from "@/components/simulation/SimulationsView";
+
+export const metadata: Metadata = {
+  title: "Simulasi Pesanan What-If — BizCapacity",
+  description: "Uji berbagai skenario kapasitas produksi sebelum menerima pesanan.",
+};
 
 const SIMULATABLE = new Set(["DRAFT", "CONFIRMED", "IN_PROGRESS"]);
 const RISKY = new Set(["AT_RISK", "NOT_FEASIBLE"]);

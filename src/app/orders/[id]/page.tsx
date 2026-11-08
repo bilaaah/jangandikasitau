@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getBusinessId } from "@/lib/context";
 import { getOrderById, getActiveOrdersCount } from "@/queries/orders.queries";
 import { OrderStatusSelect } from "./OrderStatusSelect";
@@ -6,14 +7,26 @@ import { formatDate } from "@/lib/utils";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { notFound } from "next/navigation";
 
+export const metadata: Metadata = {
+  title: "Detail Pesanan — BizCapacity",
+  description: "Rincian status dan evaluasi kapasitas pesanan.",
+};
+
 export const instant = false;
+
+type OrderDetailSearchParams = { created?: string };
 
 interface OrderDetailPageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<OrderDetailSearchParams>;
 }
 
-export default async function OrderDetailPage({ params }: OrderDetailPageProps) {
+export default async function OrderDetailPage({ params, searchParams }: OrderDetailPageProps) {
   const { id } = await params;
+  const resolvedSearchParams: OrderDetailSearchParams = searchParams
+    ? await searchParams.catch(() => ({} as OrderDetailSearchParams))
+    : {};
+  const isNewlyCreated = resolvedSearchParams?.created === "draft";
   const businessId = await getBusinessId();
   
   let order = null;
@@ -32,6 +45,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
     notFound();
   }
 
+  const shortPoId = order.id.length > 8 ? order.id.slice(-6).toUpperCase() : order.id;
   const item = order.items?.[0];
   const latestAnalysis = order.capacityAnalyses?.[0];
   const isAtRisk = latestAnalysis?.status === "AT_RISK";
@@ -40,14 +54,41 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
 
   return (
     <DashboardShell activeCount={activeCount}>
-      <div className="container max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8">
+      <div className="container max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6">
+        {/* Toast Notifikasi Berhasil Simpan Draf */}
+        {isNewlyCreated && (
+          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-950 dark:text-emerald-200 flex items-center justify-between gap-3 shadow-xs animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-[22px] shrink-0">
+                check_circle
+              </span>
+              <div>
+                <strong className="text-sm font-bold block text-emerald-900 dark:text-emerald-100">
+                  Pesanan berhasil disimpan sebagai draf!
+                </strong>
+                <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                  Data spesifikasi pesanan telah tersimpan. Silakan tinjau rincian kapasitas di bawah sebelum memulai produksi.
+                </p>
+              </div>
+            </div>
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-700 shrink-0">
+              Draf Tersimpan
+            </span>
+          </div>
+        )}
+
         {/* Navigation Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
           <Link href="/orders" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-            Orders
+            Pesanan
           </Link>
           <span>/</span>
-          <span className="text-slate-800 dark:text-slate-200 font-semibold">Pesanan #{order.id}</span>
+          <span className="text-slate-800 dark:text-slate-200 font-semibold truncate max-w-[200px] sm:max-w-none">
+            {order.customerName}
+          </span>
+          <span className="text-slate-400 font-mono text-[11px]">
+            (PO #{shortPoId})
+          </span>
         </div>
 
         {/* Dramatic Order Header Card */}
@@ -58,8 +99,11 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                 <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 break-words">
                   {order.customerName}
                 </span>
-                <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
-                  {order.id}
+                <span
+                  title={`ID Lengkap: ${order.id}`}
+                  className="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 cursor-help"
+                >
+                  PO #{shortPoId}
                 </span>
                 {isFeasible && (
                   <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">

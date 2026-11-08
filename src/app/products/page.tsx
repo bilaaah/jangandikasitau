@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ProductManagementView } from "@/components/products/ProductManagementView";
 import { getBusinessId } from "@/lib/context";
 import { getManagedProducts, getManagedResources } from "@/queries/resources.queries";
 import { getActiveOrdersCount } from "@/queries/orders.queries";
+
+export const metadata: Metadata = {
+  title: "Daftar Produk & BOM — BizCapacity",
+  description: "Kelola spesifikasi produk dan bill of materials.",
+};
 
 export const instant = false;
 

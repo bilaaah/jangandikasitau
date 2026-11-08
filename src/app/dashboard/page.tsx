@@ -3,10 +3,16 @@
 // Main BizCapacity Operations Dashboard (Server Component).
 // Fetches real database aggregation metrics and commitments per business.
 
+import type { Metadata } from "next";
 import { getBusinessId } from "@/lib/context";
 import { getDashboardData } from "@/queries/dashboard.queries";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { DashboardView } from "@/components/dashboard/DashboardView";
+
+export const metadata: Metadata = {
+  title: "Dasbor Usaha — BizCapacity",
+  description: "Status kapasitas dan evaluasi pesanan UMKM hari ini.",
+};
 
 export const instant = false;
 

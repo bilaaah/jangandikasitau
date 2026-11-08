@@ -2,11 +2,17 @@
 //
 // Settings & Configuration Page (Server Component).
 
+import type { Metadata } from "next";
 import { getBusinessSettings } from "@/actions/settings.actions";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { SettingsManagerView } from "@/components/settings/SettingsManagerView";
 import { getBusinessId } from "@/lib/context";
 import { getActiveOrdersCount } from "@/queries/orders.queries";
+
+export const metadata: Metadata = {
+  title: "Pengaturan Usaha — BizCapacity",
+  description: "Pengaturan profil bisnis dan preferensi biaya operasional.",
+};
 
 export const instant = false;
 

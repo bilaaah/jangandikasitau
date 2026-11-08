@@ -192,12 +192,12 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
       if (res.success && res.data) {
         // Show success toast, then redirect
         const productLabel = selectedProduct?.name || "Pesanan";
-        setSuccessMessage(`✅ ${productLabel} untuk ${customerName} berhasil didaftarkan!`);
+        setSuccessMessage(`✅ ${productLabel} untuk ${customerName} berhasil disimpan sebagai draf!`);
         setShowSuccessToast(true);
 
         setTimeout(() => {
-          router.push(`/orders/${res.data!.orderId}`);
-        }, 1800);
+          router.push(`/orders/${res.data!.orderId}?created=draft`);
+        }, 1000);
       } else {
         setErrorMsg(res.error || "Gagal membuat pesanan. Coba lagi.");
         if (res.fieldErrors) {

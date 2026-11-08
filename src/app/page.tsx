@@ -247,11 +247,11 @@ export default function HomePage() {
                 </div>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-1 text-amber-400">
-                    <span className="material-symbols-outlined text-[16px]">star</span>
-                    <span className="material-symbols-outlined text-[16px]">star</span>
-                    <span className="material-symbols-outlined text-[16px]">star</span>
-                    <span className="material-symbols-outlined text-[16px]">star</span>
-                    <span className="material-symbols-outlined text-[16px]">star</span>
+                    <span className="material-symbols-outlined text-[16px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    <span className="material-symbols-outlined text-[16px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    <span className="material-symbols-outlined text-[16px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    <span className="material-symbols-outlined text-[16px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    <span className="material-symbols-outlined text-[16px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                     <span className="text-[14px] text-slate-900 dark:text-[#F1F5F9] ml-1 font-bold">4.9/5</span>
                   </div>
                   <span className="text-[12px] text-slate-600 dark:text-[#94A3B8]">

@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import { getBusinessId } from "@/lib/context";
 import { getOrders, getActiveOrdersCount } from "@/queries/orders.queries";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { OrdersDashboardView } from "@/components/orders/OrdersDashboardView";
+
+export const metadata: Metadata = {
+  title: "Daftar Pesanan — BizCapacity",
+  description: "Kelola seluruh pesanan masuk, berjalan, dan selesai.",
+};
 
 export const instant = false;
 

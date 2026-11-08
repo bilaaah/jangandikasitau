@@ -196,6 +196,7 @@ export function AppSidebar({ activeCount = 0, isOpen, onClose, onOpenHelp }: App
                   <Link
                     key={item.name}
                     href={item.href}
+                    prefetch={true}
                     className={`sidebar-nav-item flex items-center justify-between px-3 py-2 text-[13.5px] font-medium ${
                       active ? "active" : ""
                     }`}
@@ -238,6 +239,7 @@ export function AppSidebar({ activeCount = 0, isOpen, onClose, onOpenHelp }: App
           {/* Business card — nama usaha dari localStorage / settings */}
           <Link
             href="/settings"
+            prefetch={true}
             title="Buka Pengaturan Usaha"
             className="sidebar-profile-card block hover:bg-slate-100 dark:hover:bg-white/5 transition-colors group cursor-pointer"
           >

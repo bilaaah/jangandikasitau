@@ -249,12 +249,13 @@ export default function LoginPage() {
 
           {/* Testimonial Quote */}
           <div className="relative z-10 space-y-3">
-            <div className="flex gap-1 text-amber-400">
-              <span className="material-symbols-outlined text-[18px]">star</span>
-              <span className="material-symbols-outlined text-[18px]">star</span>
-              <span className="material-symbols-outlined text-[18px]">star</span>
-              <span className="material-symbols-outlined text-[18px]">star</span>
-              <span className="material-symbols-outlined text-[18px]">star</span>
+            <div className="flex items-center gap-1 text-amber-400">
+              <span className="material-symbols-outlined text-[18px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+              <span className="material-symbols-outlined text-[18px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+              <span className="material-symbols-outlined text-[18px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+              <span className="material-symbols-outlined text-[18px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+              <span className="material-symbols-outlined text-[18px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+              <span className="text-[13px] text-white font-bold ml-1.5 font-mono">4.9/5</span>
             </div>
             <blockquote className="text-[13px] text-[#eaf1ff] leading-relaxed italic">
               &ldquo;Kami tidak lagi menebak-nebak apakah sanggup menyelesaikan 300 hampers dalam 2 hari. BizCapacity langsung menunjukkan bottleneck di stasiun packaging sebelum kami tanda tangan PO.&rdquo;

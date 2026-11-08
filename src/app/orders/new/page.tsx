@@ -3,11 +3,17 @@
 // Page for analyzing and creating a new customer order.
 
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getBusinessId } from "@/lib/context";
 import { getProducts } from "@/queries/resources.queries";
 import { getActiveOrdersCount } from "@/queries/orders.queries";
 import { NewOrderForm } from "./NewOrderForm";
 import { DashboardShell } from "@/components/layout/DashboardShell";
+
+export const metadata: Metadata = {
+  title: "Evaluasi Pesanan Baru — BizCapacity",
+  description: "Cek kelayakan kapasitas produksi pesanan baru secara real-time.",
+};
 
 export const instant = false;
 

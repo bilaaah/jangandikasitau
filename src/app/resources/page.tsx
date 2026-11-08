@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { ResourceManagementView } from "@/components/resources/ResourceManagementView";
 import { getBusinessId } from "@/lib/context";
 import { getManagedResources } from "@/queries/resources.queries";
 import { getActiveOrdersCount } from "@/queries/orders.queries";
+
+export const metadata: Metadata = {
+  title: "Staf, Mesin & Bahan — BizCapacity",
+  description: "Kelola kapasitas pekerja, mesin, dan stok bahan baku usaha.",
+};
 
 export const instant = false;
 

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -512,7 +512,15 @@ export default function RegisterPage() {
               <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold flex items-center justify-center shrink-0 shadow-sm text-sm">
                 RK
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col flex-1">
+                <div className="flex items-center gap-1 text-amber-400 mb-1.5">
+                  <span className="material-symbols-outlined text-[16px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                  <span className="material-symbols-outlined text-[16px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                  <span className="material-symbols-outlined text-[16px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                  <span className="material-symbols-outlined text-[16px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                  <span className="material-symbols-outlined text-[16px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                  <span className="text-[12px] font-bold text-slate-900 dark:text-[#F1F5F9] ml-1 font-mono">4.9/5</span>
+                </div>
                 <p className="text-[12px] text-slate-800 dark:text-[#F1F5F9] italic leading-relaxed">
                   &ldquo;Dulu sering tolak order katering karena takut oven nggak muat. Dengan BizCapacity, kami berani ambil 40% order lebih banyak tanpa telat kirim.&rdquo;
                 </p>

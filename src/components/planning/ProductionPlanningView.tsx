@@ -368,6 +368,7 @@ export function ProductionPlanningView({ initialDbOrders }: ProductionPlanningVi
             const stationItems = filteredSchedule.filter((item) => item.station === station.id);
             const utilPct = Math.round((station.usedHours / station.totalHours) * 100);
             const isOverloaded = utilPct >= 90;
+            const isAtRisk = utilPct > 85 && utilPct < 90;
 
             return (
               <div key={station.id} className="grid grid-cols-12 min-h-[105px]">
@@ -380,6 +381,8 @@ export function ProductionPlanningView({ initialDbOrders }: ProductionPlanningVi
                         className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
                           isOverloaded
                             ? "bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800"
+                            : isAtRisk
+                            ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
                             : "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
                         }`}
                       >
@@ -391,12 +394,17 @@ export function ProductionPlanningView({ initialDbOrders }: ProductionPlanningVi
                     </p>
                   </div>
 
-                  {isOverloaded && (
+                  {isOverloaded ? (
                     <div className="mt-2 text-[11px] text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800 p-1.5 rounded-lg flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-[14px]">warning</span>
                       <span>Kapasitas kritis! Disarankan lembur atau re-route.</span>
                     </div>
-                  )}
+                  ) : isAtRisk ? (
+                    <div className="mt-2 text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 p-1.5 rounded-lg flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[14px]">error</span>
+                      <span>Mendekati batas aman (&gt;85%). Perlu dipantau.</span>
+                    </div>
+                  ) : null}
                 </div>
 
                 {/* Days Grid Column */}
@@ -490,8 +498,11 @@ export function ProductionPlanningView({ initialDbOrders }: ProductionPlanningVi
               <div>
                 <span className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase">{selectedItem.id}</span>
                 <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-50">
-                  {selectedItem.orderId} — {selectedItem.customer}
+                  {selectedItem.customer}
                 </h3>
+                <p className="text-xs text-slate-400 dark:text-slate-500 font-mono mt-0.5">
+                  PO #{selectedItem.orderId.length > 8 ? selectedItem.orderId.slice(-6).toUpperCase() : selectedItem.orderId}
+                </p>
               </div>
               <button
                 onClick={() => setSelectedItem(null)}

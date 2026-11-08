@@ -5,12 +5,11 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
 
-  /* Laptop dev server memory optimization */
+  /* Dev server cache optimization for instant navigation */
   onDemandEntries: {
-    maxInactiveAge: 15 * 1000, // Dispose inactive pages from memory after 15s
-    pagesBufferLength: 2,       // Keep at most 2 pages buffered in dev server RAM
+    maxInactiveAge: 60 * 60 * 1000, // Keep compiled pages cached for 1 hour
+    pagesBufferLength: 15,          // Buffer all sidebar pages in memory for instant switching
   },
-  cacheMaxMemorySize: 25 * 1024 * 1024, // 25 MB max in-memory cache
   serverExternalPackages: ["@prisma/client", "prisma"],
 
   experimental: {

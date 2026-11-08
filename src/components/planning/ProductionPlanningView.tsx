@@ -383,7 +383,7 @@ export function ProductionPlanningView({ initialDbOrders }: ProductionPlanningVi
                             : "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
                         }`}
                       >
-                        {utilPct}% Utilized
+                        {utilPct}% Terpakai
                       </span>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -400,14 +400,16 @@ export function ProductionPlanningView({ initialDbOrders }: ProductionPlanningVi
                 </div>
 
                 {/* Days Grid Column */}
-                <div className="col-span-8 grid grid-cols-6 divide-x divide-slate-200 dark:divide-slate-700 relative p-2 bg-white dark:bg-slate-800">
+                <div className="col-span-8 relative p-2 bg-white dark:bg-slate-800 min-h-[110px] flex flex-col justify-center">
                   {/* Grid background lines */}
-                  {DAYS.map((d) => (
-                    <div key={d.index} className="h-full min-h-[90px]" />
-                  ))}
+                  <div className="absolute inset-0 grid grid-cols-6 divide-x divide-slate-200 dark:divide-slate-700 pointer-events-none">
+                    {DAYS.map((d) => (
+                      <div key={d.index} className="h-full" />
+                    ))}
+                  </div>
 
                   {/* Schedule Bars Layer */}
-                  <div className="absolute inset-0 p-2 flex flex-col justify-center gap-2 pointer-events-none">
+                  <div className="relative z-10 flex flex-col gap-2.5 py-1.5 pointer-events-none w-full">
                     {stationItems.length === 0 ? (
                       <div className="text-center text-xs text-slate-400 dark:text-slate-500 italic py-4">
                         Tidak ada antrean pesanan di stasiun ini.
@@ -425,7 +427,7 @@ export function ProductionPlanningView({ initialDbOrders }: ProductionPlanningVi
                               width: `${widthPercent}%`,
                             }}
                             onClick={() => setSelectedItem(item)}
-                            className={`pointer-events-auto cursor-pointer p-2 rounded-xl text-left shadow-xs border transition-all hover:scale-[1.01] hover:shadow-md ${
+                            className={`pointer-events-auto cursor-pointer p-2.5 rounded-xl text-left shadow-xs border transition-all hover:scale-[1.01] hover:shadow-md ${
                               item.status === "at_risk"
                                 ? "bg-rose-50 dark:bg-rose-900/30 border-rose-300 dark:border-rose-700 text-rose-900 dark:text-rose-200 ring-1 ring-rose-400 dark:ring-rose-700"
                                 : item.status === "completed"
@@ -436,11 +438,12 @@ export function ProductionPlanningView({ initialDbOrders }: ProductionPlanningVi
                             }`}
                           >
                             <div className="flex items-center justify-between gap-1 text-[11px]">
-                              <span className="font-extrabold truncate flex items-center gap-1">
+                              <span className="font-extrabold truncate flex items-center gap-1.5" title={`${item.customer} • ${item.product}`}>
                                 {item.isCapacityLocked && (
                                   <span className="text-[10px]" title="Kapasitas Terkunci (PO Terkonfirmasi)">🔒</span>
                                 )}
-                                {item.orderId} • {item.product}
+                                <span>{item.customer}</span>
+                                <span className="opacity-75 font-normal truncate">• {item.product}</span>
                               </span>
                               {item.status === "at_risk" && (
                                 <span className="text-[10px] bg-rose-600 text-white font-bold px-1.5 py-0.2 rounded-full shrink-0">

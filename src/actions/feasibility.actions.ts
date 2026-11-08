@@ -87,9 +87,21 @@ export async function checkFeasibilityPreviewAction(
 
     const analysisResult = runCapacityEngine(engineInput);
 
+    // [Finding #1] Inject materialName into each materialAnalysis item so the UI
+    // can display human-readable names instead of raw materialId strings.
+    // We build a lookup from the resources already fetched above — no extra DB call needed.
+    const materialNameMap = new Map(resources.materials.map((m) => [m.id, m.name]));
+    const enrichedMaterialAnalysis = analysisResult.materialAnalysis.map((mat) => ({
+      ...mat,
+      materialName: materialNameMap.get(mat.materialId) ?? mat.materialId,
+    }));
+
     return {
       success: true,
-      data: analysisResult,
+      data: {
+        ...analysisResult,
+        materialAnalysis: enrichedMaterialAnalysis,
+      },
     };
   } catch (error: unknown) {
     return {

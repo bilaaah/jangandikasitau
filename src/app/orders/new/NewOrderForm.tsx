@@ -420,17 +420,17 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
                   <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
                 ) : (
                   <span className="material-symbols-outlined text-[19px]">
-                    {previewResult ? "check_circle" : "edit_note"}
+                    {previewResult ? "save" : "edit_note"}
                   </span>
                 )}
-                <span>{previewResult ? "Konfirmasi & Terima Pesanan" : "Terima Pesanan (Belum Dicek)"}</span>
+                <span>{previewResult ? "Simpan sebagai Draf" : "Simpan sebagai Draf (Belum Dicek)"}</span>
               </button>
             </div>
 
             {/* Hint if not yet checked */}
             {!previewResult && (
               <p className="text-center text-[11px] text-[#94a3b8]">
-                💡 Disarankan: klik <strong>Uji Kelayakan</strong> dulu sebelum terima pesanan
+                💡 Disarankan: klik <strong>Uji Kelayakan</strong> dulu sebelum menyimpan pesanan
               </p>
             )}
           </form>

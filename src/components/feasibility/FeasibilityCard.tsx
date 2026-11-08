@@ -24,6 +24,76 @@ interface FeasibilityCardProps {
   deliveryDateStr?: string;
 }
 
+// [Finding #5 & #1] Translate English engine messages to Indonesian for display
+// and replace raw materialId with human-readable material names in reasoning text.
+function translateEngineText(text: string, materialMap?: Map<string, string>): string {
+  let res = text;
+  if (materialMap) {
+    materialMap.forEach((name, id) => {
+      res = res.replaceAll(id, name);
+    });
+  }
+  return res
+    // Worker bottlenecks
+    .replace(
+      /Worker capacity: ([\d.]+)h required; only ([\d.]+)h free \(([\d.]+)h committed of ([\d.]+)h total\)\. Shortfall: ([\d.]+)h\./,
+      "Kapasitas tenaga kerja: dibutuhkan $1 jam; hanya $2 jam tersedia ($3 jam terpakai dari $4 jam total). Kekurangan: $5 jam.",
+    )
+    .replace(
+      /Worker utilization: ([\d.]+)% if order accepted \(above ([\d.]+)% risk threshold\)\. ([\d.]+)h required; ([\d.]+)h free\./,
+      "Utilisasi tenaga kerja: $1% jika pesanan diterima (di atas batas risiko $2%). Dibutuhkan $3 jam; $4 jam tersedia.",
+    )
+    .replace(
+      /Worker capacity: ([\d.]+)h required; ([\d.]+)h free \(([\d.]+)% utilization if accepted\)\./,
+      "Kapasitas tenaga kerja: dibutuhkan $1 jam; $2 jam tersedia (utilisasi $3% jika diterima).",
+    )
+    // Machine bottlenecks
+    .replace(
+      /Machine capacity: ([\d.]+)h required; only ([\d.]+)h free \(([\d.]+)h committed of ([\d.]+)h total\)\. Shortfall: ([\d.]+)h\./,
+      "Kapasitas mesin: dibutuhkan $1 jam; hanya $2 jam tersedia ($3 jam terpakai dari $4 jam total). Kekurangan: $5 jam.",
+    )
+    .replace(
+      /Machine utilization: ([\d.]+)% if order accepted \(above ([\d.]+)% risk threshold\)\. ([\d.]+)h required; ([\d.]+)h free\./,
+      "Utilisasi mesin: $1% jika pesanan diterima (di atas batas risiko $2%). Dibutuhkan $3 jam; $4 jam tersedia.",
+    )
+    .replace(
+      /Machine capacity: ([\d.]+)h required; ([\d.]+)h free \(([\d.]+)% utilization if accepted\)\./,
+      "Kapasitas mesin: dibutuhkan $1 jam; $2 jam tersedia (utilisasi $3% jika diterima).",
+    )
+    // Material bottlenecks
+    .replace(
+      /Material shortage: ([\d.]+)(\w+) required; only ([\d.]+)(\w+) available \(([\d.]+)(\w+) stock − ([\d.]+)(\w+) committed\)\. Shortfall: ([\d.]+)(\w+)\./,
+      "Kekurangan bahan baku: dibutuhkan $1$2; hanya $3$4 tersedia ($5$6 stok − $7$8 terpakai). Defisit: $9$10.",
+    )
+    // Deadline bottlenecks
+    .replace(
+      /Deadline impossible: (\d+) working days needed; only (\d+) available\. Shortfall: (\d+) day\(s\)\./,
+      "Deadline tidak memungkinkan: dibutuhkan $1 hari kerja; hanya $2 hari tersedia. Kekurangan: $3 hari.",
+    )
+    .replace(
+      /Deadline at risk: (\d+) days needed; (\d+) available\. Buffer: (\d+) day\(s\) — at or below (\d+)-day threshold\./,
+      "Deadline berisiko: dibutuhkan $1 hari; $2 hari tersedia. Buffer: $3 hari — di batas minimum $4 hari.",
+    )
+    .replace(
+      /Deadline: (\d+) days needed; (\d+) available\. Buffer: (\d+) day\(s\)\./,
+      "Deadline: dibutuhkan $1 hari; $2 hari tersedia. Buffer: $3 hari.",
+    )
+    .replace(
+      "Production time cannot be estimated: no workers or machines have available hours.",
+      "Waktu produksi tidak dapat diestimasi: tidak ada tenaga kerja atau mesin yang tersedia.",
+    )
+    // Reasoning prefix labels
+    .replace(/^Available working days \(Mon–Fri\): /, "Hari kerja tersedia (Sen–Jum): ")
+    .replace(/\(from /, "(dari ")
+    .replace(/ to /, " hingga ")
+    .replace(/Material \(([^)]+)\): /, "Bahan ($1): ")
+    .replace(/h required; /, " jam dibutuhkan; ")
+    .replace(/h free\./, " jam tersedia.")
+    .replace(/h available\./, " jam tersedia.")
+    .replace(/ required; /, " dibutuhkan; ")
+    .replace(/ available\./, " tersedia.");
+}
+
 // Quick-question shortcuts users can tap for instant AI explanation
 const QUICK_QUESTIONS = [
   { id: "why_risk",    icon: "help",          label: "Kenapa pesanan ini berisiko?" },
@@ -53,6 +123,16 @@ export function FeasibilityCard({
     bottlenecks,
     reasoning,
   } = analysis;
+
+  const materialNameMap = React.useMemo(() => {
+    const map = new Map<string, string>();
+    materialAnalysis.forEach((m) => {
+      if ((m as any).materialName) {
+        map.set(m.materialId, (m as any).materialName);
+      }
+    });
+    return map;
+  }, [materialAnalysis]);
 
   // ── AI Panel State ────────────────────────────────────────────────
   const [showAiPanel, setShowAiPanel] = useState(false);
@@ -438,7 +518,7 @@ export function FeasibilityCard({
                   <span className="font-bold uppercase tracking-wider px-1.5 py-0.5 rounded text-[10px] bg-background/80 shrink-0">
                     {b.severity}
                   </span>
-                  <div className="flex-1 font-medium">{b.description}</div>
+                  <div className="flex-1 font-medium">{translateEngineText(b.description, materialNameMap)}</div>
                 </div>
               ))}
             </div>
@@ -455,7 +535,7 @@ export function FeasibilityCard({
               {reasoning.map((step, idx) => (
                 <div key={idx} className="text-muted-foreground leading-relaxed">
                   <span className="text-foreground/40 mr-2">[{idx + 1}]</span>
-                  <span>{step}</span>
+                  <span>{translateEngineText(step, materialNameMap)}</span>
                 </div>
               ))}
             </div>

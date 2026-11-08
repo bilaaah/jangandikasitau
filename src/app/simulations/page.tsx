@@ -12,40 +12,62 @@ import { SimulationsView, type SimOrder } from "@/components/simulation/Simulati
 const SIMULATABLE = new Set(["DRAFT", "CONFIRMED", "IN_PROGRESS"]);
 const RISKY = new Set(["AT_RISK", "NOT_FEASIBLE"]);
 
+type SimulationSearchParams = { order?: string; solution?: string };
+
 export default async function SimulationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ order?: string; solution?: string }>;
+  searchParams?: Promise<SimulationSearchParams>;
 }) {
   const businessId = await getBusinessId();
-  const [orders, resources, params, activeCount] = await Promise.all([
-    getOrders(businessId),
-    getBusinessResources(businessId),
-    searchParams,
+  const [orders, resources, resolvedParams, activeCount] = await Promise.all([
+    getOrders(businessId).catch(() => []),
+    getBusinessResources(businessId).catch(() => ({ workers: [], machines: [], materials: [] })),
+    searchParams ? searchParams.catch(() => ({} as SimulationSearchParams)) : Promise.resolve({} as SimulationSearchParams),
     getActiveOrdersCount(businessId).catch(() => 0),
   ]);
 
-  const simOrders: SimOrder[] = orders
-    .filter((o) => SIMULATABLE.has(o.status) && o.items.length > 0)
-    .map((o) => ({
-      id: o.id,
-      customerName: o.customerName,
-      productId: o.items[0].productId,
-      productName: o.items[0].product.name,
-      quantity: o.items[0].quantity,
-      deliveryDateStr: o.requiredDeliveryDate.toISOString(),
-      status: o.status as SimOrder["status"],
-      lastKnownRisk: RISKY.has(o.capacityAnalyses[0]?.status ?? ""),
-    }))
-    // Pesanan berisiko lebih dulu, lalu urutan terbaru (urutan asli dipertahankan oleh sort stabil)
-    .sort((a, b) => Number(b.lastKnownRisk) - Number(a.lastKnownRisk));
+  const params: SimulationSearchParams = resolvedParams ?? {};
+  const now = new Date();
+  const simOrders: SimOrder[] = (orders ?? [])
+    .filter((o) => SIMULATABLE.has(o.status) && o.items && o.items.length > 0)
+    .map((o) => {
+      const firstItem = o.items[0];
+      const deliveryDate = o.requiredDeliveryDate ? new Date(o.requiredDeliveryDate) : new Date();
+      return {
+        id: o.id,
+        customerName: o.customerName ?? "Pelanggan",
+        productId: firstItem?.productId ?? "",
+        productName: firstItem?.product?.name ?? "Produk",
+        quantity: firstItem?.quantity ?? 1,
+        deliveryDateStr: !isNaN(deliveryDate.getTime())
+          ? deliveryDate.toISOString()
+          : new Date().toISOString(),
+        status: o.status as SimOrder["status"],
+        lastKnownRisk: RISKY.has(o.capacityAnalyses?.[0]?.status ?? ""),
+      };
+    })
+    // [Finding #3] Prioritaskan pesanan aktif:
+    // 1. Pesanan belum lewat tenggat yang berisiko
+    // 2. Pesanan belum lewat tenggat yang aman
+    // 3. Pesanan yang tenggatnya sudah lewat (kadaluarsa) diturunkan ke paling bawah
+    .sort((a, b) => {
+      const aDate = new Date(a.deliveryDateStr);
+      const bDate = new Date(b.deliveryDateStr);
+      const aExpired = !isNaN(aDate.getTime()) && aDate < now;
+      const bExpired = !isNaN(bDate.getTime()) && bDate < now;
+      if (aExpired !== bExpired) {
+        return aExpired ? 1 : -1; // Kadaluarsa ditaruh paling bawah
+      }
+      return Number(b.lastKnownRisk) - Number(a.lastKnownRisk);
+    });
 
   return (
     <SimulationsView
       orders={simOrders}
-      initialOrderId={params.order}
-      initialSolution={params.solution}
-      workerCount={resources.workers.length}
+      initialOrderId={params?.order}
+      initialSolution={params?.solution}
+      workerCount={resources?.workers?.length ?? 0}
       activeOrdersCount={activeCount}
     />
   );

@@ -110,6 +110,59 @@ function bindingUtilization(r: CapacityEngineResult) {
   );
 }
 
+// [Finding #5] Translate English engine messages to Indonesian for UI presentation
+function translateEngineMessage(text: string): string {
+  return text
+    // Worker bottlenecks
+    .replace(
+      /Worker capacity: ([\d.]+)h required; only ([\d.]+)h free \(([\d.]+)h committed of ([\d.]+)h total\)\. Shortfall: ([\d.]+)h\./,
+      "Kapasitas tenaga kerja: dibutuhkan $1 jam; hanya $2 jam tersedia ($3 jam terpakai dari $4 jam total). Kekurangan: $5 jam.",
+    )
+    .replace(
+      /Worker utilization: ([\d.]+)% if order accepted \(above ([\d.]+)% risk threshold\)\. ([\d.]+)h required; ([\d.]+)h free\./,
+      "Utilisasi tenaga kerja: $1% jika pesanan diterima (di atas batas risiko $2%). Dibutuhkan $3 jam; $4 jam tersedia.",
+    )
+    .replace(
+      /Worker capacity: ([\d.]+)h required; ([\d.]+)h free \(([\d.]+)% utilization if accepted\)\./,
+      "Kapasitas tenaga kerja: dibutuhkan $1 jam; $2 jam tersedia (utilisasi $3% jika diterima).",
+    )
+    // Machine bottlenecks
+    .replace(
+      /Machine capacity: ([\d.]+)h required; only ([\d.]+)h free \(([\d.]+)h committed of ([\d.]+)h total\)\. Shortfall: ([\d.]+)h\./,
+      "Kapasitas mesin: dibutuhkan $1 jam; hanya $2 jam tersedia ($3 jam terpakai dari $4 jam total). Kekurangan: $5 jam.",
+    )
+    .replace(
+      /Machine utilization: ([\d.]+)% if order accepted \(above ([\d.]+)% risk threshold\)\. ([\d.]+)h required; ([\d.]+)h free\./,
+      "Utilisasi mesin: $1% jika pesanan diterima (di atas batas risiko $2%). Dibutuhkan $3 jam; $4 jam tersedia.",
+    )
+    .replace(
+      /Machine capacity: ([\d.]+)h required; ([\d.]+)h free \(([\d.]+)% utilization if accepted\)\./,
+      "Kapasitas mesin: dibutuhkan $1 jam; $2 jam tersedia (utilisasi $3% jika diterima).",
+    )
+    // Material bottlenecks
+    .replace(
+      /Material shortage: ([\d.]+)(\w+) required; only ([\d.]+)(\w+) available \(([\d.]+)(\w+) stock − ([\d.]+)(\w+) committed\)\. Shortfall: ([\d.]+)(\w+)\./,
+      "Kekurangan bahan baku: dibutuhkan $1$2; hanya $3$4 tersedia ($5$6 stok − $7$8 terpakai). Defisit: $9$10.",
+    )
+    // Deadline bottlenecks
+    .replace(
+      /Deadline impossible: (\d+) working days needed; only (\d+) available\. Shortfall: (\d+) day\(s\)\./,
+      "Deadline tidak memungkinkan: dibutuhkan $1 hari kerja; hanya $2 hari tersedia. Kekurangan: $3 hari.",
+    )
+    .replace(
+      /Deadline at risk: (\d+) days needed; (\d+) available\. Buffer: (\d+) day\(s\) — at or below (\d+)-day threshold\./,
+      "Deadline berisiko: dibutuhkan $1 hari; $2 hari tersedia. Buffer: $3 hari — di batas minimum $4 hari.",
+    )
+    .replace(
+      /Deadline: (\d+) days needed; (\d+) available\. Buffer: (\d+) day\(s\)\./,
+      "Deadline: dibutuhkan $1 hari; $2 hari tersedia. Buffer: $3 hari.",
+    )
+    .replace(
+      "Production time cannot be estimated: no workers or machines have available hours.",
+      "Waktu produksi tidak dapat diestimasi: tidak ada tenaga kerja atau mesin yang tersedia.",
+    );
+}
+
 export function SimulationsView({
   orders,
   initialOrderId,
@@ -300,19 +353,21 @@ export function SimulationsView({
     statusLabel: BASE_STATUS_LABEL[baseStatus],
     baseStatus,
     baseUtilization,
-    baseBottleneck:
-      base.bottlenecks[0]?.description ?? "Tidak ada kendala terdeteksi",
+    baseBottleneck: base.bottlenecks[0]?.description
+      ? translateEngineMessage(base.bottlenecks[0].description)
+      : "Tidak ada kendala terdeteksi",
     orderValue,
   };
 
   // ── Biaya (tarif dari Pengaturan / Default) ──────────────────────
-  const overtimeCost =
-    overtimeHours * workerCount * workDays * overtimeRate;
-  const workerCost = extraWorkers * workDays * freelanceRate;
-  const outsourceCost = sim.outsourcedUnits * OUTSOURCE_COST_PER_UNIT;
-  const splitCost = enableSplitDelivery ? SPLIT_EXTRA_SHIPPING_COST : 0;
+  const isExpired = Boolean(selected && new Date(selected.deliveryDateStr) < new Date());
+  const overtimeCost = isExpired ? 0 : overtimeHours * workerCount * workDays * overtimeRate;
+  const workerCost = isExpired ? 0 : extraWorkers * workDays * freelanceRate;
+  const outsourceCost = isExpired ? 0 : sim.outsourcedUnits * OUTSOURCE_COST_PER_UNIT;
+  const splitCost = (!isExpired && enableSplitDelivery) ? SPLIT_EXTRA_SHIPPING_COST : 0;
   const totalCost = overtimeCost + workerCost + outsourceCost + splitCost;
-  const netProtectedRevenue = orderValue - totalCost;
+  // [Finding #2] Batasi pendapatan terlindungi minimal Rp 0 (jangan pernah minus) dan 0 jika pesanan sudah lewat
+  const netProtectedRevenue = isExpired ? 0 : Math.max(0, orderValue - totalCost);
   const costRatio =
     orderValue > 0 ? ((totalCost / orderValue) * 100).toFixed(1) : "0.0";
 
@@ -409,14 +464,41 @@ export function SimulationsView({
                 }}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-white/[0.12] bg-white dark:bg-slate-900/80 text-slate-900 dark:text-[#F1F5F9] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 font-medium"
               >
-                {orders.map((o) => (
-                  <option key={o.id} value={o.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
-                    {o.customerName} ({o.quantity} × {o.productName}) ·{" "}
-                    {ORDER_STATUS_TAG[o.status]}
-                    {o.lastKnownRisk ? " ⚠️" : ""}
-                  </option>
-                ))}
+                {orders.map((o) => {
+                  const isOptExpired = new Date(o.deliveryDateStr) < new Date();
+                  return (
+                    <option key={o.id} value={o.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                      {o.customerName} ({o.quantity} × {o.productName}) ·{" "}
+                      {ORDER_STATUS_TAG[o.status]}
+                      {isOptExpired ? " (Tenggat Lewat)" : o.lastKnownRisk ? " ⚠️" : ""}
+                    </option>
+                  );
+                })}
               </select>
+
+              {/* [Finding #2] Banner peringatan jika tenggat pesanan sudah lewat */}
+              {isExpired && (
+                <div className="p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-950 dark:text-amber-200 flex items-start gap-2.5 text-xs">
+                  <span className="material-symbols-outlined text-[18px] text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
+                    event_busy
+                  </span>
+                  <div className="space-y-0.5">
+                    <strong className="font-bold block">Tenggat Pesanan Sudah Lewat</strong>
+                    <p className="leading-relaxed opacity-90">
+                      Pesanan ini bertenggat{" "}
+                      <strong>
+                        {new Date(selected.deliveryDateStr).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </strong>
+                      . Slider simulasi dinonaktifkan karena pesanan telah melewati batas waktu pengiriman.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Current bottleneck hint */}
               <div className="flex items-start gap-1.5 p-2.5 rounded-lg bg-amber-50 dark:bg-amber-500/[0.10] border border-amber-200 dark:border-amber-500/20 text-xs text-amber-900 dark:text-amber-200">
                 <span className="material-symbols-outlined text-[15px] text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5">
@@ -441,6 +523,7 @@ export function SimulationsView({
               prefix="+"
               ticks={["0 jam", "+1", "+2", "+3", "+4 (maks)"]}
               onChange={setOvertimeHours}
+              disabled={isExpired}
               costNote={
                 overtimeHours > 0
                   ? `+Rp ${overtimeCost.toLocaleString("id-ID")} biaya lembur`
@@ -461,6 +544,7 @@ export function SimulationsView({
               prefix="+"
               ticks={["0 orang", "+1 orang", "+2 orang", "+3 orang"]}
               onChange={setExtraWorkers}
+              disabled={isExpired}
               costNote={
                 extraWorkers > 0
                   ? `+Rp ${workerCost.toLocaleString("id-ID")} upah (${workDays} hari kerja)`
@@ -481,6 +565,7 @@ export function SimulationsView({
               prefix="+"
               ticks={["0 hari", "+1", "+2", "+3", "+4", "+5", "+6", "+7 hari"]}
               onChange={setExtendedDays}
+              disabled={isExpired}
               costNote={
                 extendedDays > 0 ? "Tanpa biaya tambahan langsung" : undefined
               }
@@ -499,6 +584,7 @@ export function SimulationsView({
               unit="% unit"
               ticks={["0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80% (maks)"]}
               onChange={setOutsourcePercent}
+              disabled={isExpired}
               costNote={
                 outsourcePercent > 0
                   ? `${sim.outsourcedUnits} unit ke mitra · +Rp ${outsourceCost.toLocaleString("id-ID")} biaya maklon`
@@ -514,6 +600,7 @@ export function SimulationsView({
               cost={`Rp ${SPLIT_EXTRA_SHIPPING_COST.toLocaleString("id-ID")} (ongkir termin 2)`}
               checked={splitEnabled}
               onChange={setSplitEnabled}
+              disabled={isExpired}
             />
             {sim.splitDelivery && (
               <div className="p-3 rounded-lg bg-orange-50 dark:bg-orange-500/[0.10] border border-orange-200 dark:border-orange-500/20 text-[11px] text-orange-900 dark:text-orange-200 space-y-1">
@@ -535,7 +622,12 @@ export function SimulationsView({
             <button
               type="button"
               onClick={resetAll}
-              className="w-full py-2 px-3 text-xs font-bold text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white transition-colors text-center flex items-center justify-center gap-1.5 cursor-pointer"
+              disabled={isExpired}
+              className={`w-full py-2 px-3 text-xs font-bold transition-colors text-center flex items-center justify-center gap-1.5 ${
+                isExpired
+                  ? "text-slate-300 dark:text-slate-700 cursor-not-allowed"
+                  : "text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white cursor-pointer"
+              }`}
             >
               <span className="material-symbols-outlined text-[15px]">
                 restart_alt
@@ -650,7 +742,8 @@ export function SimulationsView({
                           ? "⚠️ Lebih baik, tapi masih perlu pantau"
                           : "🔴 Masih perlu tambahan solusi"}
                     </div>
-                    {enableSplitDelivery && (
+                    {/* [Finding #6] Hanya tampilkan catatan beban lebih ringan jika status tidak NOT_FEASIBLE */}
+                    {enableSplitDelivery && newStatus !== "NOT_FEASIBLE" && (
                       <div>
                         • 🚚 Pengiriman dibagi 2 termin — beban produksi lebih
                         ringan
@@ -953,6 +1046,7 @@ interface SliderControlProps {
   onChange: (v: number) => void;
   costNote?: string;
   costNoteColor?: string;
+  disabled?: boolean;
 }
 
 function SliderControl({
@@ -969,9 +1063,16 @@ function SliderControl({
   onChange,
   costNote,
   costNoteColor = "text-rose-600 dark:text-rose-400",
+  disabled = false,
 }: SliderControlProps) {
   return (
-    <div className="space-y-2.5 p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] hover-lift-sm transition-all overflow-hidden">
+    <div
+      className={`space-y-2.5 p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] transition-all overflow-hidden ${
+        disabled
+          ? "opacity-50 pointer-events-none cursor-not-allowed"
+          : "hover-lift-sm"
+      }`}
+    >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex items-start gap-2 min-w-0 flex-1">
           <span className="material-symbols-outlined text-[18px] text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0">
@@ -998,8 +1099,9 @@ function SliderControl({
         max={max}
         step={step}
         value={value}
+        disabled={disabled}
         onChange={(e) => onChange(parseInt(e.target.value))}
-        className="w-full accent-blue-600 dark:accent-blue-500 cursor-pointer"
+        className="w-full accent-blue-600 dark:accent-blue-500 cursor-pointer disabled:cursor-not-allowed"
       />
       <div className="flex justify-between text-[10px] text-slate-500 dark:text-[#94A3B8] font-mono">
         {ticks.map((t, i) => (
@@ -1021,6 +1123,7 @@ interface ToggleControlProps {
   checked: boolean;
   onChange: (v: boolean) => void;
   badgeLabel?: string;
+  disabled?: boolean;
 }
 
 function ToggleControl({
@@ -1031,14 +1134,22 @@ function ToggleControl({
   checked,
   onChange,
   badgeLabel,
+  disabled = false,
 }: ToggleControlProps) {
   return (
     <div
-      className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer hover-lift-sm ${checked
-          ? "bg-blue-50 dark:bg-blue-500/15 border-blue-300 dark:border-blue-500/40 shadow-xs"
-          : "bg-slate-50/80 dark:bg-white/[0.03] border-slate-200/80 dark:border-white/[0.06]"
-        }`}
-      onClick={() => onChange(!checked)}
+      className={`p-4 rounded-xl border transition-all duration-200 ${
+        disabled
+          ? "opacity-50 pointer-events-none cursor-not-allowed bg-slate-50/80 dark:bg-white/[0.03] border-slate-200/80 dark:border-white/[0.06]"
+          : `cursor-pointer hover-lift-sm ${
+              checked
+                ? "bg-blue-50 dark:bg-blue-500/15 border-blue-300 dark:border-blue-500/40 shadow-xs"
+                : "bg-slate-50/80 dark:bg-white/[0.03] border-slate-200/80 dark:border-white/[0.06]"
+            }`
+      }`}
+      onClick={() => {
+        if (!disabled) onChange(!checked);
+      }}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2.5 flex-1 min-w-0">

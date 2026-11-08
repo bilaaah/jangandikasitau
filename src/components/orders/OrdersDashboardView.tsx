@@ -480,7 +480,7 @@ export function OrdersDashboardView({ initialDbOrders }: OrdersDashboardViewProp
       <div className="px-4 sm:px-8 pb-5">
         <div className="bg-white/85 dark:bg-white/[0.04] backdrop-blur-xl rounded-2xl p-4 border border-slate-200/80 dark:border-white/[0.08] shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
           {/* Search Input */}
-          <div className="relative flex-1 min-w-[260px]">
+          <div className="relative flex-1 min-w-0 sm:min-w-[260px]">
             <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#64748B] text-[18px]">
               search
             </span>

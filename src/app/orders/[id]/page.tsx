@@ -55,7 +55,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100 dark:border-slate-700">
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
+                <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 break-words">
                   {order.customerName}
                 </span>
                 <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">

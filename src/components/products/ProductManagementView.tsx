@@ -176,11 +176,21 @@ export function ProductManagementView({
 
       {isFormOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/60 p-4">
-          <form onSubmit={handleSave} className="my-auto max-h-[92vh] w-full max-w-xl space-y-4 overflow-y-auto rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
-            <div>
+          <form onSubmit={handleSave} className="my-auto max-h-[90vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-2xl bg-white dark:bg-slate-800 p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/[0.06]">
+              <div>
                 <p className="text-xs font-bold uppercase text-blue-700 dark:text-blue-400">{editing ? "Ubah produk" : "Produk baru"}</p>
                 <h2 className="text-lg font-extrabold text-slate-900 dark:text-slate-50">Detail Produk &amp; BOM</h2>
               </div>
+              <button
+                type="button"
+                onClick={closeForm}
+                aria-label="Tutup form"
+                className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
             <label className="block space-y-1 text-xs font-semibold text-slate-700 dark:text-slate-300">
               Nama produk
               <input required maxLength={120} value={name} onChange={(event) => setName(event.target.value)} className={inputClass} />
@@ -209,13 +219,21 @@ export function ProductManagementView({
               {materials.length === 0 ? (
                 <p className="rounded-lg bg-amber-50 dark:bg-amber-900/30 p-3 text-xs text-amber-800 dark:text-amber-400">Daftarkan bahan baku terlebih dahulu sebelum membuat BOM.</p>
               ) : bom.map((row, index) => (
-                <div key={index} className="grid grid-cols-[1fr_120px_36px] gap-2">
-                  <select required value={row.materialId} onChange={(event) => setBom((rows) => rows.map((item, i) => i === index ? { ...item, materialId: event.target.value } : item))} className={inputClass}>
+                <div key={index} className="grid grid-cols-[1fr_90px_36px] sm:grid-cols-[1fr_120px_36px] gap-2 items-center">
+                  <select required value={row.materialId} onChange={(event) => setBom((rows) => rows.map((item, i) => i === index ? { ...item, materialId: event.target.value } : item))} className={`${inputClass} min-w-0`}>
                     <option value="">Pilih bahan</option>
                     {materials.map((material) => <option key={material.id} value={material.id}>{material.name} ({material.unit})</option>)}
                   </select>
                   <input required aria-label="Kebutuhan bahan per unit" type="number" min="0.001" step="any" value={row.quantityPerUnit} onChange={(event) => setBom((rows) => rows.map((item, i) => i === index ? { ...item, quantityPerUnit: event.target.value } : item))} className={inputClass} />
-                  <button type="button" aria-label="Hapus bahan BOM" disabled={bom.length === 1} onClick={() => setBom((rows) => rows.filter((_, i) => i !== index))} className="rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30 disabled:opacity-30">✕</button>
+                  <button
+                    type="button"
+                    aria-label="Hapus bahan BOM"
+                    disabled={bom.length === 1}
+                    onClick={() => setBom((rows) => rows.filter((_, i) => i !== index))}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors disabled:opacity-20 flex-shrink-0"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
                 </div>
               ))}
             </section>

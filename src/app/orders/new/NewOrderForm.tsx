@@ -389,41 +389,41 @@ export function NewOrderForm({ products }: NewOrderFormProps) {
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-2 flex flex-col sm:flex-row gap-3">
+            <div className="pt-2 flex flex-col gap-2.5">
               <button
                 type="button"
                 id="btn-check-feasibility"
                 onClick={handleCheckFeasibility}
                 disabled={isPreviewLoading}
-                className="flex-1 py-3 px-4 rounded-xl border border-[#1D4ED8]/40 bg-blue-50/70 hover:bg-blue-100 text-[#1D4ED8] text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-xs"
+                className="w-full py-3 px-4 rounded-xl border border-blue-500/30 bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:border-blue-700/50 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-xs"
               >
                 {isPreviewLoading ? (
                   <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
                 ) : (
-                  <span className="material-symbols-outlined text-[18px]">calculate</span>
+                  <span className="material-symbols-outlined text-[19px]">calculate</span>
                 )}
-                Uji Kelayakan Kapasitas
+                <span>Uji Kelayakan Kapasitas</span>
               </button>
 
               <button
                 type="submit"
                 id="btn-submit-order"
                 disabled={isPending}
-                className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm
+                className={`w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm
                   ${previewResult
-                    ? "bg-[#1D4ED8] hover:bg-[#1E40AF] text-white"
-                    : "bg-slate-200 hover:bg-slate-300 text-slate-600"
+                    ? "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20"
+                    : "bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.10] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/[0.08]"
                   }`}
                 title={!previewResult ? "Jalankan Uji Kelayakan terlebih dahulu untuk hasil terbaik" : ""}
               >
                 {isPending ? (
                   <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
                 ) : (
-                  <span className="material-symbols-outlined text-[18px]">
+                  <span className="material-symbols-outlined text-[19px]">
                     {previewResult ? "check_circle" : "edit_note"}
                   </span>
                 )}
-                {previewResult ? "Konfirmasi & Terima Pesanan" : "Terima Pesanan (Belum Dicek)"}
+                <span>{previewResult ? "Konfirmasi & Terima Pesanan" : "Terima Pesanan (Belum Dicek)"}</span>
               </button>
             </div>
 

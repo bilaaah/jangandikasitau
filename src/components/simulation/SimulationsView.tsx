@@ -566,31 +566,33 @@ export function SimulationsView({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Before Box */}
                 <div
-                  className={`p-5 rounded-2xl border space-y-3 ${baseColors.border} ${baseColors.bg}`}
+                  className={`p-4 sm:p-5 rounded-2xl border space-y-3 ${baseColors.border} ${baseColors.bg}`}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-1.5 pb-1 border-b border-black/5 dark:border-white/5">
                     <span
-                      className={`text-xs font-bold uppercase tracking-wider ${baseColors.text}`}
+                      className={`text-[11px] font-bold uppercase tracking-wider ${baseColors.text}`}
                     >
-                      Sekarang (Tanpa Solusi)
+                      Sebelum Solusi
                     </span>
                     <span
-                      className={`text-xs font-bold px-2 py-0.5 rounded ${baseColors.badge}`}
+                      className={`text-xs font-bold px-2 py-0.5 rounded shrink-0 ${baseColors.badge}`}
                     >
                       {order.statusLabel}
                     </span>
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <span
-                      className={`text-4xl font-black font-mono ${baseColors.text}`}
-                    >
-                      {order.baseUtilization}%
-                    </span>
-                    <span className={`text-xs ${baseColors.text}`}>
-                      Kapasitas Terpakai
-                    </span>
+                  <div>
+                    <div className="flex items-baseline gap-2">
+                      <span
+                        className={`text-3xl sm:text-4xl font-black font-mono tracking-tight ${baseColors.text}`}
+                      >
+                        {order.baseUtilization}%
+                      </span>
+                    </div>
+                    <p className={`text-xs font-medium mt-0.5 ${baseColors.text}`}>
+                      Kapasitas terpakai (tanpa intervensi)
+                    </p>
                   </div>
-                  <div className={`space-y-1 text-xs ${baseColors.text}`}>
+                  <div className={`space-y-1 text-xs pt-1 ${baseColors.text}`}>
                     <div>• {order.baseBottleneck}</div>
                     <div>
                       • Pekerja {baseWorkerUtil}% · Mesin {baseMachineUtil}%
@@ -601,34 +603,41 @@ export function SimulationsView({
 
                 {/* After Box */}
                 <div
-                  className={`p-5 rounded-2xl border space-y-3 transition-all duration-300 ${newColors.border} ${newColors.bg}`}
+                  className={`p-4 sm:p-5 rounded-2xl border space-y-3 transition-all duration-300 ${newColors.border} ${newColors.bg}`}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-1.5 pb-1 border-b border-black/5 dark:border-white/5">
                     <span
-                      className={`text-xs font-bold uppercase tracking-wider ${newColors.text}`}
+                      className={`text-[11px] font-bold uppercase tracking-wider ${newColors.text}`}
                     >
-                      Setelah Solusi Diterapkan
+                      Setelah Solusi
                     </span>
                     <span
-                      className={`text-xs font-bold px-2.5 py-0.5 rounded ${newColors.badge}`}
+                      className={`text-xs font-bold px-2 py-0.5 rounded shrink-0 ${newColors.badge}`}
                     >
                       {statusLabel[newStatus]}
                     </span>
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <span
-                      className={`text-4xl font-black font-mono ${newColors.text}`}
-                    >
-                      {newUtilization}%
-                    </span>
-                    <span className={`text-xs ${newColors.text}`}>
+                  <div>
+                    <div className="flex flex-wrap items-baseline gap-2">
+                      <span
+                        className={`text-3xl sm:text-4xl font-black font-mono tracking-tight ${newColors.text}`}
+                      >
+                        {newUtilization}%
+                      </span>
+                      {newUtilization < order.baseUtilization && (
+                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">
+                          ↓ {round1(order.baseUtilization - newUtilization)}%
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-xs font-medium mt-0.5 ${newColors.text}`}>
                       Kapasitas terpakai
                       {newUtilization < order.baseUtilization
-                        ? ` (turun ${order.baseUtilization - newUtilization}%)`
+                        ? ` (turun ${round1(order.baseUtilization - newUtilization)}%)`
                         : " (belum berubah)"}
-                    </span>
+                    </p>
                   </div>
-                  <div className={`space-y-1 text-xs ${newColors.text}`}>
+                  <div className={`space-y-1 text-xs pt-1 ${newColors.text}`}>
                     <div>• Tambahan kapasitas: +{addedCapacityHours} jam</div>
                     <div>
                       • Pekerja {newWorkerUtil}% · Mesin {newMachineUtil}%
@@ -962,24 +971,25 @@ function SliderControl({
   costNoteColor = "text-rose-600 dark:text-rose-400",
 }: SliderControlProps) {
   return (
-    <div className="space-y-2 p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] hover-lift-sm transition-all">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px] text-blue-600 dark:text-blue-400">
+    <div className="space-y-2.5 p-4 rounded-xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] hover-lift-sm transition-all overflow-hidden">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="flex items-start gap-2 min-w-0 flex-1">
+          <span className="material-symbols-outlined text-[18px] text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0">
             {icon}
           </span>
-          <div>
-            <label className="text-xs font-bold text-slate-900 dark:text-[#F1F5F9] block">
+          <div className="min-w-0">
+            <label className="text-xs font-bold text-slate-900 dark:text-[#F1F5F9] block leading-snug">
               {label}
             </label>
             {sublabel && (
-              <span className="text-[10px] text-slate-500 dark:text-[#94A3B8]">{sublabel}</span>
+              <span className="text-[10px] sm:text-[10.5px] text-slate-500 dark:text-[#94A3B8] block mt-0.5 leading-tight">
+                {sublabel}
+              </span>
             )}
           </div>
         </div>
-        <span className="font-mono font-bold text-sm text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-500/15 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-500/30 flex-shrink-0">
-          {prefix}
-          {value} {unit}
+        <span className="font-mono font-bold text-xs text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-500/15 px-2 py-0.5 rounded-lg border border-blue-200 dark:border-blue-500/30 shrink-0 whitespace-nowrap self-start">
+          {prefix}{value} {unit}
         </span>
       </div>
       <input

@@ -36,6 +36,7 @@ export function DashboardView({ metrics }: DashboardViewProps) {
   }, [session?.user?.name]);
 
   const isStaff = session?.user?.role === "MEMBER" || session?.user?.role === "STAFF";
+  const displayName = session?.user?.name || ownerName || (isStaff ? "Tim Produksi" : "Demo Owner");
 
   const firstAttentionOrder = metrics.activeOrders.find(
     (o) => o.capacityStatus === "AT_RISK" || o.capacityStatus === "NOT_FEASIBLE",
@@ -53,7 +54,7 @@ export function DashboardView({ metrics }: DashboardViewProps) {
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-[#F1F5F9]">
-            {greeting}, {ownerName || (isStaff ? "Tim Produksi" : "Bilah")}! 👋
+            {greeting}, {displayName}! 👋
           </h1>
           <p className="mt-1.5 text-sm text-slate-600 dark:text-[#94A3B8] max-w-xl">
             {isStaff ? (
@@ -347,7 +348,7 @@ export function DashboardView({ metrics }: DashboardViewProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Beban per Bagian */}
         <div className="lg:col-span-7 bg-white/85 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] rounded-2xl p-6 shadow-xs space-y-5">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/[0.08]">
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-white/[0.08]">
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-[#F1F5F9]">
                 Kapasitas Bagian Produksi

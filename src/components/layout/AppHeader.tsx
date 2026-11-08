@@ -312,7 +312,7 @@ export function AppHeader({ onToggleSidebar, isSidebarOpen, isHelpOpen, onOpenHe
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 top-11 w-80 sm:w-96 bg-white/95 dark:bg-[#0F172A]/90 backdrop-blur-2xl rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-black/30 border border-slate-200 dark:border-white/[0.08] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute right-0 top-11 w-[calc(100vw-2rem)] max-w-sm sm:w-96 bg-white/95 dark:bg-[#0F172A]/90 backdrop-blur-2xl rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-black/30 border border-slate-200 dark:border-white/[0.08] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100">
                 {/* Header */}
                 <div className="p-3.5 border-b border-slate-100 dark:border-white/[0.06] flex items-center justify-between bg-slate-50/50 dark:bg-white/[0.02]">
                   <div>

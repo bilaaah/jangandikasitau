@@ -98,7 +98,7 @@ export function AnalyticsView({ initialData = DEFAULT_METRICS }: AnalyticsViewPr
           </p>
         </div>
 
-        <div className="flex items-center gap-3 print:hidden">
+        <div className="flex flex-wrap items-center gap-3 print:hidden">
           {/* Period selector */}
           <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-1 text-xs font-bold text-slate-500 dark:text-slate-400">
             <button
@@ -145,17 +145,17 @@ export function AnalyticsView({ initialData = DEFAULT_METRICS }: AnalyticsViewPr
       </div>
 
       {/* Primary KPI Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">On-Time Delivery (OTD)</span>
             <span className="material-symbols-outlined text-[20px] text-emerald-600">verified</span>
           </div>
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-black text-emerald-700 dark:text-emerald-400">
+          <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
+            <span className="text-2xl sm:text-3xl font-black font-mono text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
               {metrics.onTimeDeliveryPercent}%
             </span>
-            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-0.5 rounded-full">
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 shrink-0">
               Optimal
             </span>
           </div>
@@ -169,11 +169,11 @@ export function AnalyticsView({ initialData = DEFAULT_METRICS }: AnalyticsViewPr
             <span className="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">Rata-rata Utilisasi Mesin</span>
             <span className="material-symbols-outlined text-[20px] text-blue-600 dark:text-blue-400">precision_manufacturing</span>
           </div>
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-black text-blue-700 dark:text-blue-400">
+          <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
+            <span className="text-2xl sm:text-3xl font-black font-mono text-blue-700 dark:text-blue-400 whitespace-nowrap">
               {metrics.ovenUtilizationPercent}%
             </span>
-            <span className="text-xs font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full">
+            <span className="text-xs font-bold text-blue-700 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-800 shrink-0">
               Optimal
             </span>
           </div>
@@ -185,11 +185,11 @@ export function AnalyticsView({ initialData = DEFAULT_METRICS }: AnalyticsViewPr
             <span className="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">Penghematan Biaya Lembur</span>
             <span className="material-symbols-outlined text-[20px] text-amber-600">savings</span>
           </div>
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-black text-amber-700 dark:text-amber-400">
+          <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
+            <span className="text-2xl sm:text-3xl font-black font-mono text-amber-700 dark:text-amber-400 whitespace-nowrap">
               {metrics.overtimeSavingsRupiah}
             </span>
-            <span className="text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-0.5 rounded-full">
+            <span className="text-xs font-bold text-amber-700 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800 shrink-0">
               Hemat
             </span>
           </div>
@@ -201,11 +201,13 @@ export function AnalyticsView({ initialData = DEFAULT_METRICS }: AnalyticsViewPr
             <span className="text-xs uppercase font-bold text-slate-500 dark:text-slate-400">Order Feasibility Rate</span>
             <span className="material-symbols-outlined text-[20px] text-purple-600">fact_check</span>
           </div>
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-black text-purple-700 dark:text-purple-400">
+          <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
+            <span className="text-2xl sm:text-3xl font-black font-mono text-purple-700 dark:text-purple-400 whitespace-nowrap">
               {metrics.feasibilityRatePercent}%
             </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400">Langsung Layak</span>
+            <span className="text-xs font-bold text-purple-700 bg-purple-50 dark:bg-purple-900/30 dark:text-purple-400 px-2.5 py-0.5 rounded-full border border-purple-200 dark:border-purple-800 shrink-0">
+              Langsung Layak
+            </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
             {metrics.totalAnalysesCount} pesanan dianalisis engine kapasitas.

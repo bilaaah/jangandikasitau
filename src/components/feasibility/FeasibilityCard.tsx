@@ -187,35 +187,37 @@ export function FeasibilityCard({
       )}
     >
       {/* ── Header Banner ────────────────────────────────────────── */}
-      <div className="p-6 border-b border-border/40 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-5 sm:p-6 border-b border-border/40 space-y-4">
         <div>
-          <div className="flex items-center gap-3">
-            <FeasibilityBadge status={status} className="text-sm px-3.5 py-1" />
-            <h3 className="text-xl font-bold tracking-tight">{statusConfig.headline}</h3>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <FeasibilityBadge status={status} className="text-xs sm:text-sm px-3 py-1 shrink-0" />
+            <h3 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+              {statusConfig.headline}
+            </h3>
           </div>
-          <p className="mt-1.5 text-sm text-muted-foreground">{statusConfig.description}</p>
+          <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            {statusConfig.description}
+          </p>
         </div>
 
-        {/* Timeline Summary Pill */}
-        <div className="flex items-center gap-4 bg-background/80 backdrop-blur-sm border rounded-xl px-4 py-2.5 text-xs text-muted-foreground shrink-0">
-          <div className="text-center">
-            <span className="block font-medium text-foreground text-sm font-mono">
+        {/* Timeline Summary Pill (Responsive 3-Column Strip - Never Overflows) */}
+        <div className="grid grid-cols-3 divide-x divide-border/60 bg-background/80 dark:bg-slate-900/60 backdrop-blur-sm border rounded-xl py-2 px-1 text-xs text-muted-foreground shadow-xs">
+          <div className="text-center px-1 sm:px-2">
+            <span className="block font-semibold text-foreground text-sm font-mono whitespace-nowrap">
               {availableWorkDays} Hari
             </span>
-            <span>Tersedia</span>
+            <span className="text-[10px] sm:text-[11px] block text-muted-foreground">Tersedia</span>
           </div>
-          <div className="w-px h-6 bg-border" />
-          <div className="text-center">
-            <span className="block font-medium text-foreground text-sm font-mono">
+          <div className="text-center px-1 sm:px-2">
+            <span className="block font-semibold text-foreground text-sm font-mono whitespace-nowrap">
               {estimatedProductionDays >= 0 ? `${estimatedProductionDays} Hari` : "N/A"}
             </span>
-            <span>Estimasi Produksi</span>
+            <span className="text-[10px] sm:text-[11px] block text-muted-foreground truncate">Estimasi Produksi</span>
           </div>
-          <div className="w-px h-6 bg-border" />
-          <div className="text-center">
+          <div className="text-center px-1 sm:px-2">
             <span
               className={cn(
-                "block font-medium text-sm font-mono",
+                "block font-semibold text-sm font-mono whitespace-nowrap",
                 bufferDays < 0
                   ? "text-rose-600 font-bold"
                   : bufferDays <= 1
@@ -225,7 +227,7 @@ export function FeasibilityCard({
             >
               {bufferDays >= 0 ? `+${bufferDays} Hari` : `${bufferDays} Hari`}
             </span>
-            <span>Buffer Aman</span>
+            <span className="text-[10px] sm:text-[11px] block text-muted-foreground">Buffer Aman</span>
           </div>
         </div>
       </div>

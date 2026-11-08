@@ -127,7 +127,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-xs shrink-0">
+              <div className="flex items-center justify-around sm:justify-start gap-3 sm:gap-4 bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-xs w-full sm:w-auto shrink-0 shadow-xs">
                 <div className="text-center">
                   <span className="block font-mono font-bold text-sm text-slate-900 dark:text-slate-50">
                     {latestAnalysis.availableWorkDays}d

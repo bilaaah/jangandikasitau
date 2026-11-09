@@ -28,9 +28,9 @@ const inputClass =
 
 function getFreshness(updatedAt: Date): Freshness {
   const ageHours = Math.max(0, Date.now() - new Date(updatedAt).getTime()) / 3_600_000;
-  if (ageHours <= 24) return { label: "Terkini · < 24 jam", className: "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400" };
-  if (ageHours <= 24 * 7) return { label: "Perlu diperbarui · < 7 hari", className: "bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400" };
-  return { label: "Usang · lebih dari 7 hari", className: "bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400" };
+  if (ageHours <= 24) return { label: "Terkini · < 24 jam", className: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60" };
+  if (ageHours <= 24 * 7) return { label: "Perlu diperbarui · < 7 hari", className: "bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60" };
+  return { label: "Usang · lebih dari 7 hari", className: "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60" };
 }
 
 export function ResourceManagementView({
@@ -168,7 +168,16 @@ export function ResourceManagementView({
 
       <nav className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2" aria-label="Jenis sumber daya">
         {tabItems.map((tab) => (
-          <button key={tab.key} type="button" onClick={() => { setActiveTab(tab.key); setIsFormOpen(false); setRestockMaterial(null); setError(null); }} className={`rounded-xl px-4 py-2 text-sm font-bold ${activeTab === tab.key ? "bg-blue-700 dark:bg-blue-600 text-white" : "text-slate-500 dark:text-slate-400 hover:bg-slate-50"}`}>
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => { setActiveTab(tab.key); setIsFormOpen(false); setRestockMaterial(null); setError(null); }}
+            className={`rounded-xl px-4 py-2 text-sm font-bold transition-colors ${
+              activeTab === tab.key
+                ? "bg-blue-700 dark:bg-blue-600 text-white shadow-xs"
+                : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60 hover:text-slate-900 dark:hover:text-white"
+            }`}
+          >
             {tab.label} <span className="ml-1 opacity-75">({tab.count})</span>
           </button>
         ))}
@@ -182,7 +191,15 @@ export function ResourceManagementView({
           onDeactivate={handleDeactivate}
           isPending={isPending}
           isOwner={isOwner}
-          renderDetails={(item) => <p className="text-sm text-slate-600">Kapasitas: <strong>{item.dailyAvailableHours} jam/hari</strong></p>}
+          renderDetails={(item) => (
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Kapasitas:</span>
+              <span className="inline-flex items-center gap-1 rounded-lg bg-slate-100 dark:bg-slate-700/70 px-2.5 py-1 text-xs font-bold text-slate-800 dark:text-slate-100 border border-slate-200/80 dark:border-slate-600">
+                <span className="material-symbols-outlined text-[15px] text-blue-600 dark:text-blue-400">schedule</span>
+                {item.dailyAvailableHours} jam/hari
+              </span>
+            </div>
+          )}
         />
       )}
       {activeTab === "machines" && (
@@ -193,7 +210,15 @@ export function ResourceManagementView({
           onDeactivate={handleDeactivate}
           isPending={isPending}
           isOwner={isOwner}
-          renderDetails={(item) => <p className="text-sm text-slate-600">Kapasitas: <strong>{item.dailyAvailableHours} jam/hari</strong></p>}
+          renderDetails={(item) => (
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Kapasitas:</span>
+              <span className="inline-flex items-center gap-1 rounded-lg bg-slate-100 dark:bg-slate-700/70 px-2.5 py-1 text-xs font-bold text-slate-800 dark:text-slate-100 border border-slate-200/80 dark:border-slate-600">
+                <span className="material-symbols-outlined text-[15px] text-blue-600 dark:text-blue-400">precision_manufacturing</span>
+                {item.dailyAvailableHours} jam/hari
+              </span>
+            </div>
+          )}
         />
       )}
       {activeTab === "materials" && (
@@ -208,21 +233,31 @@ export function ResourceManagementView({
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h2 className="font-bold text-slate-900 dark:text-slate-50">{item.name}</h2>
-                      <p className="mt-1 text-xs text-slate-500">Satuan: {item.unit}</p>
+                      <div className="mt-1 flex items-center gap-1.5">
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Satuan:</span>
+                        <span className="inline-flex items-center rounded-md bg-slate-100 dark:bg-slate-700/70 px-2 py-0.5 text-xs font-semibold text-slate-800 dark:text-slate-200 border border-slate-200/60 dark:border-slate-600">
+                          {item.unit}
+                        </span>
+                      </div>
                     </div>
                     <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${freshness.className}`}>{freshness.label}</span>
                   </div>
-                  <div className="rounded-xl bg-slate-50 dark:bg-slate-700/50 p-3">
-                    <p className="text-xs text-slate-500">Stok tercatat</p>
-                    <p className="mt-0.5 font-mono text-xl font-extrabold text-slate-900 dark:text-slate-50">{item.currentStock} <span className="text-sm font-semibold">{item.unit}</span></p>
-                    <p className="mt-1 text-[10px] text-slate-500">Diperbarui: {new Date(item.stockUpdatedAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}</p>
+                  <div className="rounded-xl bg-slate-50 dark:bg-slate-700/50 p-3 border border-slate-100 dark:border-slate-700">
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Stok tercatat</p>
+                    <p className="mt-0.5 font-mono text-xl font-extrabold text-slate-900 dark:text-slate-50">
+                      {item.currentStock} <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">{item.unit}</span>
+                    </p>
+                    <p className="mt-1.5 text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[13px] text-slate-400 dark:text-slate-400">update</span>
+                      Diperbarui: {new Date(item.stockUpdatedAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}
+                    </p>
                   </div>
-                  <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-3">
-                    <button type="button" onClick={() => { setRestockMaterial(item); setRestockMode("add"); setRestockQuantity("0"); setError(null); }} className="rounded-lg px-3 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30">Perbarui stok</button>
+                  <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 dark:border-slate-700/70 pt-3">
+                    <button type="button" onClick={() => { setRestockMaterial(item); setRestockMode("add"); setRestockQuantity("0"); setError(null); }} className="rounded-lg px-3 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors">Perbarui stok</button>
                     {isOwner && (
                       <>
-                        <button type="button" onClick={() => openForm(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30">Ubah</button>
-                        <button type="button" disabled={isPending} onClick={() => handleDeactivate(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 disabled:opacity-50">Nonaktifkan</button>
+                        <button type="button" onClick={() => openForm(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors">Ubah</button>
+                        <button type="button" disabled={isPending} onClick={() => handleDeactivate(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors disabled:opacity-50">Nonaktifkan</button>
                       </>
                     )}
                   </div>
@@ -268,7 +303,7 @@ export function ResourceManagementView({
                     <input required type="number" min="0" step="any" value={stock} onChange={(event) => setStock(event.target.value)} className={inputClass} />
                   </label>
                 </div>
-                <p className="text-[11px] text-slate-500">Menyimpan jumlah stok akan memperbarui waktu keterbaruan snapshot.</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">Menyimpan jumlah stok akan memperbarui waktu keterbaruan snapshot.</p>
               </>
             ) : (
               <label className="block space-y-1 text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -277,7 +312,7 @@ export function ResourceManagementView({
               </label>
             )}
             {error && <p role="alert" className="rounded-lg bg-rose-50 dark:bg-rose-900/30 p-3 text-xs text-rose-700 dark:text-rose-400">{error}</p>}
-            <div className="flex justify-end gap-2 border-t border-slate-100 pt-3">
+            <div className="flex justify-end gap-2 border-t border-slate-100 dark:border-slate-700 pt-3">
               <button type="button" onClick={() => setIsFormOpen(false)} className="rounded-xl border border-slate-200 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700">Batal</button>
               <button type="submit" disabled={isPending} className="rounded-xl bg-blue-700 dark:bg-blue-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-50">{isPending ? "Menyimpan..." : "Simpan"}</button>
             </div>
@@ -289,9 +324,11 @@ export function ResourceManagementView({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
           <form onSubmit={handleUpdateStock} className="w-full max-w-md space-y-4 rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
             <div>
-              <p className="text-xs font-bold uppercase text-blue-700">Snapshot Stok</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">Snapshot Stok</p>
               <h2 className="text-lg font-extrabold text-slate-900 dark:text-slate-50">{restockMaterial.name}</h2>
-              <p className="text-xs text-slate-500">Stok saat ini: {restockMaterial.currentStock} {restockMaterial.unit}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Stok saat ini: <strong className="font-semibold text-slate-700 dark:text-slate-200">{restockMaterial.currentStock} {restockMaterial.unit}</strong>
+              </p>
             </div>
             <label className="block space-y-1 text-xs font-semibold text-slate-700 dark:text-slate-300">
               Metode penyesuaian
@@ -305,7 +342,7 @@ export function ResourceManagementView({
               <input required type="number" min="0" step="any" value={restockQuantity} onChange={(event) => setRestockQuantity(event.target.value)} className={inputClass} />
             </label>
             {error && <p role="alert" className="rounded-lg bg-rose-50 dark:bg-rose-900/30 p-3 text-xs text-rose-700 dark:text-rose-400">{error}</p>}
-            <div className="flex justify-end gap-2 border-t border-slate-100 pt-3">
+            <div className="flex justify-end gap-2 border-t border-slate-100 dark:border-slate-700 pt-3">
               <button type="button" onClick={() => setRestockMaterial(null)} className="rounded-xl border border-slate-200 dark:border-slate-600 px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700">Batal</button>
               <button type="submit" disabled={isPending} className="rounded-xl bg-blue-700 dark:bg-blue-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-50">{isPending ? "Menyimpan..." : "Simpan stok"}</button>
             </div>
@@ -346,14 +383,14 @@ function ResourceList<T extends Worker | Machine>({
             <h2 className="font-bold text-slate-900 dark:text-slate-50">{item.name}</h2>
             {renderDetails(item)}
           </div>
-          <div className="flex justify-end gap-2 border-t border-slate-100 pt-3">
+          <div className="flex justify-end gap-2 border-t border-slate-100 dark:border-slate-700/70 pt-3">
             {isOwner ? (
               <>
-                <button type="button" onClick={() => onEdit(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30">Ubah</button>
-                <button type="button" disabled={isPending} onClick={() => onDeactivate(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 disabled:opacity-50">Nonaktifkan</button>
+                <button type="button" onClick={() => onEdit(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors">Ubah</button>
+                <button type="button" disabled={isPending} onClick={() => onDeactivate(item)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors disabled:opacity-50">Nonaktifkan</button>
               </>
             ) : (
-              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 py-1">Kapasitas Aktif • Dikelola Owner</span>
+              <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 py-1">Kapasitas Aktif • Dikelola Owner</span>
             )}
           </div>
         </article>

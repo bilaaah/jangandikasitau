@@ -4,9 +4,15 @@
 // lalu jatuh ke heuristik lokal jika gagal.
 // Owned by Anggota 3 (AI Lead).
 
-import type { AiOrderAdvice, RiskLevel } from "./types";
-import type { CapacityEngineResult } from "@/engine/types";
-import { adviceSchema, geminiResponseSchema } from "./schema";
+import type { AiOrderAdvice, RiskLevel, WhatIfAiInsight, WhatIfScenarioSummary } from "./types";
+import type { CapacityEngineResult, FeasibilityStatus } from "@/engine/types";
+import type { WhatIfSimulationResult } from "@/engine/simulation/types";
+import {
+  adviceSchema,
+  geminiResponseSchema,
+  geminiWhatIfResponseSchema,
+  whatIfInsightSchema,
+} from "./schema";
 
 const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 
@@ -41,6 +47,7 @@ async function requestGeminiJson(
   plan: ModelPlan,
   apiKey: string,
   prompt: string,
+  responseSchema: object = geminiResponseSchema,
 ): Promise<string | null> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), plan.timeoutMs);
@@ -52,20 +59,25 @@ async function requestGeminiJson(
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           responseMimeType: "application/json",
-          responseSchema: geminiResponseSchema,
+          responseSchema,
           temperature: 0.2,
           thinkingConfig: { thinkingLevel: "low" },
         },
       }),
       signal: controller.signal,
     });
-    if (!response.ok) {
-      console.warn(`[AI Gemini] ${plan.name} returned status ${response.status}.`);
+        if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      console.warn(
+        `[AI Gemini] ${plan.name} returned status ${response.status}. ${detail.slice(0, 200)}`,
+      );
       return null;
     }
     const data = await response.json();
     return data?.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
-  } catch {
+  } catch (error) {
+    const reason = error instanceof Error ? `${error.name}: ${error.message}` : "unknown error";
+    console.warn(`[AI Gemini] ${plan.name} gagal (${plan.timeoutMs}ms): ${reason}`);
     return null;
   } finally {
     clearTimeout(timeoutId);
@@ -77,11 +89,15 @@ async function requestGeminiJson(
  * (atau ambang referensi). Jika tidak, penjelasan AI ditolak dan model berikutnya/fallback dipakai.
  */
 export function hasUnknownPercentages(text: string, analysis: CapacityEngineResult): boolean {
-  const allowed = [
+  return hasPercentagesOutside(text, [
     analysis.workerAnalysis.utilizationPercent,
     analysis.machineAnalysis.utilizationPercent,
     ...KNOWN_PERCENT_REFERENCES,
-  ];
+  ]);
+}
+
+/** Benar jika ada persentase di teks yang tidak ada di daftar angka sah (toleransi pembulatan 0,6). */
+export function hasPercentagesOutside(text: string, allowed: number[]): boolean {
   const found = [...text.matchAll(/(\d+(?:[.,]\d+)?)\s*%/g)].map((m) =>
     parseFloat(m[1].replace(",", ".")),
   );
@@ -150,7 +166,6 @@ export function generateLocalFallbackAdvice(
   leadTimeWarnings: string[] = [],
 ): AiOrderAdvice {
   const criticals = analysis.bottlenecks.filter((b) => b.severity === "CRITICAL");
-  const warnings = analysis.bottlenecks.filter((b) => b.severity === "WARNING");
 
   if (analysis.status === "NOT_FEASIBLE") {
     const materialShortage = criticals.find((b) => b.resourceType === "MATERIAL");
@@ -244,6 +259,148 @@ export function generateLocalFallbackAdvice(
       },
     ],
     customerNegotiationTip: "Berikan konfirmasi kesanggupan jadwal tepat waktu untuk membangun reputasi kepuasan pelanggan.",
+    isFallback: true,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// What-If: penjelasan hasil simulasi
+// ---------------------------------------------------------------------------
+
+const STATUS_LABEL_ID: Record<FeasibilityStatus, string> = {
+  FEASIBLE: "Bisa Dikerjakan",
+  AT_RISK: "Masih Perlu Perhatian",
+  NOT_FEASIBLE: "Belum Sanggup",
+};
+
+/** Semua persentase yang sah disebut AI: dari hasil engine dan tuas skenario. */
+export function whatIfAllowedPercents(
+  sim: WhatIfSimulationResult,
+  scenario: WhatIfScenarioSummary,
+): number[] {
+  const results = [
+    sim.baselineResult,
+    sim.simulatedResult,
+    sim.splitDelivery?.wave1Result,
+    sim.splitDelivery?.wave2Result,
+  ].filter((r): r is CapacityEngineResult => Boolean(r));
+  const split = scenario.splitDelivery?.firstWavePercent;
+  return [
+    ...results.flatMap((r) => [r.workerAnalysis.utilizationPercent, r.machineAnalysis.utilizationPercent]),
+    Math.abs(sim.deltaWorkerUtilization),
+    Math.abs(sim.deltaMachineUtilization),
+    scenario.outsourcePercent,
+    100 - scenario.outsourcePercent,
+    ...(split !== undefined ? [split, 100 - split] : []),
+    ...KNOWN_PERCENT_REFERENCES,
+  ];
+}
+
+/**
+ * Penjelasan What-If via Gemini (model utama, lalu cadangan), divalidasi Zod dan dicek
+ * terhadap angka engine; jatuh ke penjelasan lokal jika gagal.
+ */
+export async function callGeminiWhatIf(
+  prompt: string,
+  sim: WhatIfSimulationResult,
+  scenario: WhatIfScenarioSummary,
+): Promise<WhatIfAiInsight> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return generateLocalWhatIfInsight(sim, scenario);
+
+  const allowed = whatIfAllowedPercents(sim, scenario);
+  const startedAt = Date.now();
+  for (const plan of getModelChain()) {
+    const remainingMs = TOTAL_AI_BUDGET_MS - (Date.now() - startedAt);
+    if (remainingMs < 1000) break;
+    const rawText = await requestGeminiJson(
+      { ...plan, timeoutMs: Math.min(plan.timeoutMs, remainingMs) },
+      apiKey,
+      prompt,
+      geminiWhatIfResponseSchema,
+    );
+    if (!rawText) continue;
+
+    try {
+      const cleaned = rawText.replace(/^```(?:json)?\s*|\s*```$/g, "").trim();
+      const parsed = whatIfInsightSchema.safeParse(JSON.parse(cleaned));
+      if (!parsed.success) {
+        console.warn(`[AI Gemini] ${plan.name}: output What-If gagal validasi Zod.`);
+        continue;
+      }
+      if (hasPercentagesOutside(JSON.stringify(parsed.data), allowed)) {
+        console.warn(`[AI Gemini] ${plan.name}: persentase What-If tidak cocok dengan engine.`);
+        continue;
+      }
+      return { ...parsed.data, isFallback: false };
+    } catch {
+      continue;
+    }
+  }
+  return generateLocalWhatIfInsight(sim, scenario);
+}
+
+/** Penjelasan deterministik dari angka engine (tanpa jaringan). */
+export function generateLocalWhatIfInsight(
+  sim: WhatIfSimulationResult,
+  scenario: WhatIfScenarioSummary,
+): WhatIfAiInsight {
+  const b = sim.baselineResult;
+  const a = sim.simulatedResult;
+  const statusText =
+    a.status === b.status
+      ? `Status tetap "${STATUS_LABEL_ID[a.status]}".`
+      : `Status berubah dari "${STATUS_LABEL_ID[b.status]}" menjadi "${STATUS_LABEL_ID[a.status]}".`;
+  const feasibilityComparison =
+    `${statusText} Utilisasi tenaga kerja ${b.workerAnalysis.utilizationPercent}% menjadi ` +
+    `${a.workerAnalysis.utilizationPercent}%, mesin ${b.machineAnalysis.utilizationPercent}% menjadi ` +
+    `${a.machineAnalysis.utilizationPercent}%, buffer ${b.bufferDays} menjadi ${a.bufferDays} hari kerja.`;
+
+  const recommendedTradeoff =
+    a.status === "FEASIBLE"
+      ? sim.statusImproved
+        ? "Kombinasi ini sudah cukup untuk menerima pesanan. Pertahankan hanya tuas yang paling murah dan paling mudah dijalankan."
+        : "Pesanan sudah aman tanpa tambahan, jadi tidak perlu mengaktifkan solusi yang menambah biaya."
+      : a.status === "AT_RISK"
+        ? "Pesanan bisa diterima dengan pengawasan ketat. Pertimbangkan satu tuas tambahan agar buffer lebih longgar."
+        : "Kombinasi ini belum cukup. Coba gabungkan pengalihan ke mitra maklon, kirim bertahap, atau negosiasi tenggat.";
+
+  const pros: string[] = [];
+  if (sim.statusImproved) pros.push(`Status pesanan naik menjadi "${STATUS_LABEL_ID[a.status]}".`);
+  if (sim.resolvedBottlenecksCount > 0) pros.push(`${sim.resolvedBottlenecksCount} kendala operasional teratasi.`);
+  if (scenario.extraWorkerDailyHours > 0)
+    pros.push(`Kapasitas tenaga kerja bertambah ${scenario.extraWorkerDailyHours} jam per hari.`);
+  if (scenario.deadlineShiftWorkingDays > 0)
+    pros.push(`Tenggat mundur ${scenario.deadlineShiftWorkingDays} hari kerja sehingga produksi lebih longgar.`);
+  if (sim.outsourcedUnits > 0)
+    pros.push(`${sim.outsourcedUnits} unit dialihkan ke mitra maklon; beban internal tinggal ${sim.internalUnits} unit.`);
+  if (sim.splitDelivery)
+    pros.push(
+      `Kirim bertahap: ${sim.splitDelivery.wave1Units} unit tepat tenggat, ${sim.splitDelivery.wave2Units} unit menyusul.`,
+    );
+  if (pros.length === 0) pros.push("Belum ada perubahan; geser slider untuk mencoba solusi.");
+
+  const cons: string[] = [];
+  if (scenario.extraWorkerDailyHours > 0) cons.push("Menambah biaya lembur atau tenaga kerja lepas.");
+  if (scenario.deadlineShiftWorkingDays > 0) cons.push("Butuh persetujuan pelanggan untuk mundur tenggat.");
+  if (sim.outsourcedUnits > 0) cons.push("Kualitas dan jadwal sebagian unit bergantung pada mitra maklon.");
+  if (sim.splitDelivery) cons.push("Ada ongkos kirim tambahan dan pelanggan menerima barang dalam dua termin.");
+  if (a.bottlenecks.length > 0) cons.push(`Masih ada ${a.bottlenecks.length} kendala yang belum teratasi.`);
+  if (cons.length === 0) cons.push("Tidak ada biaya tambahan dari skenario ini.");
+
+  const actionPlan =
+    a.status === "NOT_FEASIBLE"
+      ? "Tambah satu tuas lagi di simulasi sampai status naik, atau hubungi pelanggan untuk menegosiasikan tenggat atau jumlah."
+      : a.status === "AT_RISK"
+        ? "Siapkan jadwal produksi rinci, kunci stok bahan, dan pantau progres harian selama masa produksi."
+        : "Konfirmasi pesanan, kunci stok bahan baku, dan jadwalkan produksi sesuai skenario ini.";
+
+  return {
+    feasibilityComparison,
+    recommendedTradeoff,
+    pros: pros.slice(0, 4),
+    cons: cons.slice(0, 4),
+    actionPlan,
     isFallback: true,
   };
 }

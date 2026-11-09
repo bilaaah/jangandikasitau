@@ -11,6 +11,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { runWhatIfForOrderAction } from "@/actions/simulation.actions";
+import { WhatIfAiPanel } from "./WhatIfAiPanel";
 import type {
   CapacityEngineResult,
   FeasibilityStatus,
@@ -1023,6 +1024,30 @@ Dihasilkan otomatis oleh BizCapacity Decision Support System.`;
                 </div>
               )}
             </div>
+
+            {/* ── Penjelasan AI untuk skenario yang sedang dicoba ─── */}
+            <WhatIfAiPanel
+              key={`${selectedOrderId}-${additionalWorkerDailyHours}-${extendedDays}-${outsourcePercent}-${splitEnabled}`}
+              orderRef={{
+                orderId: selectedOrderId,
+                productId: selected.productId,
+                quantity: selected.quantity,
+                deliveryDateStr: selected.deliveryDateStr,
+              }}
+              adjustments={{
+                additionalWorkerDailyHours,
+                deadlineShiftDays: extendedDays,
+                outsourcePercent,
+                splitDelivery: splitEnabled
+                  ? {
+                      firstWavePercent: SPLIT_FIRST_WAVE_PERCENT,
+                      secondWaveDelayWorkingDays: SPLIT_DELAY_WORKING_DAYS,
+                    }
+                  : undefined,
+              }}
+              productName={selected.productName}
+              customerName={selected.customerName}
+            />
           </div>
         </div>
       </div>

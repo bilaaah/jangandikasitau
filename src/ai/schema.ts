@@ -44,3 +44,25 @@ export const geminiResponseSchema = {
   },
   required: ["headline", "summary", "actionItems"],
 };
+
+/** Validasi keluaran AI untuk penjelasan What-If. */
+export const whatIfInsightSchema = z.object({
+  feasibilityComparison: z.string().min(1),
+  recommendedTradeoff: z.string().min(1),
+  pros: z.array(z.string().min(1)).min(1).max(4),
+  cons: z.array(z.string().min(1)).min(1).max(4),
+  actionPlan: z.string().min(1),
+});
+
+/** Skema yang dikirim ke Gemini untuk penjelasan What-If. */
+export const geminiWhatIfResponseSchema = {
+  type: "OBJECT",
+  properties: {
+    feasibilityComparison: { type: "STRING" },
+    recommendedTradeoff: { type: "STRING" },
+    pros: { type: "ARRAY", items: { type: "STRING" } },
+    cons: { type: "ARRAY", items: { type: "STRING" } },
+    actionPlan: { type: "STRING" },
+  },
+  required: ["feasibilityComparison", "recommendedTradeoff", "pros", "cons", "actionPlan"],
+};

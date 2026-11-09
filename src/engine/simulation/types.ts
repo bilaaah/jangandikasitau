@@ -5,6 +5,8 @@
 
 import type { CapacityEngineInput, CapacityEngineResult } from "@/engine/types";
 
+export const MAX_ADDITIONAL_WORKER_DAILY_HOURS = 200;
+
 export interface SplitDeliveryAdjustment {
   /** Persentase jumlah yang dikirim di termin 1 pada tenggat (10–90). */
   firstWavePercent: number;

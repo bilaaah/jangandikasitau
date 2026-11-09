@@ -13,7 +13,11 @@ import {
   subtractOwnCommitment,
   workingDaysToCalendarDays,
 } from "@/engine/simulation/scenario";
-import type { WhatIfAdjustments, WhatIfSimulationResult } from "@/engine/simulation/types";
+import {
+  MAX_ADDITIONAL_WORKER_DAILY_HOURS,
+  type WhatIfAdjustments,
+  type WhatIfSimulationResult,
+} from "@/engine/simulation/types";
 import type { CapacityEngineInput } from "@/engine/types";
 import { getBusinessResources, getProductById } from "@/queries/resources.queries";
 import { getActiveCommitments } from "@/queries/orders.queries";
@@ -28,7 +32,7 @@ const OrderRefSchema = z.object({
 });
 
 const AdjustmentsSchema = z.object({
-  additionalWorkerDailyHours: z.number().min(0).max(40).optional(),
+  additionalWorkerDailyHours: z.number().min(0).max(MAX_ADDITIONAL_WORKER_DAILY_HOURS).optional(),
   additionalMachineDailyHours: z.number().min(0).max(24).optional(),
   deadlineShiftDays: z.number().int().min(0).max(30).optional(),
   additionalMaterialStock: z.record(z.string(), z.number().min(0).max(1_000_000)).optional(),

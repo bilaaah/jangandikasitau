@@ -114,10 +114,10 @@ export async function getManagedProducts(businessId: string) {
       orderBy: { name: "asc" },
     });
 
-    return products.length > 0 ? products : (DEFAULT_PRODUCTS as any);
+    return products.length > 0 ? products : DEFAULT_PRODUCTS;
   } catch (error) {
     console.warn("[ResourcesQuery] getManagedProducts fallback to sample data:", error);
-    return DEFAULT_PRODUCTS as any;
+    return DEFAULT_PRODUCTS;
   }
 }
 
@@ -180,10 +180,10 @@ export async function getProducts(businessId: string) {
       orderBy: { name: "asc" },
     });
 
-    return products.length > 0 ? products : (DEFAULT_PRODUCTS as any);
+    return products.length > 0 ? products : DEFAULT_PRODUCTS;
   } catch (error) {
     console.warn("[ResourcesQuery] getProducts fallback to sample data:", error);
-    return DEFAULT_PRODUCTS as any;
+    return DEFAULT_PRODUCTS;
   }
 }
 
@@ -210,5 +210,5 @@ export async function getProductById(productId: string, businessId: string) {
 
   // Fallback to sample products matching ID or first product
   const found = DEFAULT_PRODUCTS.find((p) => p.id === productId);
-  return (found || DEFAULT_PRODUCTS[0]) as any;
+  return found || DEFAULT_PRODUCTS[0];
 }

@@ -16,6 +16,7 @@ import {
 import type { AiOrderAdvice, WhatIfAiInsight, WhatIfScenarioSummary } from "@/ai/types";
 import type { ActionResult } from "./feasibility.actions";
 import { runWhatIfForOrderAction } from "./simulation.actions";
+import { MAX_ADDITIONAL_WORKER_DAILY_HOURS } from "@/engine/simulation/types";
 
 const STATUSES = ["FEASIBLE", "AT_RISK", "NOT_FEASIBLE"];
 
@@ -65,7 +66,7 @@ export async function generateAdviceAction(
 
 // Ringkasan tuas untuk prompt. Batas nilai sama dengan AdjustmentsSchema di simulation.actions.ts.
 const ScenarioSchema = z.object({
-  additionalWorkerDailyHours: z.number().min(0).max(40).optional(),
+  additionalWorkerDailyHours: z.number().min(0).max(MAX_ADDITIONAL_WORKER_DAILY_HOURS).optional(),
   additionalMachineDailyHours: z.number().min(0).max(24).optional(),
   deadlineShiftDays: z.number().int().min(0).max(30).optional(),
   outsourcePercent: z.number().int().min(0).max(100).optional(),

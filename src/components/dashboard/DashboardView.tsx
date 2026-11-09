@@ -556,10 +556,10 @@ export function DashboardView({ metrics }: DashboardViewProps) {
               const isAtRisk = order.capacityStatus === "AT_RISK";
               const isNotFeasible = order.capacityStatus === "NOT_FEASIBLE";
               const cardBg = isAtRisk
-                ? "border-amber-200 dark:border-amber-500/20 bg-amber-50/70 dark:bg-amber-500/[0.06] hover:bg-amber-100/70"
+                ? "border-amber-200/80 dark:border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/20 hover:bg-amber-100/80 dark:hover:bg-amber-900/30"
                 : isNotFeasible
-                  ? "border-rose-200 dark:border-rose-500/20 bg-rose-50/70 dark:bg-rose-500/[0.06] hover:bg-rose-100/70"
-                  : "border-emerald-200 dark:border-emerald-500/20 bg-emerald-50/70 dark:bg-emerald-500/[0.06] hover:bg-emerald-100/70";
+                  ? "border-rose-200/80 dark:border-rose-500/30 bg-rose-50/70 dark:bg-rose-950/20 hover:bg-rose-100/80 dark:hover:bg-rose-900/30"
+                  : "border-emerald-200/80 dark:border-emerald-500/30 bg-emerald-50/70 dark:bg-emerald-950/20 hover:bg-emerald-100/80 dark:hover:bg-emerald-900/30";
 
               return (
                 <Link
@@ -570,12 +570,12 @@ export function DashboardView({ metrics }: DashboardViewProps) {
                 >
                   <div className="flex items-center justify-between">
                     <span
-                      className={`text-[11px] font-bold px-2 py-0.5 rounded ${
+                      className={`text-[11px] font-bold px-2 py-0.5 rounded border ${
                         isAtRisk
-                          ? "text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/[0.15]"
+                          ? "text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800/60"
                           : isNotFeasible
-                            ? "text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-500/[0.15]"
-                            : "text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-500/[0.15]"
+                            ? "text-rose-800 dark:text-rose-300 bg-rose-100 dark:bg-rose-950/60 border-rose-200 dark:border-rose-800/60"
+                            : "text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800/60"
                       }`}
                     >
                       {isAtRisk
@@ -588,13 +588,13 @@ export function DashboardView({ metrics }: DashboardViewProps) {
                       {order.orderNumber} &rarr;
                     </span>
                   </div>
-                  <h5 className="font-bold text-sm text-slate-900 dark:text-[#F1F5F9] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  <h5 className="font-bold text-sm text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {order.customerName}
                   </h5>
-                  <p className="text-xs text-slate-600 dark:text-[#94A3B8]">
-                    {order.quantity} unit • {order.productName}
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{order.quantity} unit</span> • {order.productName}
                   </p>
-                  <div className="text-[11px] font-medium pt-1 border-t border-slate-200/60 dark:border-white/[0.08] flex items-center justify-between">
+                  <div className="text-[11px] font-medium pt-1.5 border-t border-slate-200/60 dark:border-slate-700/60 text-slate-600 dark:text-slate-300 flex items-center justify-between">
                     <span className="truncate pr-2">{order.statusNote}</span>
                     <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 underline opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                       Buka

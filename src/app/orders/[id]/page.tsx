@@ -6,6 +6,8 @@ import { OrderStatusSelect } from "./OrderStatusSelect";
 import { formatDate } from "@/lib/utils";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { notFound } from "next/navigation";
+import { OrderDetailAiPanel } from "@/components/orders/OrderDetailAiPanel";
+import { DssRecommendationCard } from "@/components/orders/DssRecommendationCard";
 
 export const metadata: Metadata = {
   title: "Detail Pesanan — BizCapacity",
@@ -51,6 +53,21 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
   const isAtRisk = latestAnalysis?.status === "AT_RISK";
   const isNotFeasible = latestAnalysis?.status === "NOT_FEASIBLE";
   const isFeasible = latestAnalysis?.status === "FEASIBLE";
+
+  const materialMap = new Map(
+    (item?.product?.materials || []).map((pm) => [pm.material.id, pm.material.name])
+  );
+
+  const shortageMaterials = (item?.product?.materials || [])
+    .filter((pm) => pm.material.currentStock < (item?.quantity || 0) * pm.quantityPerUnit)
+    .map((pm) => ({
+      name: pm.material.name,
+      deficit:
+        Math.round(
+          ((item?.quantity || 0) * pm.quantityPerUnit - pm.material.currentStock) * 100
+        ) / 100,
+      unit: pm.material.unit,
+    }));
 
   return (
     <DashboardShell activeCount={activeCount}>
@@ -147,25 +164,33 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
             <div
               className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                 isAtRisk
-                  ? "bg-amber-500/10 border-amber-500/30 text-amber-950"
+                  ? "bg-amber-500/10 dark:bg-amber-950/20 border-amber-500/30"
                   : isNotFeasible
-                    ? "bg-rose-500/10 border-rose-500/30 text-rose-950"
-                    : "bg-emerald-500/10 border-emerald-500/30 text-emerald-950"
+                    ? "bg-rose-500/10 dark:bg-rose-950/20 border-rose-500/30"
+                    : "bg-emerald-500/10 dark:bg-emerald-950/20 border-emerald-500/30"
               }`}
             >
               <div className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-[24px] shrink-0 mt-0.5">
+                <span
+                  className={`material-symbols-outlined text-[24px] shrink-0 mt-0.5 ${
+                    isAtRisk
+                      ? "text-amber-600 dark:text-amber-400"
+                      : isNotFeasible
+                        ? "text-rose-600 dark:text-rose-400"
+                        : "text-emerald-600 dark:text-emerald-400"
+                  }`}
+                >
                   {isFeasible ? "verified" : "warning"}
                 </span>
                 <div className="space-y-0.5">
-                  <h4 className="text-sm font-bold">
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
                     {isFeasible
                       ? "Status Kapasitas: Layak"
                       : isAtRisk
                         ? "Status Kapasitas: Perlu Ditinjau"
                         : "Status Kapasitas: Tidak Layak"}
                   </h4>
-                  <p className="text-xs text-[#64748B]">
+                  <p className="text-xs text-slate-600 dark:text-slate-300">
                     Analisis tersimpan pada {formatDate(latestAnalysis.analyzedAt)}.
                   </p>
                 </div>
@@ -190,10 +215,10 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
                   <span
                     className={`block font-mono font-bold text-sm ${
                       latestAnalysis.bufferDays < 0
-                        ? "text-rose-600"
+                        ? "text-rose-600 dark:text-rose-400"
                         : latestAnalysis.bufferDays <= 1
-                          ? "text-amber-600"
-                          : "text-emerald-600"
+                          ? "text-amber-600 dark:text-amber-400"
+                          : "text-emerald-600 dark:text-emerald-400"
                     }`}
                   >
                     {latestAnalysis.bufferDays > 0
@@ -305,26 +330,44 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
                 <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
                   {Array.isArray(latestAnalysis.reasoning) &&
                   latestAnalysis.reasoning.every((reason: unknown): reason is string => typeof reason === "string") ? (
-                    latestAnalysis.reasoning.map((reason: string, index: number) => (
-                      <li key={`${index}-${reason}`} className="flex gap-2">
-                        <span aria-hidden="true">•</span>
-                        <span>{reason}</span>
-                      </li>
-                    ))
+                    latestAnalysis.reasoning.map((reason: string, index: number) => {
+                      let cleanedReason = reason;
+                      materialMap.forEach((name, id) => {
+                        cleanedReason = cleanedReason.replaceAll(id, name);
+                      });
+                      return (
+                        <li key={`${index}-${reason}`} className="flex gap-2">
+                          <span aria-hidden="true" className="text-slate-400 dark:text-slate-500">•</span>
+                          <span>{cleanedReason}</span>
+                        </li>
+                      );
+                    })
                   ) : (
                     <li>Rincian alasan analisis tidak tersedia.</li>
                   )}
                 </ul>
                 {latestAnalysis.bottlenecks?.length > 0 && (
                   <div className="space-y-2 border-t border-slate-200 dark:border-slate-700 pt-4">
-                    <h4 className="text-xs font-bold uppercase tracking-wide text-[#64748B]">
-                      Kendala yang terdeteksi
+                    <h4 className="text-xs font-bold uppercase tracking-wide text-rose-700 dark:text-rose-400 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[16px]">warning</span>
+                      <span>Kendala yang terdeteksi</span>
                     </h4>
-                    {latestAnalysis.bottlenecks.map((bottleneck) => (
-                      <p key={bottleneck.id} className="text-sm text-rose-700">
-                        {bottleneck.description}
-                      </p>
-                    ))}
+                    <div className="space-y-1.5">
+                      {latestAnalysis.bottlenecks.map((bottleneck) => {
+                        let cleanedDesc = bottleneck.description;
+                        materialMap.forEach((name, id) => {
+                          cleanedDesc = cleanedDesc.replaceAll(id, name);
+                        });
+                        return (
+                          <p
+                            key={bottleneck.id}
+                            className="text-xs sm:text-sm font-medium text-rose-700 dark:text-rose-300 bg-rose-50/80 dark:bg-rose-950/40 p-2.5 rounded-xl border border-rose-200/80 dark:border-rose-900/60 leading-relaxed"
+                          >
+                            {cleanedDesc}
+                          </p>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               </div>
@@ -334,71 +377,28 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
               </div>
             )}
 
-            <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1D4ED8]">
-                <span className="material-symbols-outlined text-[18px]">psychology</span>
-                <span>Rekomendasi Tindakan DSS BizCapacity</span>
-              </div>
+            {/* AI Decision Explainability & Recommendation Panel */}
+            <OrderDetailAiPanel
+              orderId={order.id}
+              customerName={order.customerName}
+              productName={item?.product?.name || "Produk"}
+            />
 
-              <div className="space-y-3">
-                <div className="p-4 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/30 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#1D4ED8]">Opsi 1: Tambah 1 Shift Lembur (+3 Jam)</span>
-                    <span className="text-[11px] font-mono font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
-                      Kapasitas 82% (AMAN)
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                    Memberikan tambahan 12 jam kerja total pada stasiun packaging. Estimasi upah lembur Rp 360.000 (jauh di bawah margin profit pesanan 300 box).
-                  </p>
-                  <Link
-                    href={`/simulations?order=${order.id.toLowerCase()}&solution=overtime`}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 hover:text-blue-900 pt-1"
-                  >
-                    <span>Uji Opsi Lembur di Simulasi</span>
-                    <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
-                  </Link>
-                </div>
-
-                <div className="p-4 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-950/30 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-indigo-900 dark:text-indigo-300">Opsi 2: Rekrut 1 Tenaga Lepas Harian (Freelance)</span>
-                    <span className="text-[11px] font-mono font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
-                      Kapasitas 78% (LELUASA)
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                    Menugaskan 1 pekerja harian khusus untuk melipat rigid box dan menempel pita. Tidak mengganggu operator reguler.
-                  </p>
-                  <Link
-                    href={`/simulations?order=${order.id.toLowerCase()}&solution=workers`}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-700 hover:text-indigo-900 pt-1"
-                  >
-                    <span>Uji Opsi Pekerja Lepas di Simulasi</span>
-                    <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
-                  </Link>
-                </div>
-
-                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100">Opsi 3: Split Delivery (2 Termin Pengiriman)</span>
-                    <span className="text-[11px] font-mono font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
-                      Zero Cost
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                    Kirim 150 box pada 24 Okt, dan sisa 150 box pada 26 Okt dengan konfirmasi persetujuan pihak pemesan.
-                  </p>
-                  <Link
-                    href={`/simulations?order=${order.id.toLowerCase()}&solution=split`}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0F172A] hover:text-blue-700 pt-1"
-                  >
-                    <span>Uji Opsi Split Delivery di Simulasi</span>
-                    <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
+            {/* Dynamic DSS Recommendation Action Card */}
+            <DssRecommendationCard
+              orderId={order.id}
+              customerName={order.customerName}
+              productName={item?.product?.name || "Produk"}
+              quantity={item?.quantity || 1}
+              deliveryDate={order.requiredDeliveryDate}
+              status={latestAnalysis?.status || "FEASIBLE"}
+              workerUtilizationPercent={latestAnalysis?.workerUtilizationPercent ?? 0}
+              machineUtilizationPercent={latestAnalysis?.machineUtilizationPercent ?? 0}
+              availableWorkDays={latestAnalysis?.availableWorkDays ?? 0}
+              estimatedProductionDays={latestAnalysis?.estimatedProductionDays ?? 0}
+              bufferDays={latestAnalysis?.bufferDays ?? 0}
+              shortageMaterials={shortageMaterials}
+            />
           </div>
         </div>
       </div>

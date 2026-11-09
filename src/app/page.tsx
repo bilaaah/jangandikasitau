@@ -230,33 +230,34 @@ export default function HomePage() {
               </div>
 
               {/* SME Social Proof Avatars */}
-              <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-4 bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] p-4 rounded-2xl shadow-xs animate-slide-up stagger-4 hover-lift">
-                <div className="flex -space-x-3 overflow-hidden">
-                  <div className="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-[#0B1120] bg-blue-600 text-white font-bold flex items-center justify-center text-xs">
+              <div className="mt-2 flex items-center gap-3.5 sm:gap-4 bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] p-3.5 sm:p-4 rounded-2xl shadow-xs animate-slide-up stagger-4 hover-lift">
+                <div className="flex -space-x-2.5 overflow-hidden shrink-0">
+                  <div className="w-9 h-9 rounded-full ring-2 ring-white dark:ring-slate-900 bg-blue-600 text-white font-bold flex items-center justify-center text-xs shadow-xs">
                     BL
                   </div>
-                  <div className="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-[#0B1120] bg-indigo-600 text-white font-bold flex items-center justify-center text-xs">
+                  <div className="w-9 h-9 rounded-full ring-2 ring-white dark:ring-slate-900 bg-indigo-600 text-white font-bold flex items-center justify-center text-xs shadow-xs">
                     RK
                   </div>
-                  <div className="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-[#0B1120] bg-cyan-600 text-white font-bold flex items-center justify-center text-xs">
+                  <div className="w-9 h-9 rounded-full ring-2 ring-white dark:ring-slate-900 bg-cyan-600 text-white font-bold flex items-center justify-center text-xs shadow-xs">
                     AP
                   </div>
-                  <div className="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-[#0B1120] bg-blue-500 text-white flex items-center justify-center text-[11px] font-bold">
+                  <div className="w-9 h-9 rounded-full ring-2 ring-white dark:ring-slate-900 bg-blue-500 text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
                     +450
                   </div>
                 </div>
-                <div className="flex flex-col">
+                <div className="min-w-0 flex-1 space-y-0.5">
                   <div className="flex items-center gap-1 text-amber-400">
-                    <span className="material-symbols-outlined text-[16px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                    <span className="material-symbols-outlined text-[16px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                    <span className="material-symbols-outlined text-[16px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                    <span className="material-symbols-outlined text-[16px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                    <span className="material-symbols-outlined text-[16px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                    <span className="text-[14px] text-slate-900 dark:text-[#F1F5F9] ml-1 font-bold">4.9/5</span>
+                    <span className="material-symbols-outlined text-[15px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    <span className="material-symbols-outlined text-[15px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    <span className="material-symbols-outlined text-[15px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    <span className="material-symbols-outlined text-[15px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    <span className="material-symbols-outlined text-[15px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100 font-mono ml-1">4.9/5</span>
+                    <span className="text-[11px] text-slate-400 dark:text-slate-500 ml-1 hidden sm:inline">(450+ Rating)</span>
                   </div>
-                  <span className="text-[12px] text-slate-600 dark:text-[#94A3B8]">
+                  <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 leading-snug line-clamp-2">
                     Dipercaya 450+ pemilik bakery, katering, konveksi, dan hampers di Jabodetabek &amp; Surabaya
-                  </span>
+                  </p>
                 </div>
               </div>
             </div>

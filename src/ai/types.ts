@@ -29,3 +29,14 @@ export interface WhatIfAiInsight {
   actionPlan: string;
   isFallback?: boolean;
 }
+
+/** Tuas skenario yang sedang dicoba di Simulasi What-If (dipakai prompt dan fallback AI). */
+export interface WhatIfScenarioSummary {
+  /** Total jam kerja tambahan per hari (lembur + pekerja lepas). */
+  extraWorkerDailyHours: number;
+  extraMachineDailyHours: number;
+  /** Mundur tenggat, dalam HARI KERJA. */
+  deadlineShiftWorkingDays: number;
+  outsourcePercent: number;
+  splitDelivery?: { firstWavePercent: number; secondWaveDelayWorkingDays: number };
+}

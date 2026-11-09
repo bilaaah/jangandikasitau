@@ -5,10 +5,9 @@ import {
   OrderStatus,
   PrismaClient,
 } from "@prisma/client";
-import { runCapacityEngine } from "../src/engine/capacity/calculator";
 
 const prisma = new PrismaClient();
-const BUSINESS_NAME = "SweetCrumbs Bakery";
+const BUSINESS_NAME = "Sweet Delights Bakery (Demo)";
 
 async function ensureDemoUser(input: {
   email: string;
@@ -181,149 +180,46 @@ function getDeliveryDateAfterWorkDays(startDate: Date, workDays: number) {
   return deliveryDate;
 }
 
-async function seedAtRiskDemoOrder(
-  businessId: string,
-  productId: string,
-  packagingMaterial: { id: string; currentStock: number; unit: string },
-  workers: { id: string; dailyAvailableHours: number }[],
-  machines: { id: string; dailyAvailableHours: number }[],
-) {
-  const analysisDate = new Date();
-  const requiredDeliveryDate = getDeliveryDateAfterWorkDays(analysisDate, 5);
-  const quantity = 300;
-  const analysis = runCapacityEngine({
-    newOrder: {
-      quantity,
-      productId,
-      analysisDate,
-      requiredDeliveryDate,
-    },
-    product: {
-      workerHoursPerUnit: 0.45,
-      machineHoursPerUnit: 0.1,
-      materials: [{ materialId: packagingMaterial.id, quantityPerUnit: 1 }],
-    },
-    workforce: { workers },
-    machinery: { machines },
-    inventory: {
-      materials: [
-        {
-          id: packagingMaterial.id,
-          currentStock: packagingMaterial.currentStock,
-          unit: packagingMaterial.unit,
-        },
-      ],
-    },
-    activeCommitments: {
-      workerHoursCommitted: 0,
-      machineHoursCommitted: 0,
-      materialCommitments: [],
-    },
-  });
-
-  if (analysis.status !== "AT_RISK") {
-    throw new Error(
-      `The 300-unit demo order must be AT_RISK, got ${analysis.status}.`,
-    );
-  }
-
-  const customerName = "Demo AT_RISK - 300 gift boxes";
-  const notes = "Demo fixture: 90% worker utilization with zero delivery buffer.";
-
+async function ensureDemoOrder(input: {
+  businessId: string;
+  customerName: string;
+  status: OrderStatus;
+  requiredDeliveryDate: Date;
+  productId: string;
+  quantity: number;
+  notes?: string;
+}) {
   await prisma.$transaction(async (tx) => {
     const existing = await tx.order.findFirst({
-      where: { businessId, customerName, notes },
-      include: {
-        items: true,
-        capacityAnalyses: {
-          orderBy: { analyzedAt: "desc" },
-          take: 1,
-        },
-      },
+      where: { businessId: input.businessId, customerName: input.customerName },
+      include: { items: true },
     });
-
+    const data = {
+      status: input.status,
+      requiredDeliveryDate: input.requiredDeliveryDate,
+      notes: input.notes ?? null,
+    };
     const order = existing
-      ? await tx.order.update({
-          where: { id: existing.id },
-          data: { status: OrderStatus.DRAFT, requiredDeliveryDate },
-        })
+      ? await tx.order.update({ where: { id: existing.id }, data })
       : await tx.order.create({
-          data: {
-            businessId,
-            customerName,
-            notes,
-            status: OrderStatus.DRAFT,
-            requiredDeliveryDate,
-          },
+          data: { businessId: input.businessId, customerName: input.customerName, ...data },
         });
 
     const existingItem = existing?.items[0];
     if (existingItem) {
       await tx.orderItem.update({
         where: { id: existingItem.id },
-        data: { productId, quantity },
+        data: { productId: input.productId, quantity: input.quantity },
       });
       await tx.orderItem.deleteMany({
         where: { orderId: order.id, id: { not: existingItem.id } },
       });
     } else {
       await tx.orderItem.create({
-        data: { orderId: order.id, productId, quantity },
-      });
-    }
-
-    const existingAnalysis = existing?.capacityAnalyses[0];
-    if (existingAnalysis) {
-      await tx.bottleneck.deleteMany({ where: { analysisId: existingAnalysis.id } });
-      await tx.capacityAnalysis.update({
-        where: { id: existingAnalysis.id },
-        data: {
-          status: analysis.status,
-          workerUtilizationPercent: analysis.workerAnalysis.utilizationPercent,
-          machineUtilizationPercent: analysis.machineAnalysis.utilizationPercent,
-          availableWorkDays: analysis.availableWorkDays,
-          estimatedProductionDays: analysis.estimatedProductionDays,
-          bufferDays: analysis.bufferDays,
-          reasoning: analysis.reasoning,
-          analyzedAt: analysisDate,
-          bottlenecks: {
-            create: analysis.bottlenecks.map((bottleneck) => ({
-              resourceType: bottleneck.resourceType,
-              resourceId: bottleneck.resourceId ?? null,
-              severity: bottleneck.severity,
-              description: bottleneck.description,
-            })),
-          },
-        },
-      });
-    } else {
-      await tx.capacityAnalysis.create({
-        data: {
-          orderId: order.id,
-          status: analysis.status,
-          workerUtilizationPercent: analysis.workerAnalysis.utilizationPercent,
-          machineUtilizationPercent: analysis.machineAnalysis.utilizationPercent,
-          availableWorkDays: analysis.availableWorkDays,
-          estimatedProductionDays: analysis.estimatedProductionDays,
-          bufferDays: analysis.bufferDays,
-          reasoning: analysis.reasoning,
-          analyzedAt: analysisDate,
-          bottlenecks: {
-            create: analysis.bottlenecks.map((bottleneck) => ({
-              resourceType: bottleneck.resourceType,
-              resourceId: bottleneck.resourceId ?? null,
-              severity: bottleneck.severity,
-              description: bottleneck.description,
-            })),
-          },
-        },
+        data: { orderId: order.id, productId: input.productId, quantity: input.quantity },
       });
     }
   });
-
-  console.log(
-    `Skenario order demo tersimpan: ${quantity} unit, ${analysis.status} (${analysis.bottlenecks.length} bottleneck).`,
-  );
 }
 
 async function main() {
@@ -340,104 +236,110 @@ async function main() {
       });
 
   await ensureDemoUser({
-    email: "bilah@sweetcrumbs.id",
-    name: "Bilah",
+    email: "staff@sweetdelights.dev",
+    name: "Demo Staff",
+    businessId: business.id,
+    role: BusinessRole.STAFF,
+  });
+  await ensureDemoUser({
+    email: "owner@sweetdelights.dev",
+    name: "Demo Owner",
     businessId: business.id,
     role: BusinessRole.OWNER,
   });
-  await ensureDemoUser({
-    email: "staff@sweetcrumbs.id",
-    name: "Demo Staff",
-    businessId: business.id,
-    role: BusinessRole.MEMBER,
-  });
 
-  const [
-    hardbox,
-    ribbon,
-    glassJar,
-    cocoa,
-    butter,
-    brownieBox,
-    flour,
-    yeastStarter,
-    demoPackaging,
-  ] = await Promise.all([
-    ensureMaterial(business.id, { name: "Hardbox Rigid Satin", unit: "box", currentStock: 250 }),
-    ensureMaterial(business.id, { name: "Pita Satin Emas", unit: "meter", currentStock: 600 }),
-    ensureMaterial(business.id, { name: "Jar Kaca 350ml", unit: "pcs", currentStock: 800 }),
-    ensureMaterial(business.id, { name: "Dark Cocoa Powder", unit: "kg", currentStock: 80 }),
-    ensureMaterial(business.id, { name: "Unsalted Butter Anchor", unit: "kg", currentStock: 60 }),
-    ensureMaterial(business.id, { name: "Brownie Packaging Box", unit: "box", currentStock: 500 }),
-    ensureMaterial(business.id, { name: "Premium Bread Flour", unit: "kg", currentStock: 120 }),
-    ensureMaterial(business.id, { name: "Wild Yeast Starter", unit: "kg", currentStock: 30 }),
-    ensureMaterial(business.id, { name: "Demo Gift Box Packaging", unit: "box", currentStock: 350 }),
+  const [butter, darkChocolate, eggs, flour, yeast] = await Promise.all([
+    ensureMaterial(business.id, { name: "Butter", unit: "kg", currentStock: 20 }),
+    ensureMaterial(business.id, { name: "Dark Chocolate", unit: "kg", currentStock: 15 }),
+    ensureMaterial(business.id, { name: "Eggs", unit: "pcs", currentStock: 200 }),
+    ensureMaterial(business.id, { name: "Flour", unit: "kg", currentStock: 50 }),
+    ensureMaterial(business.id, { name: "Yeast", unit: "kg", currentStock: 8 }),
   ]);
 
-  const [, , , demoAtRiskProduct] = await Promise.all([
+  const [, sourdough, weddingCake] = await Promise.all([
     ensureProduct(business.id, {
-      name: "Custom Gift Boxes Lebaran (4 SKU Set)",
-      description: "Paket hampers premium dengan hardbox satin, pita, dan jar.",
-      workerHoursPerUnit: 1.5,
-      machineHoursPerUnit: 0.8,
+      name: "Chocolate Brownie Box (24 pcs)",
+      description: "Kotak berisi 24 brownies cokelat premium.",
+      workerHoursPerUnit: 2,
+      machineHoursPerUnit: 1,
       billOfMaterials: [
-        { materialId: hardbox.id, quantityPerUnit: 1 },
-        { materialId: ribbon.id, quantityPerUnit: 2 },
-        { materialId: glassJar.id, quantityPerUnit: 3 },
+        { materialId: flour.id, quantityPerUnit: 0.5 },
+        { materialId: butter.id, quantityPerUnit: 0.3 },
+        { materialId: darkChocolate.id, quantityPerUnit: 0.4 },
+        { materialId: eggs.id, quantityPerUnit: 4 },
       ],
     }),
     ensureProduct(business.id, {
-      name: "Signature Fudgy Brownies Box",
-      description: "Brownies cokelat premium dalam kotak kemasan.",
-      workerHoursPerUnit: 0.4,
-      machineHoursPerUnit: 0.7,
-      billOfMaterials: [
-        { materialId: cocoa.id, quantityPerUnit: 0.25 },
-        { materialId: butter.id, quantityPerUnit: 0.2 },
-        { materialId: brownieBox.id, quantityPerUnit: 1 },
-      ],
-    }),
-    ensureProduct(business.id, {
-      name: "Artisan Sourdough Loaf",
+      name: "Sourdough Loaf",
       description: "Roti sourdough artisan dengan fermentasi alami.",
-      workerHoursPerUnit: 0.6,
-      machineHoursPerUnit: 1.2,
+      workerHoursPerUnit: 3,
+      machineHoursPerUnit: 1.5,
       billOfMaterials: [
         { materialId: flour.id, quantityPerUnit: 0.6 },
-        { materialId: yeastStarter.id, quantityPerUnit: 0.15 },
+        { materialId: yeast.id, quantityPerUnit: 0.02 },
       ],
     }),
     ensureProduct(business.id, {
-      name: "Demo Rush Gift Box (300-unit AT_RISK)",
-      description: "Skenario demo dengan utilisasi pekerja 90% dan buffer pengiriman nol.",
-      workerHoursPerUnit: 0.45,
-      machineHoursPerUnit: 0.1,
-      billOfMaterials: [{ materialId: demoPackaging.id, quantityPerUnit: 1 }],
+      name: "Custom Wedding Cake",
+      description: "Kue pengantin fondant bertingkat sesuai pesanan.",
+      workerHoursPerUnit: 8,
+      machineHoursPerUnit: 2,
+      billOfMaterials: [
+        { materialId: flour.id, quantityPerUnit: 2 },
+        { materialId: butter.id, quantityPerUnit: 0.5 },
+        { materialId: eggs.id, quantityPerUnit: 12 },
+      ],
     }),
   ]);
 
-  const demoWorkers = await Promise.all([
-    ensureWorker(business.id, "Budi Santoso", 8),
-    ensureWorker(business.id, "Chef Aris", 8),
-    ensureWorker(business.id, "Siti Rahma", 8),
-    ensureWorker(business.id, "Dita", 6),
+  await Promise.all([
+    ensureWorker(business.id, "Budi (Decorator)", 8),
+    ensureWorker(business.id, "Rina (Part-time)", 4),
+    ensureWorker(business.id, "Siti (Head Baker)", 8),
   ]);
-  const demoMachines = await Promise.all([
-    ensureMachine(business.id, "Oven Deck Gas 3-Deck", 10),
-    ensureMachine(business.id, "Mesin Band Sealer", 8),
+  await Promise.all([
+    ensureMachine(business.id, "Commercial Oven 1", 10),
+    ensureMachine(business.id, "Commercial Oven 2", 8),
   ]);
 
-  await seedAtRiskDemoOrder(
-    business.id,
-    demoAtRiskProduct.id,
-    demoPackaging,
-    demoWorkers.map(({ id, dailyAvailableHours }) => ({ id, dailyAvailableHours })),
-    demoMachines.map(({ id, dailyAvailableHours }) => ({ id, dailyAvailableHours })),
-  );
+  const today = new Date();
+  await ensureDemoOrder({
+    businessId: business.id,
+    customerName: "PT Amanah",
+    status: OrderStatus.DRAFT,
+    requiredDeliveryDate: getDeliveryDateAfterWorkDays(today, 4),
+    productId: sourdough.id,
+    quantity: 10,
+    notes: "custom kartu ucapan",
+  });
+  await ensureDemoOrder({
+    businessId: business.id,
+    customerName: "PT ibu imut",
+    status: OrderStatus.CONFIRMED,
+    requiredDeliveryDate: getDeliveryDateAfterWorkDays(today, 14),
+    productId: sourdough.id,
+    quantity: 10,
+  });
+  await ensureDemoOrder({
+    businessId: business.id,
+    customerName: "Budi Wedding (Existing)",
+    status: OrderStatus.CANCELLED,
+    requiredDeliveryDate: new Date("2026-11-01T17:00:00.000Z"),
+    productId: weddingCake.id,
+    quantity: 2,
+  });
+  await ensureDemoOrder({
+    businessId: business.id,
+    customerName: "Demo What-if",
+    status: OrderStatus.DRAFT,
+    requiredDeliveryDate: getDeliveryDateAfterWorkDays(today, 8),
+    productId: sourdough.id,
+    quantity: 44,
+  });
 
   console.log(`Data demo berhasil disiapkan untuk ${business.name}.`);
   console.log("Seed tidak menghapus data usaha atau pesanan lain.");
-  console.log("Jumlah fixture: 1 usaha, 4 produk+BOM, 4 pekerja, 2 mesin, 9 bahan baku, 1 order AT_RISK.");
+  console.log("Jumlah fixture: 1 usaha, 3 produk+BOM, 3 pekerja, 2 mesin, 5 bahan baku, 4 pesanan.");
 }
 
 main()
@@ -448,3 +350,5 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+  
+  

@@ -43,7 +43,7 @@ model UserBusiness {
   id         String   @id @default(cuid())
   userId     String
   businessId String
-  role       BusinessRole @default(MEMBER)
+  role       BusinessRole @default(STAFF)
   joinedAt   DateTime     @default(now())
 
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -55,7 +55,7 @@ model UserBusiness {
 
 enum BusinessRole {
   OWNER
-  MEMBER
+  STAFF
 }
 
 // =============================================================================

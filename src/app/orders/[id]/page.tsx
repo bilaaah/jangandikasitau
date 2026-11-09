@@ -21,6 +21,8 @@ interface OrderDetailPageProps {
   searchParams?: Promise<OrderDetailSearchParams>;
 }
 
+type OrderDetails = NonNullable<Awaited<ReturnType<typeof getOrderById>>>;
+
 export default async function OrderDetailPage({ params, searchParams }: OrderDetailPageProps) {
   const { id } = await params;
   const resolvedSearchParams: OrderDetailSearchParams = searchParams
@@ -29,7 +31,7 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
   const isNewlyCreated = resolvedSearchParams?.created === "draft";
   const businessId = await getBusinessId();
   
-  let order = null;
+  let order: OrderDetails | null = null;
   let activeCount = 0;
   try {
     [order, activeCount] = await Promise.all([
@@ -39,8 +41,6 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
   } catch (err) {
     console.warn(`[OrderDetail] DB getOrderById failed for ${id}:`, err);
   }
-
-  // Jika tidak ditemukan di DB → tampilkan 404
   if (!order) {
     notFound();
   }
@@ -259,7 +259,7 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
                       Kebutuhan Bahan Baku (Bill of Materials)
                     </h5>
                     <div className="divide-y divide-slate-100 dark:divide-slate-700 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs">
-                      {(item.product?.materials || []).map((pm: any) => {
+                      {(item.product?.materials || []).map((pm) => {
                         const requiredQty = item.quantity * pm.quantityPerUnit;
                         const isShortage = pm.material.currentStock < requiredQty;
                         return (
@@ -298,14 +298,13 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
             </div>
           </div>
 
-          {/* Right Column: Full DSS Feasibility Report */}
           <div className="lg:col-span-7 space-y-6">
             {latestAnalysis ? (
               <div className="rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 shadow-xs space-y-4">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">Alasan Analisis Kapasitas</h3>
                 <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
                   {Array.isArray(latestAnalysis.reasoning) &&
-                  latestAnalysis.reasoning.every((reason: any): reason is string => typeof reason === "string") ? (
+                  latestAnalysis.reasoning.every((reason: unknown): reason is string => typeof reason === "string") ? (
                     latestAnalysis.reasoning.map((reason: string, index: number) => (
                       <li key={`${index}-${reason}`} className="flex gap-2">
                         <span aria-hidden="true">•</span>
@@ -321,7 +320,7 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
                     <h4 className="text-xs font-bold uppercase tracking-wide text-[#64748B]">
                       Kendala yang terdeteksi
                     </h4>
-                    {latestAnalysis.bottlenecks.map((bottleneck: any) => (
+                    {latestAnalysis.bottlenecks.map((bottleneck) => (
                       <p key={bottleneck.id} className="text-sm text-rose-700">
                         {bottleneck.description}
                       </p>
@@ -335,7 +334,6 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
               </div>
             )}
 
-            {/* AI Decision Explainability & Recommendation Card */}
             <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1D4ED8]">
                 <span className="material-symbols-outlined text-[18px]">psychology</span>

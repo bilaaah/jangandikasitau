@@ -15,7 +15,7 @@ const authConfig = {
         const businessId = "businessId" in user ? user.businessId : undefined;
         const role = "role" in user ? (user as { role?: unknown }).role : undefined;
         if (typeof businessId === "string") token.businessId = businessId;
-        if (typeof role === "string") token.role = role as any;
+        if (role === "OWNER" || role === "STAFF") token.role = role;
       }
       return token;
     },
@@ -25,7 +25,7 @@ const authConfig = {
         session.user.businessId =
           typeof token.businessId === "string" ? token.businessId : undefined;
         session.user.role =
-          typeof token.role === "string" ? (token.role as any) : undefined;
+          token.role === "OWNER" || token.role === "STAFF" ? token.role : undefined;
       }
       return session;
     },

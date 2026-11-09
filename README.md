@@ -170,12 +170,14 @@ npm run db:generate    # Generate Prisma Client
 npm run db:migrate -- --name init # Buat/jalankan migrasi awal
 npm run db:seed        # Seed data awal
 ```
-Seed membuat atau memperbarui satu usaha demo, empat produk beserta BOM,
-pekerja, mesin, bahan baku, serta akun Owner dan Staff tanpa menghapus data
-usaha lain. Seed juga menyiapkan order `DRAFT` 300 unit dengan status kapasitas
-`AT_RISK`, bottleneck utilisasi pekerja 90%, dan buffer tenggat nol hari.
-Saat akun pertama kali dibuat, kata sandi acak dicetak di terminal; simpan kata
-sandi tersebut dengan aman.
+Seed membuat atau memperbarui data demo Sweet Delights Bakery, tiga produk
+beserta BOM, pekerja, mesin, bahan baku, akun Owner dan Staff, serta empat
+pesanan contoh tanpa menghapus data usaha atau pesanan lain. Pesanan Budi
+Wedding disimpan sebagai `CANCELLED` agar tidak lagi mengunci kapasitas; order
+`Demo What-if` tetap menjadi draf untuk pengujian simulasi. Akun demo:
+`owner@sweetdelights.dev` dan `staff@sweetdelights.dev`. Saat akun baru dibuat,
+kata sandi acak dicetak di terminal; seed tidak mengubah kata sandi akun yang
+sudah ada.
 
 ### 4. Jalankan Development Server
 ```bash

@@ -6,6 +6,8 @@
 
 import { z } from "zod";
 import { getBusinessId } from "@/lib/context";
+import { findLeadTimeConflicts } from "@/ai/leadTime";
+import { getBusinessResources } from "@/queries/resources.queries";
 import {
   generateOrderFeasibilityAdvice,
   generateWhatIfInsight,
@@ -20,7 +22,7 @@ const STATUSES = ["FEASIBLE", "AT_RISK", "NOT_FEASIBLE"];
 export async function generateAdviceAction(
   input: GenerateAdviceInput,
 ): Promise<ActionResult<AiOrderAdvice>> {
-  await getBusinessId(); // redirect ke /login jika belum masuk
+  const businessId = await getBusinessId(); // redirect ke /login jika belum masuk
 
   const valid =
     !!input &&
@@ -38,7 +40,20 @@ export async function generateAdviceAction(
   }
 
   try {
-    const advice = await generateOrderFeasibilityAdvice(input);
+    const resources = await getBusinessResources(businessId);
+    const leadTimes = Object.fromEntries(
+      resources.materials.map((material) => [
+        material.id,
+        { name: material.name, leadTimeDays: material.leadTimeDays },
+      ]),
+    );
+    const leadTimeWarnings = findLeadTimeConflicts({
+      materialAnalysis: input.analysis.materialAnalysis,
+      leadTimes,
+      availableWorkDays: input.analysis.availableWorkDays,
+      estimatedProductionDays: input.analysis.estimatedProductionDays,
+    });
+    const advice = await generateOrderFeasibilityAdvice({ ...input, leadTimeWarnings });
     return { success: true, data: advice };
   } catch (error: unknown) {
     return {

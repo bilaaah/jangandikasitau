@@ -33,10 +33,15 @@ export async function getBusinessContext() {
       }
     }
   } catch (error) {
+    if (process.env.NODE_ENV === "production") throw error;
     console.warn("[Context] Auth session check fallback to dev context:", error);
   }
 
-  // Frontend Dev fallback context so all pages can be tested freely without blocking login
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Business context is unavailable for the authenticated user.");
+  }
+
+  // Development-only fallback so local pages can be tested without blocking login.
   const devBusinessId = process.env.DEV_BUSINESS_ID || "sudah-dikasih-tau";
   return {
     userId: "dev-user-sweetcrumbs",

@@ -184,6 +184,9 @@ model Material {
   /// See MATERIAL_CONFIG.STOCK_MODEL in constants.ts.
   currentStock     Float    @default(0)
 
+  /// Supplier lead time in working days.
+  leadTimeDays     Int      @default(0)
+
   /// Timestamp of the last manual stock update. Displayed in the UI as a
   /// freshness indicator to remind users to keep stock current.
   stockUpdatedAt   DateTime @default(now())

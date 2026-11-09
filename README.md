@@ -173,10 +173,33 @@ GOOGLE_GEMINI_API_KEY="your-google-gemini-api-key"
 
 ### 3. Generate Prisma Client
 ```bash
-npm run db:generate    # Menghasilkan Prisma Client lokal
+npm run db:generate    # Generate Prisma Client
+npm run db:migrate:deploy # Terapkan migrasi yang sudah dikomit
+npm run db:seed        # Seed data awal
+```
+Seed membuat atau memperbarui data demo Sweet Delights Bakery, tiga produk
+beserta BOM, pekerja, mesin, bahan baku, akun Owner dan Staff, serta empat
+pesanan contoh tanpa menghapus data usaha atau pesanan lain. Pesanan Budi
+Wedding disimpan sebagai `CANCELLED` agar tidak lagi mengunci kapasitas; order
+`Demo What-if` tetap menjadi draf untuk pengujian simulasi. Akun demo:
+`owner@sweetdelights.dev` dan `staff@sweetdelights.dev`. Saat akun baru dibuat,
+kata sandi acak dicetak di terminal; seed tidak mengubah kata sandi akun yang
+sudah ada. Lead time pemasok pada bahan baru dimulai dari 0 hari kerja; isi
+nilai sesuai pemasok lewat Data Produksi karena seed tidak menimpa nilai yang
+sudah diatur.
+
+Perubahan schema disimpan di `prisma/migrations` dan diterapkan berurutan.
+Untuk database bersama yang sudah dibuat sebelum baseline migrasi tersedia,
+pastikan schema lama sudah cocok dengan baseline, lalu tandai baseline tersebut
+satu kali sebelum menerapkan migrasi berikutnya:
+
+```bash
+npx prisma migrate resolve --applied 20261109170000_baseline
+npm run db:migrate:deploy
 ```
 
-*(Opsional: Jika menggunakan database lokal baru, jalankan `npm run db:migrate` dan `npm run db:seed` untuk mengisi data demo awal).*
+Jangan jalankan perintah baseline pada database baru; `db:migrate:deploy`
+menerapkan baseline dan migrasi berikutnya secara otomatis.
 
 ### 4. Jalankan Development Server
 ```bash

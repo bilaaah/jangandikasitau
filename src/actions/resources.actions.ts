@@ -97,6 +97,7 @@ export async function saveMaterialAction(input: unknown): Promise<ResourceAction
           name: parsed.data.name,
           unit: parsed.data.unit,
           currentStock: parsed.data.currentStock,
+          leadTimeDays: parsed.data.leadTimeDays,
           stockUpdatedAt: new Date(),
         },
       });
@@ -108,6 +109,7 @@ export async function saveMaterialAction(input: unknown): Promise<ResourceAction
           name: parsed.data.name,
           unit: parsed.data.unit,
           currentStock: parsed.data.currentStock,
+          leadTimeDays: parsed.data.leadTimeDays,
           stockUpdatedAt: new Date(),
         },
       });

@@ -6,13 +6,13 @@
 import { db } from "@/lib/db";
 
 const DEFAULT_MATERIALS = [
-  { id: "mat-1", name: "Hardbox Rigid Satin", unit: "box", currentStock: 250, isActive: true, stockUpdatedAt: new Date() },
-  { id: "mat-2", name: "Pita Satin Emas 2.5cm", unit: "meter", currentStock: 600, isActive: true, stockUpdatedAt: new Date() },
-  { id: "mat-3", name: "Jar Kaca 350ml", unit: "pcs", currentStock: 800, isActive: true, stockUpdatedAt: new Date() },
-  { id: "mat-4", name: "Dark Cocoa Powder", unit: "kg", currentStock: 80, isActive: true, stockUpdatedAt: new Date() },
-  { id: "mat-5", name: "Unsalted Butter Anchor", unit: "kg", currentStock: 60, isActive: true, stockUpdatedAt: new Date() },
-  { id: "mat-6", name: "Brownie Packaging Box", unit: "box", currentStock: 500, isActive: true, stockUpdatedAt: new Date() },
-  { id: "mat-7", name: "Premium Bread Flour", unit: "kg", currentStock: 120, isActive: true, stockUpdatedAt: new Date() },
+  { id: "mat-1", name: "Hardbox Rigid Satin", unit: "box", currentStock: 250, leadTimeDays: 0, isActive: true, stockUpdatedAt: new Date() },
+  { id: "mat-2", name: "Pita Satin Emas 2.5cm", unit: "meter", currentStock: 600, leadTimeDays: 0, isActive: true, stockUpdatedAt: new Date() },
+  { id: "mat-3", name: "Jar Kaca 350ml", unit: "pcs", currentStock: 800, leadTimeDays: 0, isActive: true, stockUpdatedAt: new Date() },
+  { id: "mat-4", name: "Dark Cocoa Powder", unit: "kg", currentStock: 80, leadTimeDays: 0, isActive: true, stockUpdatedAt: new Date() },
+  { id: "mat-5", name: "Unsalted Butter Anchor", unit: "kg", currentStock: 60, leadTimeDays: 0, isActive: true, stockUpdatedAt: new Date() },
+  { id: "mat-6", name: "Brownie Packaging Box", unit: "box", currentStock: 500, leadTimeDays: 0, isActive: true, stockUpdatedAt: new Date() },
+  { id: "mat-7", name: "Premium Bread Flour", unit: "kg", currentStock: 120, leadTimeDays: 0, isActive: true, stockUpdatedAt: new Date() },
 ];
 
 const DEFAULT_WORKERS = [
@@ -137,7 +137,14 @@ export async function getBusinessResources(businessId: string) {
       }),
       db.material.findMany({
         where: { businessId, isActive: true },
-        select: { id: true, name: true, currentStock: true, unit: true, stockUpdatedAt: true },
+        select: {
+          id: true,
+          name: true,
+          currentStock: true,
+          unit: true,
+          leadTimeDays: true,
+          stockUpdatedAt: true,
+        },
       }),
     ]);
 

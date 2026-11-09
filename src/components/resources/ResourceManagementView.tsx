@@ -17,6 +17,7 @@ type Material = {
   name: string;
   unit: string;
   currentStock: number;
+  leadTimeDays: number;
   stockUpdatedAt: Date;
 };
 type Tab = "workers" | "machines" | "materials";
@@ -51,6 +52,7 @@ export function ResourceManagementView({
   const [hours, setHours] = useState("8");
   const [unit, setUnit] = useState("pcs");
   const [stock, setStock] = useState("0");
+  const [leadTimeDays, setLeadTimeDays] = useState("0");
   const [restockMaterial, setRestockMaterial] = useState<Material | null>(null);
   const [restockMode, setRestockMode] = useState<"add" | "set">("add");
   const [restockQuantity, setRestockQuantity] = useState("0");
@@ -68,6 +70,7 @@ export function ResourceManagementView({
     } else {
       setUnit(item && "unit" in item ? item.unit : "pcs");
       setStock(String(item && "currentStock" in item ? item.currentStock : 0));
+      setLeadTimeDays(String(item && "leadTimeDays" in item ? item.leadTimeDays : 0));
     }
     setError(null);
     setIsFormOpen(true);
@@ -95,6 +98,7 @@ export function ResourceManagementView({
                 name,
                 unit,
                 currentStock: Number(stock),
+                leadTimeDays: Number(leadTimeDays),
               });
 
       if (!result.success) {
@@ -146,7 +150,7 @@ export function ResourceManagementView({
           <p className="text-xs text-slate-500 dark:text-slate-400">Data Usaha / Sumber Daya</p>
           <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 sm:text-3xl">Data Produksi</h1>
           <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-            Kelola kapasitas pekerja dan mesin serta snapshot stok bahan baku usaha.
+            Kelola kapasitas pekerja dan mesin, snapshot stok, serta lead time pemasok bahan baku.
           </p>
         </div>
         {(isOwner || activeTab === "materials") && (
@@ -252,6 +256,9 @@ export function ResourceManagementView({
                       Diperbarui: {new Date(item.stockUpdatedAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}
                     </p>
                   </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-300">
+                    Lead time pemasok: <strong>{item.leadTimeDays} hari kerja</strong>
+                  </p>
                   <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 dark:border-slate-700/70 pt-3">
                     <button type="button" onClick={() => { setRestockMaterial(item); setRestockMode("add"); setRestockQuantity("0"); setError(null); }} className="rounded-lg px-3 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors">Perbarui stok</button>
                     {isOwner && (
@@ -303,6 +310,18 @@ export function ResourceManagementView({
                     <input required type="number" min="0" step="any" value={stock} onChange={(event) => setStock(event.target.value)} className={inputClass} />
                   </label>
                 </div>
+                <label className="block space-y-1 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Lead time pemasok (hari kerja)
+                  <input
+                    required
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={leadTimeDays}
+                    onChange={(event) => setLeadTimeDays(event.target.value)}
+                    className={inputClass}
+                  />
+                </label>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">Menyimpan jumlah stok akan memperbarui waktu keterbaruan snapshot.</p>
               </>
             ) : (
@@ -398,4 +417,3 @@ function ResourceList<T extends Worker | Machine>({
     </div>
   );
 }
-

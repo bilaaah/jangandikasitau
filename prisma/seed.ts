@@ -69,7 +69,7 @@ async function ensureDemoUser(input: {
 
 async function ensureMaterial(
   businessId: string,
-  material: { name: string; unit: string; currentStock: number },
+  material: { name: string; unit: string; currentStock: number; leadTimeDays: number },
 ) {
   const existing = await prisma.material.findFirst({
     where: { businessId, name: material.name },
@@ -78,7 +78,12 @@ async function ensureMaterial(
   return existing
     ? prisma.material.update({
         where: { id: existing.id },
-        data: { ...material, isActive: true },
+        data: {
+          name: material.name,
+          unit: material.unit,
+          currentStock: material.currentStock,
+          isActive: true,
+        },
       })
     : prisma.material.create({
         data: { businessId, ...material },
@@ -249,11 +254,11 @@ async function main() {
   });
 
   const [butter, darkChocolate, eggs, flour, yeast] = await Promise.all([
-    ensureMaterial(business.id, { name: "Butter", unit: "kg", currentStock: 20 }),
-    ensureMaterial(business.id, { name: "Dark Chocolate", unit: "kg", currentStock: 15 }),
-    ensureMaterial(business.id, { name: "Eggs", unit: "pcs", currentStock: 200 }),
-    ensureMaterial(business.id, { name: "Flour", unit: "kg", currentStock: 50 }),
-    ensureMaterial(business.id, { name: "Yeast", unit: "kg", currentStock: 8 }),
+    ensureMaterial(business.id, { name: "Butter", unit: "kg", currentStock: 20, leadTimeDays: 0 }),
+    ensureMaterial(business.id, { name: "Dark Chocolate", unit: "kg", currentStock: 15, leadTimeDays: 0 }),
+    ensureMaterial(business.id, { name: "Eggs", unit: "pcs", currentStock: 200, leadTimeDays: 0 }),
+    ensureMaterial(business.id, { name: "Flour", unit: "kg", currentStock: 50, leadTimeDays: 0 }),
+    ensureMaterial(business.id, { name: "Yeast", unit: "kg", currentStock: 8, leadTimeDays: 0 }),
   ]);
 
   const [, sourdough, weddingCake] = await Promise.all([

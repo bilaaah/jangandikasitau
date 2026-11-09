@@ -28,6 +28,11 @@ export const SaveMaterialSchema = z.object({
   name: ResourceNameSchema,
   unit: z.string().trim().min(1, "Satuan wajib diisi.").max(32),
   currentStock: z.number().finite().min(0, "Stok tidak boleh negatif."),
+  leadTimeDays: z
+    .number()
+    .int()
+    .min(0, "Lead time harus berupa hari kerja non-negatif.")
+    .default(0),
 });
 
 export const UpdateMaterialStockSchema = z.object({

@@ -1,69 +1,101 @@
 # BizCapacity 🏭
 
-> **Tagline:** *Sistem Keputusan Kapasitas UMKM*
+> **Tagline:** *Sistem Keputusan Kapasitas UMKM*  
 > **Tipe Produk:** Decision Support System (DSS) untuk UMKM berbasis Make-to-Order
 
-BizCapacity membantu bisnis manufaktur dan make-to-order mengevaluasi pesanan pelanggan terhadap jam kerja aktif, kapasitas mesin, stok bahan baku, dan deadline pengiriman — sebelum konfirmasi diberikan.
+BizCapacity membantu bisnis manufaktur dan *make-to-order* mengevaluasi pesanan pelanggan terhadap jam kerja aktif, kapasitas mesin, ketersediaan bahan baku, dan tenggat pengiriman — sebelum komitmen atau konfirmasi pesanan diberikan kepada pelanggan.
 
 ---
 
 ## 🎯 Visi Produk
 
-UMKM seringkali menerima pesanan tanpa mengetahui apakah kapasitas produksi mereka mampu memenuhinya. BizCapacity hadir sebagai sistem pendukung keputusan yang memberikan jawaban berbasis data: **FEASIBLE**, **AT_RISK**, atau **NOT_FEASIBLE** — secara real-time.
+Banyak pelaku UMKM manufaktur dan bakery menerima pesanan secara intuitif tanpa mengetahui apakah kapasitas produksi mereka mampu memenuhinya, yang sering berujung pada lembur berbiaya tinggi, keterlambatan pengiriman, atau penolakan pesanan yang sebenarnya menguntungkan. 
+
+BizCapacity hadir sebagai sistem pendukung keputusan (*Decision Support System*) yang memberikan jawaban berbasis data matematis secara real-time: **FEASIBLE**, **AT_RISK**, atau **NOT_FEASIBLE**.
 
 ---
 
 ## 🚀 Fitur Utama
 
-### 1. Mesin Kapasitas Deterministik
-- Kalkulasi matematis murni tanpa database I/O di dalam engine
-- Evaluasi jam kerja pooled, jam mesin, stok bahan baku, dan hari kerja (Senin–Jumat)
-- Output: gap resource dan persentase utilisasi
+### 1. Mesin Kapasitas Deterministik (Deterministic Capacity Engine)
+- Kalkulasi matematis murni (*pure function*) tanpa I/O database di dalam komputasi engine.
+- Evaluasi komprehensif 4 dimensi kapasitas: jam kerja pekerja (*pooled*), kapasitas mesin/oven, ketersediaan stok bahan baku (*Bill of Materials*), dan hari kerja aktif (Senin–Jumat).
+- Menghitung utilisasi sumber daya, buffer waktu pengiriman, dan identifikasi *bottleneck* secara presisi.
 
-### 2. Vonis Kelayakan (Feasibility Verdict)
+### 2. Tiga Vonis Kelayakan DSS (Feasibility Verdict)
 
-| Vonis | Kondisi |
-|-------|---------|
-| ✅ **FEASIBLE** | Semua constraint terpenuhi dalam safety margin |
-| ⚠️ **AT_RISK** | Hard constraint terpenuhi, tapi utilisasi >85% atau buffer ≤1 hari kerja |
-| ❌ **NOT_FEASIBLE** | Defisit material, jam kerja/mesin tidak cukup, atau deadline tidak realistis |
+| Vonis | Kondisi Logika DSS |
+|---|---|
+| ✅ **FEASIBLE** | Semua batasan (*constraints*) terpenuhi dalam margin aman (utilisasi pekerja & mesin ≤85%, buffer waktu >1 hari kerja, stok bahan mencukupi). |
+| ⚠️ **AT_RISK** | Hard constraints terpenuhi, tetapi utilisasi sumber daya tinggi (>85%) atau buffer pengiriman tipis (≤1 hari kerja). |
+| ❌ **NOT_FEASIBLE** | Terjadi defisit bahan baku, total jam kerja atau mesin tidak mencukupi, atau tenggat pengiriman tidak realistis. |
 
-### 3. Simulasi DSS Interaktif (`/simulations`)
-- Pemilik UMKM bisa mensimulasikan kuantitas pesanan & tanggal pengiriman secara real-time *sebelum* membuat order
-- Didukung rekomendasi AI (Milestone 3)
+### 3. Simulasi Interaktif & Analisis What-If (`/simulations`)
+- Pemilik UMKM dan staf dapat menggeser *slider* kuantitas pesanan & tenggat pengiriman secara interaktif untuk melihat perubahan kelayakan secara seketika (*real-time*).
+- Menghitung potensi omzet yang terlindungi (*Protected Revenue*).
+- Rekomendasi mitigasi cerdas: **Split Delivery** (pengiriman bertahap), negosiasi tenggat, atau opsi *outsource*.
+- Fitur salin ringkasan simulasi ke clipboard untuk koordinasi cepat antar-tim.
 
-### 4. Manajemen Order & Log Bottleneck (`/orders`)
-- Lifecycle: `DRAFT` → `CONFIRMED` → `IN_PROGRESS` → `COMPLETED` / `CANCELLED`
-- Hanya order `CONFIRMED` dan `IN_PROGRESS` yang mengkonsumsi kapasitas terpooling
-- Pembuatan order menyimpan snapshot analisis secara atomik; saat diterima, kapasitas dicek ulang dan dikunci lewat status `CONFIRMED`. Pembatalan melepas komitmen kapasitas.
+### 4. Rekomendasi AI Generatif (Google Gemini via Vercel AI SDK)
+- Analisis natural language berbasis konteks matematis DSS (bukan sekadar saran umum).
+- Menghasilkan naskah negosiasi ramah pelanggan (*customer negotiation script*) dan alternatif solusi taktis.
+- Dilengkapi mekanisme pertahanan *Local Fallback Rule-Based* jika kuota API habis atau jaringan bermasalah.
 
-### 5. Dashboard Analytics (`/dashboard`)
-- Ringkasan utilisasi kapasitas real-time
-- Grafik trend pesanan dan produksi
-- KPI cards: Total Order, Pendapatan, Utilisasi Mesin, dll.
+### 5. Manajemen Pesanan & Komitmen Kapasitas Atomik (`/orders`)
+- Siklus hidup pesanan: `DRAFT` → `CONFIRMED` → `IN_PROGRESS` → `COMPLETED` / `CANCELLED`.
+- Hanya pesanan berstatus `CONFIRMED` dan `IN_PROGRESS` yang mengunci kapasitas produksi. Pembatalan (`CANCELLED`) secara atomik melepas kembali kapasitas.
+- Antarmuka detail pesanan yang ramah pengguna dengan nomor referensi PO ringkas, ringkasan BOM, dan notifikasi konfirmasi.
 
-### 6. Perencanaan Produksi (`/production-planning`)
-- Penjadwalan kapasitas untuk order-order mendatang
-- Deteksi konflik kapasitas antar order
+### 6. Jadwal & Perencanaan Produksi (`/production-planning`)
+- Visualisasi kalender dan Gantt bar per *workstation*.
+- Deteksi dini penumpukan jadwal dan indikator peringatan utilisasi (>85%).
 
-### 7. Data Produk & Sumber Daya (`/products`, `/resources`)
-- CRUD produk beserta BOM yang tersimpan dan divalidasi terhadap bahan aktif milik usaha.
-- CRUD snapshot stok bahan baku dengan penanda keterbaruan (terkini, perlu diperbarui, atau usang).
-- CRUD pekerja dan mesin; data yang dinonaktifkan tetap disimpan untuk menjaga riwayat.
+### 7. Manajemen Produk, Bahan Baku & Sumber Daya (`/products`, `/resources`)
+- CRUD produk beserta komposisi bahan baku (*Bill of Materials* - BOM).
+- Snapshot stok bahan baku dengan penanda keterbaruan (*freshness indicator*): Terkini vs Usang (>7 hari).
+- Manajemen data pekerja dan mesin operasional dengan status aktif/nonaktif untuk menjaga integritas riwayat.
+
+### 8. Desain Dual Theme & Modern Glassmorphism
+- Mendukung penuh **Light Mode** dan **Dark Mode** melalui Tailwind CSS v4.
+- Desain modern, bersih, kontras tinggi, dan responsif optimal di perangkat mobile maupun desktop.
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Lapisan | Teknologi |
-|---------|-----------|
-| **Framework** | Next.js 16 (App Router + Server Actions) |
-| **Bahasa** | TypeScript 5 (Strict Mode) |
-| **Styling** | Tailwind CSS v4 |
-| **Database ORM** | Prisma 6 + PostgreSQL |
-| **Validasi Schema** | Zod |
-| **AI/ML** | Vercel AI SDK (Google Gemini) |
-| **Auth** | Auth.js v5 Credentials + JWT Session |
+| Lapisan | Teknologi | Keterangan |
+|---|---|---|
+| **Framework** | Next.js 16 (App Router + Server Actions) | SSR & Server Actions mutasi data |
+| **Bahasa** | TypeScript 5 (Strict Mode) | Kontrak tipe aman antar lapisan |
+| **Styling** | Tailwind CSS v4 | Glassmorphism & dual light/dark theme |
+| **Database ORM** | Prisma 6 + PostgreSQL (Supabase) | Multi-tenant UMKM context |
+| **Validasi Schema** | Zod | Validasi ketat input form & respon AI |
+| **AI / LLM** | Google Gemini 2.5 Flash via Vercel AI SDK | Rekomendasi DSS & naskah negosiasi |
+| **Autentikasi** | Auth.js v5 (NextAuth) Credentials | Role-Based Access Control (`OWNER`, `STAFF`) |
+| **Testing** | Vitest | 41 pengujian unit, skenario, dan integrasi |
+
+---
+
+## 👥 Role-Based Access Control (RBAC) & Akun Demo
+
+Aplikasi mengelompokkan otorisasi ke dalam 2 peran pengguna:
+
+| Peran | Email Demo | Wewenang Utama |
+|---|---|---|
+| 👑 **OWNER** | `owner@sweetdelights.dev` | Akses penuh: konfirmasi pesanan (`CONFIRMED`), kelola master data (produk, pekerja, mesin, bahan), dan pengaturan bisnis. |
+| 🧑‍🍳 **STAFF** | `staff@sweetdelights.dev` | Akses operasional: melihat dashboard, melakukan simulasi kelayakan (*What-If*), melihat status pesanan & jadwal produksi. |
+
+### Skenario Data Demo Resmi: *Sweet Delights Bakery (Demo)*
+- **3 Produk Unggulan & BOM:**
+  - *Chocolate Brownie Box (24 pcs)*: 2 jam kerja, 1 jam mesin (Flour, Butter, Dark Chocolate, Eggs)
+  - *Sourdough Loaf*: 3 jam kerja, 1.5 jam mesin (Flour, Yeast)
+  - *Custom Wedding Cake*: 8 jam kerja, 2 jam mesin (Flour, Butter, Eggs)
+- **Sumber Daya:** 3 Pekerja (Budi - 8 jam, Rina - 4 jam, Siti - 8 jam) & 2 Mesin (Commercial Oven 1 - 10 jam, Commercial Oven 2 - 8 jam).
+- **4 Skenario Pesanan Uji:**
+  1. `PT Amanah` (*DRAFT*, 10 Sourdough, tenggat +4 hari kerja)
+  2. `PT ibu imut` (*CONFIRMED*, 10 Sourdough, tenggat +14 hari kerja — mengunci kapasitas aktif)
+  3. `Budi Wedding (Existing)` (*CANCELLED* — pesanan lampau dibatalkan agar kapasitas jam kerja & mesin bersih)
+  4. `Demo What-if` (*DRAFT*, 44 Sourdough, tenggat +8 hari kerja — skenario simulasi batas kapasitas ~82.5% dan uji rekomendasi Split Delivery AI)
 
 ---
 
@@ -73,77 +105,52 @@ UMKM seringkali menerima pesanan tanpa mengetahui apakah kapasitas produksi mere
 src/
 ├── app/                     # Next.js App Router (pages & layouts)
 │   ├── page.tsx             # Landing page (public)
-│   ├── dashboard/           # Dashboard analytics
-│   ├── orders/              # Manajemen order (list, new, detail)
-│   ├── simulations/         # Simulasi kapasitas DSS
-│   ├── production-planning/ # Perencanaan produksi
-│   ├── products/            # Manajemen produk
-│   ├── resources/           # Manajemen sumber daya (mesin, pekerja)
-│   ├── analytics/           # Analytics lanjutan
-│   ├── settings/            # Pengaturan bisnis
-│   ├── login/               # Halaman login
-│   └── register/            # Halaman registrasi
+│   ├── dashboard/           # Dashboard analitik & ringkasan utilisasi
+│   ├── orders/              # Manajemen pesanan (list, new, [id] detail)
+│   ├── simulations/         # Simulasi kapasitas DSS & What-if analysis
+│   ├── production-planning/ # Perencanaan produksi & visual jadwal
+│   ├── products/            # Manajemen produk & Bill of Materials (BOM)
+│   ├── resources/           # Manajemen sumber daya (pekerja, mesin, bahan baku)
+│   ├── analytics/           # Analitik mendalam utilisasi & tren
+│   ├── settings/            # Pengaturan profil bisnis
+│   ├── login/               # Halaman masuk (multi-role)
+│   └── register/            # Halaman registrasi usaha baru
 │
-├── components/              # React Components (reusable)
-│   ├── brand/               # BrandLogo, branding elements
-│   ├── layout/              # AppHeader, AppSidebar, DashboardShell
-│   ├── ai/                  # AI chat & recommendation components
-│   ├── analytics/           # Chart & analytics components
-│   ├── feasibility/         # FeasibilityCard, FeasibilityBadge
-│   ├── orders/              # Order-related components
-│   ├── planning/            # Production planning components
-│   ├── products/            # Product components
-│   └── settings/            # Settings form components
+├── components/              # Komponen antarmuka React
+│   ├── brand/               # Komponen logo & identitas BizCapacity
+│   ├── layout/              # AppHeader, AppSidebar, DashboardShell, ThemeToggle
+│   ├── ai/                  # AI recommendation card & interactive prompt
+│   ├── analytics/           # Visualisasi chart & metrik KPI
+│   ├── feasibility/         # FeasibilityCard, FeasibilityBadge, detail bottleneck
+│   ├── orders/              # Order list, form input pesanan, modal aksi
+│   ├── planning/            # ProductionPlanningView & timeline bar
+│   ├── simulation/          # SimulationsView, slider kontrol & what-if panel
+│   └── products/            # Modal & form produk serta bahan
 │
-├── actions/                 # Server Actions (Next.js)
-│   ├── order.actions.ts     # CRUD order
-│   ├── simulation.actions.ts# Kalkulasi simulasi
-│   └── ai.actions.ts        # AI recommendations
+├── actions/                 # Next.js Server Actions (mutasi aman ke DB)
+│   ├── order.actions.ts     # CRUD pesanan & komitmen kapasitas atomik
+│   ├── simulation.actions.ts# Eksekusi kalkulasi simulasi what-if
+│   ├── feasibility.actions.ts # Analisis kelayakan pesanan real-time
+│   └── ai.actions.ts        # Generator rekomendasi AI Google Gemini
 │
-├── engine/                  # Business Logic (Pure Functions, tanpa DB)
+├── engine/                  # Core Business Logic (Pure Math Engine, Tanpa DB)
 │   └── capacity/
-│       ├── calculator.ts    # Mesin kapasitas deterministik
-│       └── types.ts         # Types untuk engine
+│       ├── calculator.ts    # Algoritma deterministik 4 dimensi kapasitas
+│       ├── types.ts         # Definisi tipe input/output engine
+│       └── utils.ts         # Kalkulasi hari kerja (Senin–Jumat) & interval
 │
-├── ai/                      # AI/ML Integration
-│   └── gemini.ts            # Google Gemini integration
+├── ai/                      # Integrasi LLM & Skema AI
+│   └── gemini.ts            # Handler Gemini dengan validasi skema Zod & fallback
 │
-├── queries/                 # Database Queries (Prisma)
-├── schemas/                 # Zod Schemas (validasi input)
-├── types/                   # TypeScript types global
-└── lib/                     # Utilities (db.ts, utils.ts)
+├── queries/                 # Kueri database Prisma teroptimasi
+├── schemas/                 # Zod validation schemas
+├── types/                   # Definisi tipe global TypeScript
+└── lib/                     # Utilitas pendukung (db.ts, auth.ts, utils.ts)
 ```
 
 ---
 
-## 👥 Tim & Pembagian Tugas
-
-Lihat detail di [`TEAM_TASKS.md`](TEAM_TASKS.md) dan [`ALUR_KOLABORASI_GIT.md`](ALUR_KOLABORASI_GIT.md).
-
-### Ringkasan Tugas Per Role:
-
-**🎨 Frontend (UI/UX)**
-- Owns: `src/app/`, `src/components/`
-- Konsumsi: Server Actions dari `src/actions/`, Types dari `src/types/`
-- Jangan ubah: `src/engine/`, `src/ai/`, `src/queries/`
-
-**⚙️ Backend (Core Engine & Database)**
-- Owns: `prisma/schema.prisma`, `src/engine/`, `src/actions/` (non-AI), `src/queries/`, `src/schemas/`
-- Jangan ubah: `src/app/`, `src/components/`
-- API Contract: Semua perubahan di `src/types/index.ts` harus dikoordinasikan dengan Frontend
-
-**🤖 AI Engineer**
-- Owns: `src/ai/`, `src/actions/ai.actions.ts`
-- Konsumsi: Output dari `src/engine/capacity/calculator.ts` (tipe `CapacityEngineResult`)
-- Input ke Frontend: `src/components/ai/` components untuk chat & rekomendasi
-
-**🧪 QA**
-- Test entry points: `src/engine/capacity/calculator.ts` (unit test), Server Actions (integration), `/simulations` page (E2E)
-- Coverage target: engine 100%, actions 80%
-
----
-
-## 🏁 Setup & Menjalankan Lokal
+## 🏁 Panduan Menjalankan Secara Lokal
 
 ### 1. Clone & Install Dependencies
 ```bash
@@ -152,113 +159,71 @@ cd bizcapacity
 npm install
 ```
 
-### 2. Environment Variables
-Copy `.env.example` ke `.env`:
+### 2. Konfigurasi Environment Variables
+Salin file `.env.example` menjadi `.env`:
 ```bash
 cp .env.example .env
 ```
-Isi variabel berikut:
+Pastikan variabel lingkungan terisi:
 ```env
-DATABASE_URL="postgresql://user:password@host:5432/dbname"
-AUTH_SECRET="generate-a-unique-random-secret"
-GOOGLE_GEMINI_API_KEY="your-gemini-key"
+DATABASE_URL="postgresql://user:password@host:5432/postgres"
+AUTH_SECRET="your-generated-auth-secret-key"
+GOOGLE_GEMINI_API_KEY="your-google-gemini-api-key"
 ```
 
-### 3. Setup Database
+### 3. Generate Prisma Client
 ```bash
-npm run db:generate    # Generate Prisma Client
-npm run db:migrate -- --name init # Buat/jalankan migrasi awal
-npm run db:seed        # Seed data awal
+npm run db:generate    # Menghasilkan Prisma Client lokal
 ```
-Seed membuat atau memperbarui data demo Sweet Delights Bakery, tiga produk
-beserta BOM, pekerja, mesin, bahan baku, akun Owner dan Staff, serta empat
-pesanan contoh tanpa menghapus data usaha atau pesanan lain. Pesanan Budi
-Wedding disimpan sebagai `CANCELLED` agar tidak lagi mengunci kapasitas; order
-`Demo What-if` tetap menjadi draf untuk pengujian simulasi. Akun demo:
-`owner@sweetdelights.dev` dan `staff@sweetdelights.dev`. Saat akun baru dibuat,
-kata sandi acak dicetak di terminal; seed tidak mengubah kata sandi akun yang
-sudah ada.
+
+*(Opsional: Jika menggunakan database lokal baru, jalankan `npm run db:migrate` dan `npm run db:seed` untuk mengisi data demo awal).*
 
 ### 4. Jalankan Development Server
 ```bash
 npm run dev
 ```
-Buka [http://localhost:3000](http://localhost:3000). Masuk melalui
-[http://localhost:3000/login](http://localhost:3000/login).
-
-> ⚠️ Jangan jalankan `npm run db:studio` bersamaan dengan `npm run dev` di mesin dengan RAM 8GB.
+Akses aplikasi melalui browser di **[http://localhost:3000](http://localhost:3000)**.  
+Halaman login: **[http://localhost:3000/login](http://localhost:3000/login)**.
 
 ---
 
-## 🌿 Git Workflow
+## 🧪 Pengujian Otomatis (Testing)
+
+Proyek ini dilengkapi rangkaian pengujian unit dan integrasi otomatis menggunakan **Vitest** untuk menjamin akurasi mesin matematis dan keandalan sistem DSS:
+
+```bash
+npm test
+```
+
+**Cakupan Pengujian (41 Tests Passed):**
+- **Engine Capacity Calculator:** Pengujian 100% deterministik untuk skenario *FEASIBLE*, *AT_RISK*, dan *NOT_FEASIBLE*.
+- **Constraint Handling:** Validasi defisit bahan baku, batas utilisasi jam kerja pooled (>85%), dan batas jam mesin.
+- **Outsource & Split Delivery:** Pengujian logika pemecahan pengiriman bertahap dan toleransi kapasitas.
+- **AI Schema & Fallback:** Validasi kepatuhan skema Zod dan uji ketahanan fallback lokal saat API Google Gemini tidak tersedia/gagal jaringan.
+
+---
+
+## 🌿 Alur Kolaborasi Git
 
 | Branch | Fungsi |
-|--------|--------|
-| `main` | Production-ready, deploy otomatis |
-| `dev` | Integration branch, semua fitur merge ke sini dulu |
-| `feat/*` | Feature branch per fitur/task |
-| `fix/*` | Bug fix branch |
+|---|---|
+| `main` | Branch produksi yang stabil dan siap dipresentasikan. |
+| `dev` | Branch integrasi utama tempat seluruh fitur digabungkan dan diuji bersama. |
+| `feature/*` | Feature branch mandiri untuk penambahan modul atau fitur baru. |
+| `fix/*` | Bug fix branch untuk perbaikan isu spesifik. |
 
-**Alur kerja:**
-```
-feat/nama-fitur → dev → (PR & review) → main
-```
-
-Lihat detail di [`ALUR_KOLABORASI_GIT.md`](ALUR_KOLABORASI_GIT.md).
-
----
-
-## 📐 Arsitektur Frontend
-
-### Layout System
-- **`DashboardShell`**: Wrapper utama semua halaman authenticated. Berisi `AppSidebar` + `AppHeader`.
-- **`AppSidebar`**: Navigasi sidebar dengan `z-[70]` untuk mobile drawer. Backdrop di `z-[60]`.
-- **`AppHeader`**: Header dengan user profile, notifikasi, dan breadcrumb. Responsive di mobile.
-
-### Responsive Design
-- Mobile-first dengan Tailwind CSS breakpoints (`sm:`, `md:`, `lg:`)
-- Mobile: hamburger menu + sidebar drawer overlay
-- Desktop: sidebar permanen di sisi kiri
-
-### Branding
-- Logo: `public/logo.png` (juga `src/app/icon.png` untuk favicon App Router)
-- Komponen: `src/components/brand/BrandLogo.tsx`
-- Tagline: *"Sistem Keputusan Kapasitas UMKM"*
-
----
-
-## 🔌 API Contract (Frontend ↔ Backend)
-
-### Server Actions yang dikonsumsi Frontend:
-```typescript
-// src/actions/order.actions.ts
-getOrders(): Promise<Order[]>
-createOrder(data: CreateOrderInput): Promise<Order>
-updateOrderStatus(id: string, status: OrderStatus): Promise<Order>
-
-// src/actions/simulation.actions.ts
-runSimulation(input: SimulationInput): Promise<SimulationResult>
-
-// src/actions/ai.actions.ts
-getAIRecommendation(context: CapacityEngineResult): Promise<string>
-```
-
-### Types yang harus konsisten (`src/types/index.ts`):
-```typescript
-type FeasibilityVerdict = 'FEASIBLE' | 'AT_RISK' | 'NOT_FEASIBLE'
-type OrderStatus = 'DRAFT' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
-```
+Lihat panduan lengkap di [`ALUR_KOLABORASI_GIT.md`](ALUR_KOLABORASI_GIT.md).
 
 ---
 
 ## 📊 Status Pengembangan
 
 | Milestone | PIC | Status | Deskripsi |
-|-----------|-----|--------|-----------|
-| Frontend UI & Dashboard | Frontend | 🔄 In Progress | Responsive UI, semua halaman, branding |
-| Core Engine & Backend | Backend | 📋 Planned | Capacity calculator, database, server actions |
-| AI Integration | AI Engineer | 📋 Planned | Gemini recommendations & advisory |
-| QA & Testing | QA | 📋 Planned | Unit + integration + E2E tests |
+|---|---|---|---|
+| **Frontend UI & UX Dashboard** | Nabilah (Frontend Lead) | ✅ **Selesai** | Seluruh 10 halaman responsif, glassmorphism, dual light/dark mode, real-time feasibility cards, what-if sliders, dan route metadata. |
+| **Core Engine & Backend** | Syuja (Backend Lead) | ✅ **Selesai** | Mesin kapasitas deterministik, database Prisma PostgreSQL (Supabase), komitmen kapasitas atomik, dan RBAC (`OWNER`/`STAFF`). |
+| **AI Decision Advisory** | AI Engineer | ✅ **Selesai** | Integrasi Google Gemini 2.5 Flash, ekstraksi konteks kapasitas, naskah negosiasi, rekomendasi split delivery, dan local fallback. |
+| **QA & DSS Validation** | QA | ✅ **Selesai** | 41 pengujian otomatis Vitest lulus 100%, validasi skenario demo proposal, dan pengujian batas beban kapasitas. |
 
 ---
 

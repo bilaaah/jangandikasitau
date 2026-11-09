@@ -7,11 +7,13 @@
 // Includes inline "Explain with AI" panel (Modul C) — calls generateAdviceAction.
 
 import React, { useState, useEffect } from "react";
-import type { CapacityEngineResult } from "@/types";
+import type { CapacityEngineResult, MaterialAnalysis } from "@/types";
 import type { AiOrderAdvice } from "@/ai/types";
 import { generateAdviceAction } from "@/actions/ai.actions";
 import { FeasibilityBadge } from "./FeasibilityBadge";
 import { cn, round } from "@/lib/utils";
+/** Hasil engine + nama bahan yang disisipkan oleh checkFeasibilityPreviewAction. */
+type MaterialRow = MaterialAnalysis & { materialName?: string };
 
 interface FeasibilityCardProps {
   analysis: CapacityEngineResult;
@@ -124,12 +126,10 @@ export function FeasibilityCard({
     reasoning,
   } = analysis;
 
-  const materialNameMap = React.useMemo(() => {
+    const materialNameMap = React.useMemo(() => {
     const map = new Map<string, string>();
-    materialAnalysis.forEach((m) => {
-      if ((m as any).materialName) {
-        map.set(m.materialId, (m as any).materialName);
-      }
+    (materialAnalysis as MaterialRow[]).forEach((m) => {
+      if (m.materialName) map.set(m.materialId, m.materialName);
     });
     return map;
   }, [materialAnalysis]);
@@ -142,19 +142,10 @@ export function FeasibilityCard({
   const [activeQuestion, setActiveQuestion] = useState<string | null>(null);
   const [loadingSeconds, setLoadingSeconds] = useState(0);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (isAiLoading) {
-      setLoadingSeconds(0);
-      interval = setInterval(() => {
-        setLoadingSeconds((prev) => prev + 1);
-      }, 1000);
-    } else {
-      setLoadingSeconds(0);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
+    useEffect(() => {
+    if (!isAiLoading) return;
+    const interval = setInterval(() => setLoadingSeconds((prev) => prev + 1), 1000);
+    return () => clearInterval(interval);
   }, [isAiLoading]);
 
   function getLoadingStatus(seconds: number) {
@@ -191,6 +182,7 @@ export function FeasibilityCard({
   }
 
   async function handleAskAi(questionId?: string) {
+    setLoadingSeconds(0);
     setIsAiLoading(true);
     setAiError(null);
     setActiveQuestion(questionId || "general");
@@ -442,7 +434,7 @@ export function FeasibilityCard({
               {materialAnalysis.map((mat) => {
                 const isShort = mat.gap < 0;
                 // Prefer materialName if available, fallback to materialId
-                const displayName = (mat as any).materialName || mat.materialId;
+                const displayName = (mat as MaterialRow).materialName || mat.materialId;
                 return (
                   <div
                     key={mat.materialId}

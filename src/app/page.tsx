@@ -53,9 +53,9 @@ export default function HomePage() {
 
       {/* Sticky Header (Responsive) */}
       <header className="sticky top-0 w-full z-50 bg-white/85 dark:bg-[#0B1120]/80 backdrop-blur-2xl border-b border-slate-200/80 dark:border-white/[0.08] shadow-xs dark:shadow-[0_1px_16px_rgba(0,0,0,0.4)]">
-        <div className="h-16 sm:h-20 max-w-7xl mx-auto px-3 sm:px-8 flex items-center justify-between gap-2 sm:gap-4">
-          <div className="shrink-0 max-w-[190px] sm:max-w-none">
-            <BrandLogo size="sm" subtitleText="Sistem Kapasitas UMKM" className="sm:hidden" />
+        <div className="h-16 sm:h-20 max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-between gap-3 sm:gap-4">
+          <div className="shrink-0">
+            <BrandLogo size="sm" showSubtitle={false} className="sm:hidden" />
             <BrandLogo size="md" subtitleText="Sistem Keputusan Kapasitas UMKM" className="hidden sm:flex" />
           </div>
 
@@ -75,7 +75,7 @@ export default function HomePage() {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <ThemeToggle />
+            <ThemeToggle className="w-8 h-8 sm:w-9 sm:h-9" />
             <Link
               href="/login"
               className="hidden sm:inline-flex items-center justify-center px-4 py-2 text-[14px] font-semibold text-slate-700 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-xl transition-all"
@@ -84,7 +84,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/register"
-              className="inline-flex items-center justify-center px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-white text-xs sm:text-[14px] font-bold shadow-md shadow-blue-500/25 hover:from-blue-500 hover:to-blue-400 transition-all active:scale-[0.99] whitespace-nowrap"
+              className="hidden sm:inline-flex items-center justify-center px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-white text-xs sm:text-[14px] font-bold shadow-md shadow-blue-500/25 hover:from-blue-500 hover:to-blue-400 transition-all active:scale-[0.99] whitespace-nowrap"
             >
               Mulai Gratis
             </Link>
@@ -93,7 +93,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl text-slate-700 dark:text-[#F1F5F9] hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors flex items-center justify-center"
+              className="lg:hidden p-1.5 sm:p-2 rounded-xl text-slate-700 dark:text-[#F1F5F9] hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors flex items-center justify-center shrink-0"
               aria-label={mobileMenuOpen ? "Tutup menu" : "Buka menu navigasi"}
             >
               <span className="material-symbols-outlined text-[24px]">
@@ -141,7 +141,11 @@ export default function HomePage() {
               </a>
             </div>
 
-            <div className="pt-3.5 flex flex-col gap-2">
+            <div className="pt-3.5 flex flex-col gap-2.5">
+              <div className="flex items-center justify-between py-1 px-3 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/60 dark:border-white/[0.08]">
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Mode Tampilan</span>
+                <ThemeToggle variant="pill" />
+              </div>
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}

@@ -66,7 +66,7 @@ export function ThemeToggle({ className = "", variant = "icon" }: ThemeTogglePro
     }
     return (
       <div
-        className={`w-9 h-9 rounded-xl border border-slate-200/60 dark:border-white/[0.08] bg-white/50 dark:bg-slate-800/50 opacity-40 ${className}`}
+        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-slate-200/60 dark:border-white/[0.08] bg-white/50 dark:bg-slate-800/50 opacity-40 shrink-0 ${className}`}
         aria-hidden="true"
       />
     );
@@ -144,14 +144,14 @@ export function ThemeToggle({ className = "", variant = "icon" }: ThemeTogglePro
       onClick={toggleTheme}
       aria-label={theme === "dark" ? "Beralih ke Mode Terang" : "Beralih ke Mode Gelap"}
       title={theme === "dark" ? "Mode Gelap aktif (Klik untuk Mode Terang)" : "Mode Terang aktif (Klik untuk Mode Gelap)"}
-      className={`relative w-9 h-9 rounded-xl transition-all duration-200 flex items-center justify-center border shadow-xs cursor-pointer active:scale-90 ${
+      className={`relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl transition-all duration-200 flex items-center justify-center border shadow-xs cursor-pointer active:scale-90 shrink-0 ${
         theme === "dark"
           ? "bg-slate-800/80 border-slate-700 text-amber-300 hover:bg-slate-700 hover:border-slate-600 hover:text-amber-200 shadow-black/20"
           : "bg-white/80 border-slate-200/90 text-slate-700 hover:bg-slate-100 hover:border-slate-300 hover:text-blue-600 shadow-slate-200/50"
       } ${className}`}
     >
       <span
-        className={`material-symbols-outlined text-[20px] transition-all duration-300 ${
+        className={`material-symbols-outlined text-[18px] sm:text-[20px] transition-all duration-300 ${
           theme === "dark" ? "text-amber-300 rotate-180" : "text-slate-700 hover:text-blue-600"
         }`}
       >

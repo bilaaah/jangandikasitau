@@ -78,16 +78,20 @@ export default function RegisterPage() {
     <main className="w-full min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#F8FAFC] dark:bg-[#0B1120] text-slate-900 dark:text-[#F1F5F9] transition-colors duration-200">
       <div className="flex flex-col w-full max-w-7xl mx-auto py-4">
         {/* Dynamic Top Banner */}
-        <div className="flex items-center justify-between mb-6 px-2">
-          <BrandLogo size="md" subtitleText="Sistem Keputusan Kapasitas UMKM" />
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between mb-6 px-2 gap-2">
+          <div className="shrink-0">
+            <BrandLogo size="sm" showSubtitle={false} className="sm:hidden" />
+            <BrandLogo size="md" subtitleText="Sistem Keputusan Kapasitas UMKM" className="hidden sm:flex" />
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <ThemeToggle />
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-[#94A3B8] hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1.5 px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.06]"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-[#94A3B8] hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1.5 px-2.5 sm:px-3 rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.06]"
             >
               <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-              <span>Kembali ke Beranda</span>
+              <span className="hidden sm:inline">Kembali ke Beranda</span>
+              <span className="sm:hidden text-[11px]">Beranda</span>
             </Link>
             <div className="hidden sm:flex items-center space-x-2 bg-blue-50 dark:bg-blue-500/[0.10] border border-blue-200 dark:border-blue-500/20 px-4 py-1.5 rounded-full">
               <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />

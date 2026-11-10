@@ -141,11 +141,7 @@ export default function HomePage() {
               </a>
             </div>
 
-            <div className="pt-3.5 flex flex-col gap-2.5">
-              <div className="flex items-center justify-between py-1 px-3 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/60 dark:border-white/[0.08]">
-                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Mode Tampilan</span>
-                <ThemeToggle variant="pill" />
-              </div>
+            <div className="pt-3.5 flex flex-col gap-2">
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
